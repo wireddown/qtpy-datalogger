@@ -1,0 +1,18 @@
+https://learn.adafruit.com/circuitpython-essentials/circuitpython-pins-and-modules#what-are-all-the-available-names-3082670
+
+board.A0 board.D18 (GPIO18)
+board.A1 board.D17 (GPIO17)
+board.A2 board.D9 (GPIO9)
+board.A3 board.D8 (GPIO8)
+board.A4 board.D7 board.SDA (GPIO7)
+board.A5 board.D6 board.SCL (GPIO6)
+board.A6 board.D5 board.TX (GPIO5)
+board.A7 board.D16 board.RX (GPIO16)
+board.BUTTON board.D0 (GPIO0)
+board.D35 board.MOSI (GPIO35)
+board.D36 board.SCK (GPIO36)
+board.D37 board.MISO (GPIO37)
+board.D40 board.SCL1 (GPIO40)
+board.D41 board.SDA1 (GPIO41)
+board.NEOPIXEL (GPIO39)
+board.NEOPIXEL_POWER (GPIO38)
