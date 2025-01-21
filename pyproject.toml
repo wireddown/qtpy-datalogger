@@ -14,6 +14,7 @@ qtpy-datalogger = "qtpy_datalogger.__main__:main"
 [tool.poetry.dependencies]
 python = "^3.11"
 click = "^8.1.8"
+pyserial = "^3.5"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -25,6 +26,10 @@ pyright = "^1.1.391"
 [tool.poetry.group.jupyter.dependencies]
 jupyter = "^1.1.1"
 seaborn = "^0.13.2"
+
+
+[tool.poetry.group.windows.dependencies]
+wmi = "^1.5.1"
 
 [tool.poe.tasks]
 _ruff_check = "ruff check"
