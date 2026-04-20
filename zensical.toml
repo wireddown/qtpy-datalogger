@@ -17,12 +17,12 @@ site_name = "QT Py S3 DAQ App"
 # meaningful description of the site content for use by search engines.
 #
 # Read more: https://zensical.org/docs/setup/basics/#site_description
-site_description = "A data acquisition application using the Adafruit QT Py S3 and CircuitPython."
+site_description = "qtpy-datalogger: A data acquisition application using the Adafruit QT Py S3 and CircuitPython."
 
 # The site_author attribute. This is used in the HTML head element.
 #
 # Read more: https://zensical.org/docs/setup/basics/#site_author
-site_author = "wireddown"
+site_author = "Joe Friedrichsen"
 
 
 # The site_url is the canonical URL for your site. When building online
@@ -36,7 +36,7 @@ repo_url = "https://github.com/wireddown/qt-py-s3-daq-app"
 #
 # Read more: https://zensical.org/docs/setup/basics/#copyright
 copyright = """
-Copyright &copy; 2026 wireddown
+Copyright &copy; 2026 Joe Friedrichsen
 """
 
 # Zensical supports both implicit navigation and explicitly defined navigation.
@@ -350,3 +350,31 @@ combine_header_slug = true
 [project.markdown_extensions.pymdownx.tasklist]
 custom_checkbox = true
 [project.markdown_extensions.pymdownx.tilde]
+
+# Generate API documentation
+# https://mkdocstrings.github.io/python/usage/configuration
+[project.plugins.mkdocstrings.handlers.python]
+inventories = [
+  "https://docs.python.org/3/objects.inv",
+]
+paths = ["src"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+# General
+show_source = false
+# Headings
+show_root_heading = true
+show_symbol_type_heading = true
+show_symbol_type_toc = true
+# Members
+inherited_members = true
+summary = true
+show_labels = false
+# Docstrings
+docstring_style = "google"
+show_if_no_docstring = true
+# Signatures
+modernize_annotations = true
+show_signature_annotations = true
+separate_signature = true
+signature_crossrefs = true
