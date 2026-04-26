@@ -7,17 +7,21 @@ import json
 import logging
 import pathlib
 import subprocess
+import sys
 import tkinter as tk
 import webbrowser
 from collections.abc import Callable
+from dataclasses import dataclass
 from tkinter import font
-from typing import ClassVar, NamedTuple
+from typing import Any, ClassVar, NamedTuple
 
 import click
+import matplotlib.axes as mpl_axes
 import ttkbootstrap as ttk
 import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.style as ttk_style
 import ttkbootstrap.themes.standard as ttk_themes
+import ttkbootstrap.tooltip as ttk_tooltip
 from tkfontawesome import icon_to_image
 from ttkbootstrap import constants as bootstyle
 
@@ -548,6 +552,283 @@ class AboutDialog(AsyncDialog):
         self.refresh_icons()
 
 
+@dataclass(order=True, frozen=True)
+class Range:
+    """A class that represents a numerical range."""
+
+    lower: float
+    """The lower bound of the range."""
+
+    upper: float
+    """The upper bound of the range."""
+
+    @staticmethod
+    def from_matplotlib(mpl_limits: tuple[float, float]) -> "Range":
+        """Create a Range from the matplotlib representation."""
+        return Range(lower=mpl_limits[0], upper=mpl_limits[1])
+
+    @staticmethod
+    def create_infinite() -> "Range":
+        """Create a Range that spans Python's support for floating point values."""
+        largest_float = sys.float_info.max
+        return Range(lower=-1 * largest_float, upper=largest_float)
+
+
+class AxisToolDialog(AsyncDialog):
+    """A dialog that shows controls for configuring the attached matplotlib axis."""
+
+    class Axis(enum.StrEnum):
+        """Enumeration representing the dimension of the attached axis."""
+
+        X = "X"
+        Y = "Y"
+
+    class AxisScale(enum.StrEnum):
+        """Enumeration representing the numerical scale of the attached axis."""
+
+        Linear = "Linear"
+        Log = "Log"
+
+    def __init__(self, parent: ttk.Toplevel | ttk.Window) -> None:
+        """Initialize a new AxisToolDialog."""
+        self.tool_frames: dict[str, ttk.Frame] = {}
+        super().__init__(parent=parent, title="")
+
+    async def on_loop(self) -> None:
+        """Update UI elements."""
+        await asyncio.sleep(20e-3)
+
+    def attach_to_axis(self, refresh_graph: Callable[[], None], axes: mpl_axes.Axes, axis: Axis, limits: Range) -> None:
+        """Present a UI that configures the specified axis."""
+        self.root_window.title("Axis settings")
+        self.root_window.columnconfigure(0, weight=1)
+        self.root_window.rowconfigure(0, weight=1)
+        self.root_window.minsize(width=170, height=166)
+        self.root_window.maxsize(width=170, height=400)
+
+        frame_key = f"{axes!r}.{axis}"
+        if frame_key not in self.tool_frames:
+            tool_frame = self.create_axis_tool_frame(refresh_graph, axes, axis, limits)
+            self.tool_frames[frame_key] = tool_frame
+        tool_frame = self.tool_frames[frame_key]
+
+        # Raise the active tool_frame and remove the previous one
+        tool_frame.grid(column=0, row=0, sticky=tk.NSEW)
+        for child in self.root_window.children.values():
+            if child is tool_frame:
+                continue
+            child.grid_forget()
+        self.root_window.update_idletasks()  # Apply layout and compose visual tree
+        self.root_window.focus()
+
+    def create_axis_tool_frame(  # noqa: PLR0915 -- allow long function to create the UI
+        self, refresh_graph: Callable[[], None], axes: mpl_axes.Axes, axis: Axis, limits: Range
+    ) -> ttk.Frame:
+        """Create a ttk.Frame that shows axis configuration settings and handles user input."""
+        tool_frame = ttk.Frame(self.root_window, padding=16)
+        tool_frame.columnconfigure(0, weight=1)  # Labels
+        tool_frame.columnconfigure(1, weight=1)  # Controls
+        tool_frame.rowconfigure(0, weight=0)  # Name of axis under edit
+        tool_frame.rowconfigure(1, weight=0)  # Upper limit
+        tool_frame.rowconfigure(2, weight=0)  # Lower limit
+        tool_frame.rowconfigure(3, weight=1)  # Scale
+
+        if axis == AxisToolDialog.Axis.X:
+            plot_axis = axes.xaxis
+            axis_view_limits = axes.get_xlim()
+            axis_scale = axes.get_xscale()
+            set_axis_limits = axes.set_xlim
+            set_axis_scale = axes.set_xscale
+        else:
+            plot_axis = axes.yaxis
+            axis_view_limits = axes.get_ylim()
+            axis_scale = axes.get_yscale()
+            set_axis_limits = axes.set_ylim
+            set_axis_scale = axes.set_yscale
+
+        axis_name = ttk.Label(
+            tool_frame,
+            text=plot_axis.get_label().get_text(),
+            font=font.Font(family="Segoe UI", size=10, weight=font.BOLD),
+        )
+        axis_name.grid(column=0, columnspan=2, row=0, pady=(0, 8), sticky=tk.W)
+
+        max_limit_label = ttk.Label(tool_frame, text="Maximum")
+        max_limit_label.grid(column=0, row=1, padx=(0, 12), pady=(8, 8), sticky=tk.EW)
+        min_limit_label = ttk.Label(tool_frame, text="Minimum")
+        min_limit_label.grid(column=0, row=2, padx=(0, 12), pady=(8, 8), sticky=tk.EW)
+        scale_label = ttk.Label(tool_frame, text="Scale")
+        scale_label.grid(column=0, row=3, padx=(0, 12), pady=(8, 8), sticky=(tk.EW, tk.N))  # pyright: ignore reportArgumentType -- the type hints don't understand tuples
+
+        viewing_range = Range.from_matplotlib(axis_view_limits)
+
+        axis_max_input = NumericInput(tool_frame, limits=limits, default_value=viewing_range.upper)
+        ttk_tooltip.ToolTip(
+            axis_max_input.widget, text=f"Cannot be greater than {limits.upper}", bootstyle=bootstyle.DEFAULT
+        )
+        axis_max_input.widget.grid(column=1, row=1, sticky=tk.EW)
+
+        axis_min_input = NumericInput(tool_frame, limits=limits, default_value=viewing_range.lower)
+        ttk_tooltip.ToolTip(
+            axis_min_input.widget, text=f"Cannot be less than {limits.lower}", bootstyle=bootstyle.DEFAULT
+        )
+        axis_min_input.widget.grid(column=1, row=2, sticky=tk.EW)
+
+        def on_new_upper_or_lower_bound(event_args: tk.Event) -> None:
+            """Handle the ValueChanged event for the NumericInput control."""
+            lower_bound = axis_min_input.value
+            upper_bound = axis_max_input.value
+            set_axis_limits(lower_bound, upper_bound)
+            refresh_graph()
+
+        axis_max_input.widget.bind(NumericInput.Event.ValueChanged, on_new_upper_or_lower_bound)
+        axis_min_input.widget.bind(NumericInput.Event.ValueChanged, on_new_upper_or_lower_bound)
+
+        def handle_scale_selection(new_selection: str) -> None:
+            """Handle the selection event for the linear/log scale combobox."""
+            if new_selection == axis_scale:
+                return
+            if new_selection == AxisToolDialog.AxisScale.Log:
+                lower_view_limit = axis_view_limits[0]
+                safe_minimum = max(0.01, lower_view_limit)
+                set_axis_limits(safe_minimum, axis_max_input.value)  # Change limits to update scale
+                axis_min_input._value = safe_minimum
+                axis_min_input.widget.configure(state=tk.DISABLED)
+                set_axis_scale(new_selection.lower())
+            else:
+                previous_value = float(axis_min_input.widget.get())
+                set_axis_scale(new_selection.lower())  # Change scale to update limits
+                set_axis_limits(previous_value, axis_max_input.value)
+                axis_min_input._value = previous_value
+                axis_min_input.widget.configure(state=tk.NORMAL)
+            refresh_graph()
+
+        scale_input = create_dropdown_combobox(
+            parent=tool_frame,
+            values=[AxisToolDialog.AxisScale.Linear, AxisToolDialog.AxisScale.Log],
+            width=5,
+            justify=bootstyle.RIGHT,
+            completion=handle_scale_selection,
+        )
+        scale_input.grid(column=1, row=3, sticky=(tk.EW, tk.N))  # pyright: ignore reportArgumentType -- the type hints don't understand tuples
+        scale_input.set(axis_scale.capitalize())
+
+        return tool_frame
+
+
+class NumericInput:
+    """A wrapped ttk.Spinbox that coerces text input into a numeric value."""
+
+    class Event(enum.StrEnum):
+        """Events emitted by this control."""
+
+        ValueChanged = "<<ValueChanged>>"
+
+    def __init__(self, parent: tk.Widget, limits: Range, default_value: float) -> None:
+        """Initialize a new NumericInput widget."""
+        decimal_places_for_max = {
+            100: 0,
+            10: 1,
+            1: 2,
+        }
+        increment_for_max = {
+            100: 10.0,
+            20: 1.0,
+            2: 0.1,
+        }
+        largest_magnitude = max(abs(limits.upper), abs(limits.lower))
+        decimal_places = get_first_in_range(largest_magnitude, decimal_places_for_max)
+        increment = get_first_in_range(largest_magnitude, increment_for_max)
+
+        self._value = default_value
+        self._input_variable = tk.StringVar(value=f"{default_value:.{decimal_places}f}")
+        self._input_control = ttk.Spinbox(
+            master=parent,
+            from_=limits.lower,
+            to=limits.upper,
+            increment=increment,
+            format=f"%.{decimal_places}f",
+            width=5,
+            justify=tk.RIGHT,
+            textvariable=self._input_variable,
+        )
+
+        # Configure the input-validation and entry-complete pipeline
+        def value_is_indeterminate(candidate_value: str) -> bool:
+            """Return True if the value is not a fully formed floating point number."""
+            # Allow empty and minus sign to support keyboard entry
+            return len(candidate_value) == 0 or candidate_value == "-"
+
+        def try_as_float(string_value: str) -> float | None:
+            """If string_value is a float, return its value as a float. Otherwise return None."""
+            try:
+                as_float = float(string_value)
+            except ValueError:
+                return None
+            else:
+                return as_float
+
+        def check_float_in_range(sender: ttk.Spinbox, limits: Range, candidate_value: str) -> bool:
+            """Return True if candidate_value is a float and in range."""
+            if value_is_indeterminate(candidate_value):
+                return True
+
+            as_float = try_as_float(candidate_value)
+            if as_float is None:
+                return False
+
+            is_valid = limits.lower <= as_float <= limits.upper
+            new_style = bootstyle.DEFAULT if is_valid else bootstyle.DANGER
+            sender.configure(bootstyle=new_style)
+            return is_valid
+
+        def handle_new_value(sender: ttk.Spinbox, variable_name: str, empty: str, operation: str) -> None:
+            """Process a new value that passed input validation."""
+            new_value = sender.get()
+            if value_is_indeterminate(new_value):
+                return
+            as_float = float(new_value)
+            self._value = as_float
+
+        def handle_entry_complete(event_args: tk.Event) -> None:
+            """Handle the Enter key and FocusOut events."""
+            sender = event_args.widget
+            if not isinstance(sender, ttk.Spinbox):
+                raise TypeError()
+            sender.icursor(tk.END)
+
+            # Widget events like MouseWheel fire before the widget receives the new value
+            # Allow the trace subroutine to execute and set the new value
+            # Otherwise subscribed event handlers see the widget with the previous value
+            sender.after(0, sender.selection_clear)
+            sender.after(0, self._input_control.event_generate, NumericInput.Event.ValueChanged)
+
+        # Validate keyboard input for floats
+        # https://www.tcl-lang.org/man/tcl8.6/TkCmd/ttk_entry.htm#M34
+        # - Validate all user actions: key input, focus-in, focus-out
+        # - %P: incoming new value to be validated
+        input_validator = parent.register(functools.partial(check_float_in_range, self._input_control, limits))
+        self._input_control.configure(validate=tk.ALL, validatecommand=(input_validator, "%P"))
+        # Once valid, run a follow-up trace command to accept the new float
+        self._input_variable.trace_add("write", functools.partial(handle_new_value, self._input_control))
+        # Once a user action commits the new value, emit the value changed event
+        self._input_control.bind("<<Increment>>", handle_entry_complete)
+        self._input_control.bind("<<Decrement>>", handle_entry_complete)
+        self._input_control.bind("<MouseWheel>", handle_entry_complete)
+        self._input_control.bind("<KeyPress-Return>", handle_entry_complete)
+        self._input_control.bind("<FocusOut>", handle_entry_complete)
+
+    @property
+    def widget(self) -> ttk.Spinbox:
+        """Return the Tk widget for this NumericInput."""
+        return self._input_control
+
+    @property
+    def value(self) -> float:
+        """Return the value of the NumericInput as a float."""
+        return self._value
+
+
 class ThemeChanger:
     """A class that changes Tk themes and emits a corresponding event."""
 
@@ -814,6 +1095,14 @@ def create_dropdown_combobox(
     combobox.bind("<<ComboboxSelected>>", handle_selection)
     combobox.selection_clear()
     return combobox
+
+
+def get_first_in_range(upper_bound: float, selection: dict) -> Any:  # noqa ANN401: allow callers to select from any collection
+    """Get the first value in the selection that is lower than the upper_bound."""
+    descending = sorted(selection.keys(), reverse=True)
+    first_in_range_index = [upper_bound > entry for entry in descending].index(True)
+    first_value_in_range = selection[descending[first_in_range_index]]
+    return first_value_in_range
 
 
 def hex_string_for_style(style_name: str, theme_name: str = "") -> str:
