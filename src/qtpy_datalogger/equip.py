@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 _PC_ONLY_IMPORTS = [
     "typing",
+    "collections",
 ]
 
 _EQUIP_IGNORE_PATTERNS = frozenset(
