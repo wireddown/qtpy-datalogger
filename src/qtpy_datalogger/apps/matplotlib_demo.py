@@ -7,9 +7,9 @@ import pathlib
 import tkinter as tk
 from tkinter import font
 
+import matplotlib.backend_bases as mpl_backend_bases
 import numpy as np
 import ttkbootstrap as ttk
-from matplotlib.backend_bases import key_press_handler  # Attach the default Matplotlib key bindings
 from matplotlib.figure import Figure
 
 from qtpy_datalogger import guikit, ttkbootstrap_matplotlib
@@ -78,12 +78,12 @@ class PlottingApp(guikit.AsyncWindow):
 
         figure_aspect = (4, 3)
         figure_dpi = 100
-        fig = Figure(figsize=figure_aspect, dpi=figure_dpi)
-        ax = fig.add_subplot()
-        ax.set_title("Function plot")
-        ax.set_xlabel("time (s)")
-        ax.set_ylabel("y")
-        ax.grid(
+        mpl_figure = Figure(figsize=figure_aspect, dpi=figure_dpi)
+        self.axes = mpl_figure.add_subplot()
+        self.axes.set_title("Function plot")
+        self.time_axis_label = self.axes.set_xlabel("time (s)", picker=True)  # Enable picking to generate mouse events
+        self.y_axis_label = self.axes.set_ylabel("y", picker=True)  # Enable picking to generate mouse events
+        self.axes.grid(
             visible=True,
             which="major",
             axis="y",
@@ -91,20 +91,23 @@ class PlottingApp(guikit.AsyncWindow):
             zorder=-1,
         )
         self.t = np.arange(0, 1200, 0.1)
-        (self.line,) = ax.plot(
+        (self.line,) = self.axes.plot(
             self.t,
             1000 * np.sin(2 * np.pi * self.t * float(slider_update.get())),
             label="y = 1000*sin(2*pi * f * t)",
         )
-        ax.legend(
+        self.axes.legend(
             title="Function",
             loc="upper left",
             draggable=True,
         )
 
-        self.canvas = ttkbootstrap_matplotlib.create_styled_plot_canvas(fig, canvas_frame)
-        self.canvas.mpl_connect("key_press_event", lambda event: print(f"Received {event.key}"))  # type: ignore # noqa T201 -- allow printing to demonstrate event handling
-        self.canvas.mpl_connect("key_press_event", key_press_handler)  # pyright: ignore reportArgumentType -- matplotlib type annotations are also a little too strict
+        self.axis_tool_window = None
+        self.background_tasks: set[asyncio.Task] = set()
+        self.canvas = ttkbootstrap_matplotlib.create_styled_plot_canvas(mpl_figure, canvas_frame)
+        self.canvas.mpl_connect("key_press_event", mpl_backend_bases.key_press_handler)  # pyright: ignore reportArgumentType -- matplotlib type annotations are also a little too loose
+        self.canvas.mpl_connect("button_press_event", self.on_graph_mouse_down)
+        self.canvas.mpl_connect("pick_event", self.on_graph_pick)
 
         toolbar_row = ttk.Frame(main, name="toolbar_row")
         toolbar_row.grid(column=0, row=3, padx=(40, 80), sticky=tk.EW)
@@ -137,6 +140,54 @@ class PlottingApp(guikit.AsyncWindow):
         y = 1000 * np.sin(2 * np.pi * f * self.t)
         self.line.set_data(self.t, y)
         self.canvas.draw()
+
+    def on_graph_mouse_down(self, event_args: mpl_backend_bases.Event) -> None:
+        """Handle mouse-down events from the graph."""
+        if type(event_args) is not mpl_backend_bases.MouseEvent:
+            return
+        if not guikit.is_left_double_click(event_args):
+            return
+
+        clicked = event_args.inaxes
+        if clicked is not self.axes:
+            return
+
+        if not self.axis_tool_window:
+            self.axis_tool_window = guikit.AxisToolDialog(self.root_window)
+            open_tool_window_task = asyncio.create_task(self.axis_tool_window.show(guikit.DialogBehavior.Modeless))
+            self.background_tasks.add(open_tool_window_task)
+            open_tool_window_task.add_done_callback(self.finalize_tool_window)
+        limits = guikit.Range.create_infinite()
+        self.axis_tool_window.attach_to_axis(
+            event_args.canvas.draw_idle, self.axes, guikit.AxisToolDialog.Axis.Y, limits
+        )
+
+    def on_graph_pick(self, event_args: mpl_backend_bases.Event) -> None:
+        """Handle pick events from the graph."""
+        if type(event_args) is not mpl_backend_bases.PickEvent:
+            return
+        if not guikit.is_left_double_click(event_args.mouseevent):
+            return
+
+        clicked = event_args.artist
+        if clicked is self.y_axis_label:
+            axis = guikit.AxisToolDialog.Axis.Y
+        elif clicked is self.time_axis_label:
+            axis = guikit.AxisToolDialog.Axis.X
+        else:
+            return
+
+        if not self.axis_tool_window:
+            self.axis_tool_window = guikit.AxisToolDialog(self.root_window)
+            open_tool_window_task = asyncio.create_task(self.axis_tool_window.show(guikit.DialogBehavior.Modeless))
+            self.background_tasks.add(open_tool_window_task)
+            open_tool_window_task.add_done_callback(self.finalize_tool_window)
+        limits = guikit.Range.create_infinite()
+        self.axis_tool_window.attach_to_axis(event_args.canvas.draw_idle, self.axes, axis, limits)
+
+    def finalize_tool_window(self, task: asyncio.Task) -> None:
+        """Finalize the AxisToolDialog after the user closes it."""
+        self.axis_tool_window = None
 
 
 if __name__ == "__main__":
