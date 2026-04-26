@@ -804,7 +804,7 @@ def create_dropdown_combobox(
     parent: tk.Misc,
     values: list[str],
     width: int,
-    justify: Literal["left", "center", "right"],
+    justify: bootstyle.Side,
     completion: Callable[[str], None],
 ) -> ttk.Combobox:
     """Create a ttk.Combobox that only allows selection of entries."""
