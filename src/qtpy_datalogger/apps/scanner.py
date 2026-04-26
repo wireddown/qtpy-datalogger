@@ -182,12 +182,13 @@ class ScannerApp(guikit.AsyncWindow):
         self.status_icon_label.pack(side=tk.LEFT)
         self.status_message = ttk.Label(selection_status_frame, borderwidth=0, relief=tk.SOLID)
         self.status_message.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(8, 0))
-        self.selected_node_combobox = ttk.Combobox(
+        self.selected_node_combobox = guikit.create_dropdown_combobox(
             selection_status_frame,
+            values=[Constants.NoneChoice],
             width=20,
-            state=bootstyle.READONLY,
+            justify=bootstyle.RIGHT,
+            completion=self.on_combobox_selected,
         )
-        self.selected_node_combobox.bind("<<ComboboxSelected>>", self.on_combobox_selected)
         self.selected_node_combobox.pack(side=tk.LEFT, padx=(8, 0))
 
         message_frame = ttk.Frame(comms_frame, name="message_frame")
@@ -262,15 +263,12 @@ class ScannerApp(guikit.AsyncWindow):
 
         self.on_node_selected(selected_serial_number)
 
-    def on_combobox_selected(self, event_args: tk.Event) -> None:
+    def on_combobox_selected(self, new_selection: str) -> None:
         """Handle the user selecting a new entry in the combobox."""
-        if not isinstance(event_args.widget, ttk.Combobox):
-            raise TypeError()
-        selected_value = event_args.widget.get()
         selected_serial_number = Constants.NoneChoice
         for _, devices_in_group in self.scan_db.devices_by_group.items():
             for serial_number, device_info in devices_in_group.items():
-                if selected_value in [device_info.node_id, device_info.com_port]:
+                if new_selection in [device_info.node_id, device_info.com_port]:
                     selected_serial_number = serial_number
         self.on_node_selected(selected_serial_number)
 
