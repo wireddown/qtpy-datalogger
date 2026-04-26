@@ -11,7 +11,7 @@ import tkinter as tk
 import webbrowser
 from collections.abc import Callable
 from tkinter import font
-from typing import ClassVar, Literal, NamedTuple
+from typing import ClassVar, NamedTuple
 
 import click
 import ttkbootstrap as ttk
@@ -742,24 +742,9 @@ def create_theme_combobox(parent: tk.BaseWidget) -> ttk.Combobox:
             raise ValueError()
     sorted_by_kind = [*sorted(light_themes), *sorted(dark_themes)]
 
-    theme_combobox = ttk.Combobox(
-        parent,
-        width=12,
-        values=sorted_by_kind,
-    )
-    theme_combobox.set(active_theme.name.capitalize())
-    theme_combobox.configure(state=bootstyle.READONLY)
-    theme_combobox.selection_clear()
-
-    def handle_change_theme(event_args: tk.Event) -> None:
+    def handle_change_theme(new_selection: str) -> None:
         """Handle the selection event for the theme Combobox."""
-        sending_combobox = event_args.widget
-        if not isinstance(sending_combobox, ttk.Combobox):
-            raise TypeError()
-        theme_name = sending_combobox.get().lower()
-        sending_combobox.configure(state=bootstyle.READONLY)
-        sending_combobox.selection_clear()
-        ThemeChanger.use_bootstrap_theme(theme_name, sending_combobox)
+        ThemeChanger.use_bootstrap_theme(new_selection.lower(), parent)
 
     def on_theme_changed(themed_widget: tk.Misc, event_args: tk.Event) -> None:
         """Handle the ThemeChanger.Event.BootstrapThemeChanged event."""
@@ -771,7 +756,14 @@ def create_theme_combobox(parent: tk.BaseWidget) -> ttk.Combobox:
             raise ValueError()
         sending_combobox.set(style.theme.name.capitalize())
 
-    theme_combobox.bind("<<ComboboxSelected>>", handle_change_theme)
+    theme_combobox = create_dropdown_combobox(
+        parent,
+        values=sorted_by_kind,
+        width=12,
+        justify=bootstyle.LEFT,
+        completion=handle_change_theme,
+    )
+    theme_combobox.set(active_theme.name.capitalize())
     ThemeChanger.add_handler(theme_combobox, functools.partial(on_theme_changed, theme_combobox))
     return theme_combobox
 
