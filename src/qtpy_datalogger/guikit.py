@@ -17,6 +17,7 @@ from typing import Any, ClassVar, NamedTuple
 
 import click
 import matplotlib.axes as mpl_axes
+import matplotlib.backend_bases as mpl_backend_bases
 import ttkbootstrap as ttk
 import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.style as ttk_style
@@ -1095,6 +1096,13 @@ def create_dropdown_combobox(
     combobox.bind("<<ComboboxSelected>>", handle_selection)
     combobox.selection_clear()
     return combobox
+
+
+def is_left_double_click(mouse_args: mpl_backend_bases.MouseEvent) -> bool:
+    """Return True when the mouse_args represent a double-left-click."""
+    if mouse_args.button != mpl_backend_bases.MouseButton.LEFT:
+        return False
+    return mouse_args.dblclick
 
 
 def get_first_in_range(upper_bound: float, selection: dict) -> Any:  # noqa ANN401: allow callers to select from any collection
