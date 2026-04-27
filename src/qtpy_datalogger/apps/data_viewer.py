@@ -15,6 +15,7 @@ import tkinter as tk
 from enum import StrEnum
 from tkinter import filedialog, font
 
+import matplotlib.backend_bases as mpl_backend_bases
 import matplotlib.figure as mpl_figure
 import numpy as np
 import pandas as pd
@@ -183,6 +184,8 @@ class DataViewer(guikit.AsyncWindow):
         self.canvas_frame.rowconfigure(0, weight=1)
         plot_figure = mpl_figure.Figure(figsize=figure_aspect, dpi=figure_dpi)
         self.canvas_figure = ttkbootstrap_matplotlib.create_styled_plot_canvas(plot_figure, self.canvas_frame)
+        self.canvas_figure.mpl_connect("button_press_event", self.on_graph_mouse_down)
+        self.canvas_figure.mpl_connect("pick_event", self.on_graph_pick)
         plot_figure.subplots_adjust(
             left=0.10,  # Leave room on left and bottom for axis labels
             bottom=0.10,
@@ -191,6 +194,8 @@ class DataViewer(guikit.AsyncWindow):
         )
 
         self.plot_axes = plot_figure.add_subplot()
+        self.axis_tool_window = None
+        self.background_tasks: set[asyncio.Task] = set()
 
         toolbar_row = ttk.Frame(main, name="toolbar_row")
         toolbar_row.grid(column=0, row=1, sticky=tk.NSEW, padx=40, pady=(8, 0))
@@ -690,8 +695,8 @@ class DataViewer(guikit.AsyncWindow):
                 measurements,
                 label=plot_name,
             )
-        self.plot_axes.set_xlabel("Time")
-        self.plot_axes.set_ylabel("Measurement")
+        self.time_axis_label = self.plot_axes.set_xlabel("Time", picker=True)
+        self.y_axis_label = self.plot_axes.set_ylabel("Measurement", picker=True)
         self.plot_axes.grid(
             visible=True,
             which="major",
@@ -707,6 +712,54 @@ class DataViewer(guikit.AsyncWindow):
         self.canvas_figure.draw()
         self.update_file_message(f"Duration: {time_coordinates[-1]:.3f}")
         return data_series.keys().to_list()
+
+    def on_graph_mouse_down(self, event_args: mpl_backend_bases.Event) -> None:
+        """Handle mouse-down events from the graph."""
+        if type(event_args) is not mpl_backend_bases.MouseEvent:
+            return
+        if not guikit.is_left_double_click(event_args):
+            return
+
+        clicked = event_args.inaxes
+        if clicked is not self.plot_axes:
+            return
+
+        if not self.axis_tool_window:
+            self.axis_tool_window = guikit.AxisToolDialog(self.root_window)
+            open_tool_window_task = asyncio.create_task(self.axis_tool_window.show(guikit.DialogBehavior.Modeless))
+            self.background_tasks.add(open_tool_window_task)
+            open_tool_window_task.add_done_callback(self.finalize_tool_window)
+        limits = guikit.Range.create_infinite()
+        self.axis_tool_window.attach_to_axis(
+            event_args.canvas.draw_idle, self.plot_axes, guikit.AxisToolDialog.Axis.Y, limits
+        )
+
+    def on_graph_pick(self, event_args: mpl_backend_bases.Event) -> None:
+        """Handle pick events from the graph."""
+        if type(event_args) is not mpl_backend_bases.PickEvent:
+            return
+        if not guikit.is_left_double_click(event_args.mouseevent):
+            return
+
+        clicked = event_args.artist
+        if clicked is self.y_axis_label:
+            axis = guikit.AxisToolDialog.Axis.Y
+        elif clicked is self.time_axis_label:
+            axis = guikit.AxisToolDialog.Axis.X
+        else:
+            return
+
+        if not self.axis_tool_window:
+            self.axis_tool_window = guikit.AxisToolDialog(self.root_window)
+            open_tool_window_task = asyncio.create_task(self.axis_tool_window.show(guikit.DialogBehavior.Modeless))
+            self.background_tasks.add(open_tool_window_task)
+            open_tool_window_task.add_done_callback(self.finalize_tool_window)
+        limits = guikit.Range.create_infinite()
+        self.axis_tool_window.attach_to_axis(event_args.canvas.draw_idle, self.plot_axes, axis, limits)
+
+    def finalize_tool_window(self, task: asyncio.Task) -> None:
+        """Finalize the AxisToolDialog after the user closes it."""
+        self.axis_tool_window = None
 
     def get_data(self) -> tuple[list[float], pd.DataFrame]:
         """Get the time coordinates and measurement series from the data file."""
