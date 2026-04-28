@@ -75,7 +75,9 @@ jobs:
       shell: poetry run python {0}
 
     - name: Build package
-      run: poetry build --verbose
+      run: |
+        echo '## :building_construction: Build' >> $env:GITHUB_STEP_SUMMARY
+        poetry build --verbose
 
     - name: Upload release packages
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -99,7 +101,9 @@ jobs:
       with:
         name: release-distribution-packages
         path: dist/
-    - run: ls -lR
+    - run: |
+        echo '## :snake: Upload to PyPI' >> $env:GITHUB_STEP_SUMMARY
+        ls -lR
     # - name: Upload to PyPI
     #   uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
 
@@ -136,7 +140,7 @@ jobs:
       id: update_version
       run: |
         $new_version = $(poetry version patch --short)
-        echo "new_version=$new_version" >> $GITHUB_OUTPUT
+        echo "new_version=$new_version" >> $env:GITHUB_OUTPUT
         echo "## New version: $new_version" >> $env:GITHUB_STEP_SUMMARY
 
     - name: Create pull request
@@ -144,7 +148,7 @@ jobs:
       uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
       with:
         branch: 'users/build/update-package-version-to-${{ steps.update_version.outputs.new_version }}'
-        commit-message: 'Automated update version to ${{ steps.update_version.outputs.new_version }}'
+        commit-message: 'Automated version update to ${{ steps.update_version.outputs.new_version }}'
         title: 'Package: Update version to ${{ steps.update_version.outputs.new_version }}'
         body:  |
           This PR updates the version to ${{ steps.update_version.outputs.new_version }}.
@@ -153,5 +157,5 @@ jobs:
 
     - name: Write summary
       run: |
-        echo '## Pull request' >> $GITHUB_STEP_SUMMARY
-        echo "- ${{ steps.create_pr.outputs.pull-request-url }}" >> $GITHUB_STEP_SUMMARY
+        echo '## Pull request' >> $env:GITHUB_STEP_SUMMARY
+        echo "- ${{ steps.create_pr.outputs.pull-request-url }}" >> $env:GITHUB_STEP_SUMMARY
