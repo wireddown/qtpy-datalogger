@@ -154,7 +154,7 @@ jobs:
         body:  |
           This PR updates the package's version in `pyproject.toml` to **${{ steps.update_version.outputs.new_version }}**.
 
-          Click "Ready for review" to start the PR checks.
+          Close and reopen this PR to start the PR checks.
 
           _Automated:_ See [.github/workflows/publish.yml](${{ github.server_url }}/${{ github.repository }}/blob/main/.github/workflows/publish.yml) for details.
 
