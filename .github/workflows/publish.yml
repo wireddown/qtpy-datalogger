@@ -22,7 +22,7 @@ jobs:
 
     - name: Install poetry
       run: |
-        echo '# :checkered_flag: Release on PyPI _(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
+        echo '# :flying_saucer: Release on PyPI _(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
         pipx install poetry
         poetry about
         poetry config --list
@@ -131,18 +131,13 @@ jobs:
       run: |
         poetry self add 'poethepoet[poetry_plugin]'
         poetry install
-        echo '## :package: Installed plugins and dependencies' >> $env:GITHUB_STEP_SUMMARY
-        echo '```' >> $env:GITHUB_STEP_SUMMARY
-        poetry self show plugins >> $env:GITHUB_STEP_SUMMARY
-        poetry show >> $env:GITHUB_STEP_SUMMARY
-        echo '```' >> $env:GITHUB_STEP_SUMMARY
 
     - name: Update package version
       id: update_version
       run: |
         new_version=$(poetry version patch --short)
         echo "new_version=$new_version" >> $GITHUB_OUTPUT
-        echo "## New version: `$new_version`" >> $env:GITHUB_STEP_SUMMARY
+        echo "## New version: $new_version" >> $env:GITHUB_STEP_SUMMARY
 
     - name: Create pull request
       id: create_pr
