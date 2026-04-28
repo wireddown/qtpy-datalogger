@@ -147,13 +147,16 @@ jobs:
       id: create_pr
       uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
       with:
+        draft: 'always-true'
         branch: 'users/build/update-package-version-to-${{ steps.update_version.outputs.new_version }}'
         commit-message: 'Automated version update to ${{ steps.update_version.outputs.new_version }}'
-        title: 'Package: Update version to ${{ steps.update_version.outputs.new_version }}'
+        title: 'pyproject.toml: Update version to ${{ steps.update_version.outputs.new_version }}'
         body:  |
-          This PR updates the version to ${{ steps.update_version.outputs.new_version }}.
+          This PR updates the package's version in `pyproject.toml` to **${{ steps.update_version.outputs.new_version }}**.
 
-          See ${{ github.server_url }}/${{ github.repository }}/blob/main/.github/workflows/publish.yml for details.
+          Click "Ready for review" to start the PR checks.
+
+          _Automated:_ See [.github/workflows/publish.yml](${{ github.server_url }}/${{ github.repository }}/blob/main/.github/workflows/publish.yml) for details.
 
     - name: Write summary
       run: |
