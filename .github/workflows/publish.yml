@@ -104,12 +104,12 @@ jobs:
       with:
         name: release-distribution-packages
         path: dist/
-    - run: |
-        echo '## :snake: Upload to PyPI' >> $env:GITHUB_STEP_SUMMARY
-        echo '- [Release history](https://pypi.org/project/qtpy-datalogger/#history)' >> $env:GITHUB_STEP_SUMMARY
-        ls -lR
     # - name: Upload to PyPI
     #   uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+    - run: |
+        echo '# :snake: Upload to PyPI' >> $env:GITHUB_STEP_SUMMARY
+        echo '- [Release history](https://pypi.org/project/qtpy-datalogger/#history)' >> $env:GITHUB_STEP_SUMMARY
+        ls -lR
 
   update_version:
     name: Update version
