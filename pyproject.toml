@@ -12,32 +12,32 @@ readme = "README.md"
 qtpy-datalogger = "qtpy_datalogger.__main__:main"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-click = "^8.3.2"
-pyserial = "^3.5"
-wmi = "^1.5.1"
-circup = "^3.0.1"
-findimports = "^3.0.0"
-packaging = "^26.0"
 beautifulsoup4 = "^4.14.3"
+circup = "^3.0.1"
+click = "^8.3.2"
+findimports = "^3.0.0"
 gmqtt = "^0.7.0"
-psutil = "^7.2.2"
-ttkbootstrap = "^1.20.2"
 matplotlib = "^3.10.8"
+packaging = "^26.0"
 pandas = "^3.0.2"
+psutil = "^7.2.2"
+pyserial = "^3.5"
+python = "^3.11"
 tkfontawesome = "^0.3.2"
+ttkbootstrap = "^1.20.2"
+wmi = "^1.5.1"
 
 [tool.poetry.group.dev.dependencies]
+pyright = "^1.1.408"
 pytest = "^9.0.2"
 ruff = "^0.15.8"
-pyright = "^1.1.408"
 
 [tool.poetry.group.circup.dependencies]
 circuitpython-stubs = "==9.2.1"
-adafruit-circuitpython-neopixel = "^6.3.16"
 adafruit-circuitpython-adxl37x = "^1.2.4"
-adafruit-circuitpython-minimqtt = "^8.0.0"
 adafruit-circuitpython-connectionmanager = "^3.1.4"
+adafruit-circuitpython-minimqtt = "^8.0.0"
+adafruit-circuitpython-neopixel = "^6.3.16"
 
 [tool.poe.poetry_hooks]
 pre_build = "prebuild_tasks"
@@ -70,6 +70,9 @@ venvPath = ".venv"
 verboseOutput = true
 exclude = [
     ".venv",
+    "**/__pycache__",
+    "**/.*",
+    "**/node_modules",
     "docs/legacy",
 ]
 executionEnvironments = [
@@ -106,8 +109,8 @@ extend-select = [
     "N",
     "NPY",
     "PD",
-    "PL",
     "PIE",
+    "PL",
     "PT",
     "PTH",
     "Q",
@@ -123,11 +126,11 @@ extend-select = [
     "W",
 ]
 ignore = [
+    "COM812",
     "D203",
     "D211",
     "D212",
     "D400",
-    "COM812",
     "G004",
     "ISC001",
     "RET504",
@@ -137,8 +140,8 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**.py" = [
     "INP001",
-    "S101",
     "PLC0415",
+    "S101",
 ]
 "src/qtpy_datalogger/apps/empty.py" = [
     "F401",
