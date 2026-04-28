@@ -24,6 +24,7 @@ jobs:
       run: |
         echo '# :flying_saucer: Release on PyPI _(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
         pipx install poetry
+        pipx environment --value PIPX_HOME
         poetry about
         poetry config --list
 
@@ -105,7 +106,6 @@ jobs:
   update_version:
     name: Update version
     runs-on: windows-latest
-    # needs: publish
     needs: build
     permissions:
       contents: write
@@ -135,7 +135,7 @@ jobs:
     - name: Update package version
       id: update_version
       run: |
-        new_version=$(poetry version patch --short)
+        $new_version = $(poetry version patch --short)
         echo "new_version=$new_version" >> $GITHUB_OUTPUT
         echo "## New version: $new_version" >> $env:GITHUB_STEP_SUMMARY
 
