@@ -29,8 +29,12 @@ graph LR
 ```
 
 Supported Python versions
-- Host: **Python 3.11** and newer
-- Node: **CircuitPython 9.0** and newer
+- Host
+  - **Python 3.11**
+  - **Python 3.12**
+  - **Python 3.13**
+- Node
+  - **CircuitPython 9.0**
 
 Supported host platforms
 - Windows
