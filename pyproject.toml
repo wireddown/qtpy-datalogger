@@ -150,6 +150,7 @@ extend-select = [
     "UP",
     "W",
 ]
+# https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
 ignore = [
     "COM812",
     "D203",
@@ -162,16 +163,19 @@ ignore = [
     "TD002",
 ]
 
+# Disable rules by path
 [tool.ruff.lint.per-file-ignores]
+# Tests
 "tests/**.py" = [
-    "INP001",
-    "PLC0415",
-    "S101",
+    "INP001",       # Allow implicit namespaces
+    "PLC0415",      # Allow non-toplevel imports for clarity
+    "S101",         # Allow the 'assert' keyword
 ]
+# Templates
 "src/qtpy_datalogger/apps/empty.py" = [
-    "F401",
+    "F401",         # Allow unused imports for the template
 ]
-# Disable rules
+# CircuitPython
 # - Some Python libraries are not available on CircuitPython
 # - Some design pattern deviations are expected
 "src/qtpy_datalogger/sensor_node/**.py" = [
