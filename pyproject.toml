@@ -1,6 +1,6 @@
 [project]
 name = "qtpy-datalogger"
-version = "0.2.1"
+version = "0.2.2"
 description = "Data acquisition application using Adafruit QT Py S3"
 readme = "README.md"
 requires-python = ">=3.11,<4.0"
