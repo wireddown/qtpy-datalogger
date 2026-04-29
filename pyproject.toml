@@ -27,17 +27,17 @@ tkfontawesome = "^0.3.2"
 ttkbootstrap = "^1.20.2"
 wmi = "^1.5.1"
 
-[tool.poetry.group.dev.dependencies]
-pyright = "^1.1.408"
-pytest = "^9.0.2"
-ruff = "^0.15.8"
-
 [tool.poetry.group.circup.dependencies]
 circuitpython-stubs = "==9.2.1"
 adafruit-circuitpython-adxl37x = "^1.2.4"
 adafruit-circuitpython-connectionmanager = "^3.1.4"
 adafruit-circuitpython-minimqtt = "^8.0.0"
 adafruit-circuitpython-neopixel = "^6.3.16"
+
+[tool.poetry.group.dev.dependencies]
+pyright = "^1.1.408"
+pytest = "^9.0.2"
+ruff = "^0.15.8"
 
 [tool.poe.poetry_hooks]
 pre_build = "prebuild_tasks"
