@@ -52,17 +52,17 @@ jobs:
         poetry show >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
 
-    - name: Run pytest
+    - name: ':test_tube: Run pytest'
       run: poetry run pytest --verbose --junit-xml=junit/pytest-results-${{ runner.os }}-${{ matrix.python_version }}.xml
 
-    - name: Run ruff check
+    - name: ':mag: Run ruff check'
       id: ruff-check
       run: |
         poetry run ruff check --output-format github
         poetry run ruff check --output-format junit --output-file junit/ruff-check-results-${{ runner.os }}-${{ matrix.python_version }}.xml
       if: always()
 
-    - name: Run ruff format --diff
+    - name: ':mag: Run ruff format --diff'
       run: |
         poetry run ruff format --diff
         echo '## :microscope: ruff check errors' >> $env:GITHUB_STEP_SUMMARY
@@ -86,7 +86,7 @@ jobs:
       if: ${{ failure() && steps.ruff-check.conclusion == 'failure' }}
       continue-on-error: true
 
-    - name: Run pyright
+    - name: ':mag: Run pyright'
       run: |
         poetry run pyright --dependencies
         echo '## :microscope: pyright results' >> $env:GITHUB_STEP_SUMMARY
