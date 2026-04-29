@@ -76,9 +76,10 @@ jobs:
 
     - name: Build package
       run: |
-        echo '## :building_construction: Build' >> $env:GITHUB_STEP_SUMMARY
+        echo '# :building_construction: Build distribution packages' >> $env:GITHUB_STEP_SUMMARY
         poetry build --verbose
-        echo '```' >> $env:GITHUB_STEP_SUMMARY
+        echo '## notice.toml' >> $env:GITHUB_STEP_SUMMARY
+        echo '```toml' >> $env:GITHUB_STEP_SUMMARY
         cat src\qtpy_datalogger\sensor_node\snsr\notice.toml >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
 
