@@ -81,7 +81,6 @@ qtpy-datalogger connect
 This preview does not demonstrate MQTT communication over WiFi
  - Visit the wiki for [MQTT setup and commissioning] to exercise that capability
 
-
 ## Questions and help
 
 Please go to the [wiki home page] for guidance.
@@ -101,7 +100,6 @@ This project replaces a legacy system that uses Python and JeeNodes.
 See the [summary and source code] in the `docs/legacy` folder for details.
 
 
-[Run Tests and Analyzers]: https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/ci.yml/badge.svg?branch=main&event=push
 [Dependabot Updates]: https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/dependabot/dependabot-updates/badge.svg
 
 [Adafruit QT Py S3]: https://learn.adafruit.com/adafruit-qt-py-esp32-s3
