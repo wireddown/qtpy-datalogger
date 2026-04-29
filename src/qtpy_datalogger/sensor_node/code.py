@@ -1,10 +1,12 @@
 """code.py file is the main loop from qtpy_datalogger.sensor_node."""
 
 from gc import collect
+from json import dumps
 from time import monotonic, sleep
 from traceback import print_exception
 
-from snsr.core import paint_uart_line, read_one_uart_line
+from snsr.core import get_app, read_one_uart_line
+from snsr.handlers import can_handle_message
 from snsr.node.mqtt import get_broadcast_topic, get_command_topic
 from snsr.rxtx import connect_and_subscribe, create_mqtt_client, unsubscribe_and_disconnect
 from snsr.settings import settings
@@ -22,8 +24,8 @@ def main_loop() -> str:
     mqtt_client = create_mqtt_client(settings.node_group, settings.mqtt_client_id)
     connect_and_subscribe(mqtt_client, mqtt_topics)
 
-    response = ""
-    while response.lower() not in ["exit", "quit"]:
+    uart_input = ""
+    while uart_input.lower() not in ["exit", "quit"]:
         uart_connected = settings.uart_connected
         did_receive = mqtt_client.loop(timeout=1.0)  # Smallest supported timeout
         if not (did_receive or uart_connected):
@@ -33,13 +35,18 @@ def main_loop() -> str:
             sleep(0.2)
             if not settings.uart_bytes_waiting:
                 continue
-            response = read_one_uart_line()
-            if not response:
-                response = read_one_uart_line()
-            print(f"Received '{response}' with {settings.used_kb:.3f} kB / {settings.free_kb:.3f} kB  (used/free)")
+            uart_input = read_one_uart_line(message="")
+            action_payload = can_handle_message(uart_input)
+            if action_payload:
+                app = get_app(action_payload.action)
+                result = app.handle_message()
+                print(dumps(result.as_dict()))
+                app.did_handle_message()
+            else:
+                print(f"Received '{uart_input}' with {settings.used_kb:.3f} kB / {settings.free_kb:.3f} kB  (used/free)")
 
     unsubscribe_and_disconnect(mqtt_client, mqtt_topics)
-    return response
+    return uart_input
 
 
 most_recent_error = type(None)
