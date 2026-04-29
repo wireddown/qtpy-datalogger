@@ -91,7 +91,7 @@ This project manages its Python programs with `poetry`.
 
 The environment setup instructions are in the wiki on the [Contributing] page.
 
-The design documentation is in the wiki under the [Design Doc X] pages.
+The design documentation is in the wiki under the [Design Doc] pages.
 
 ## Legacy system
 
@@ -109,5 +109,5 @@ See the [summary and source code] in the `docs/legacy` folder for details.
 
 [wiki home page]: ../../wiki/Home
 [Contributing]: ../../wiki/Contributing
-[Design Doc X]: ../../wiki/Design-Doc-1-‐-Overview
+[Design Doc]: ../../wiki/Design-Doc-1-‐-Overview
 [summary and source code]: ./docs/legacy/README.md
