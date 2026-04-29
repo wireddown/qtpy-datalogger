@@ -270,7 +270,6 @@ def open_session_on_port(port: str) -> None:
     logger.info(f"---   Quit: {quit_command}        Help: {help_command} then H   ---")
 
     miniterm.start()
-    com_port.write(b"\r\n")
     with contextlib.suppress(KeyboardInterrupt):
         miniterm.join(True)
     miniterm.join()
