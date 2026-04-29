@@ -17,6 +17,7 @@ jobs:
     name: Test on Python ${{ matrix.python_version }}
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         python_version: [
           '3.11',
