@@ -196,7 +196,7 @@ class QTPyController:
         self,
         node_id: str,
         action: node_classes.ActionInformation,
-        timeout: float = 5.0,
+        timeout: float = 5.0,  # noqa ASYNC109: Allow timeout parameter for library ease-of-use
     ) -> tuple[dict, node_classes.SenderInformation]:
         """
         Monitor the MQTT messages for a matching result to the specified action.
