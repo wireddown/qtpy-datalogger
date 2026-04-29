@@ -7,7 +7,7 @@ from snsr.node.classes import ActionInformation
 from snsr.settings import settings
 
 
-def read_one_uart_line() -> str:
+def read_one_uart_line(message: str = "[uart] ") -> str:
     """Read characters from the USB UART until a newline."""
     import usb_cdc
 
@@ -22,7 +22,7 @@ def read_one_uart_line() -> str:
     if not serial:
         return ""
 
-    line = prompt(message="[uart] ", in_stream=serial, out_stream=serial)  # type: ignore -- CircuitPython Serial objects have no parents
+    line = prompt(message=message, in_stream=serial, out_stream=serial)  # type: ignore -- CircuitPython Serial objects have no parents
     _ = serial.read(serial.in_waiting)
     return line
 
