@@ -1,43 +1,68 @@
-[tool.poetry]
+[project]
 name = "qtpy-datalogger"
-version = "0.1.0"
+version = "0.2.0"
 description = "Data acquisition application using Adafruit QT Py S3"
-authors = [
-    "Down to the Wire <8404598+wireddown@users.noreply.github.com>",
-]
-license = "Apache-2.0"
 readme = "README.md"
+requires-python = ">=3.11,<4.0"
+license = "Apache-2.0"
+authors = [
+    {name = "Down to the Wire", email = "all.wired.down@gmail.com"},
+]
+keywords = [
+    "circuitpython",
+    "daq",
+    "qtpy",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Embedded Systems",
+    "Topic :: Software Development :: User Interfaces",
+]
+dynamic = ["dependencies"]
 
-[tool.poetry.scripts]
+[project.urls]
+homepage = "https://github.com/wireddown/qt-py-s3-daq-app"
+source = "https://github.com/wireddown/qt-py-s3-daq-app"
+changelog = "https://github.com/wireddown/qt-py-s3-daq-app/releases"
+documentation = "https://github.com/wireddown/qt-py-s3-daq-app/wiki"
+issues = "https://github.com/wireddown/qt-py-s3-daq-app/issues"
+
+[project.scripts]
 qtpy-datalogger = "qtpy_datalogger.__main__:main"
 
 [tool.poetry.dependencies]
-python = "^3.11"
-click = "^8.3.2"
-pyserial = "^3.5"
-wmi = "^1.5.1"
-circup = "^3.0.1"
-findimports = "^3.0.0"
-packaging = "^26.0"
 beautifulsoup4 = "^4.14.3"
+circup = "^3.0.1"
+click = "^8.3.2"
+findimports = "^3.0.0"
 gmqtt = "^0.7.0"
-psutil = "^7.2.2"
-ttkbootstrap = "^1.20.2"
 matplotlib = "^3.10.8"
+packaging = "^26.0"
 pandas = "^3.0.2"
+psutil = "^7.2.2"
+pyserial = "^3.5"
+python = "^3.11"
 tkfontawesome = "^0.3.2"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^9.0.2"
-ruff = "^0.15.8"
-pyright = "^1.1.408"
+ttkbootstrap = "^1.20.2"
+wmi = "^1.5.1"
 
 [tool.poetry.group.circup.dependencies]
 circuitpython-stubs = "==9.2.1"
-adafruit-circuitpython-neopixel = "^6.3.16"
 adafruit-circuitpython-adxl37x = "^1.2.4"
-adafruit-circuitpython-minimqtt = "^8.0.0"
 adafruit-circuitpython-connectionmanager = "^3.1.4"
+adafruit-circuitpython-minimqtt = "^8.0.0"
+adafruit-circuitpython-neopixel = "^6.3.16"
+
+[tool.poetry.group.dev.dependencies]
+pyright = "^1.1.408"
+pytest = "^9.0.2"
+ruff = "^0.15.8"
 
 [tool.poe.poetry_hooks]
 pre_build = "prebuild_tasks"
@@ -70,6 +95,9 @@ venvPath = ".venv"
 verboseOutput = true
 exclude = [
     ".venv",
+    "**/__pycache__",
+    "**/.*",
+    "**/node_modules",
     "docs/legacy",
 ]
 executionEnvironments = [
@@ -106,8 +134,8 @@ extend-select = [
     "N",
     "NPY",
     "PD",
-    "PL",
     "PIE",
+    "PL",
     "PT",
     "PTH",
     "Q",
@@ -122,28 +150,32 @@ extend-select = [
     "UP",
     "W",
 ]
+# https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
 ignore = [
+    "COM812",
     "D203",
     "D211",
     "D212",
     "D400",
-    "COM812",
     "G004",
     "ISC001",
     "RET504",
     "TD002",
 ]
 
+# Disable rules by path
 [tool.ruff.lint.per-file-ignores]
+# Tests
 "tests/**.py" = [
-    "INP001",
-    "S101",
-    "PLC0415",
+    "INP001",       # Allow implicit namespaces
+    "PLC0415",      # Allow non-toplevel imports for clarity
+    "S101",         # Allow the 'assert' keyword
 ]
+# Templates
 "src/qtpy_datalogger/apps/empty.py" = [
-    "F401",
+    "F401",         # Allow unused imports for the template
 ]
-# Disable rules
+# CircuitPython
 # - Some Python libraries are not available on CircuitPython
 # - Some design pattern deviations are expected
 "src/qtpy_datalogger/sensor_node/**.py" = [
