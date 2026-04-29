@@ -109,7 +109,7 @@ jobs:
     - run: |
         echo '# :snake: Upload to PyPI' >> $env:GITHUB_STEP_SUMMARY
         echo '- [Release history](https://pypi.org/project/qtpy-datalogger/#history)' >> $env:GITHUB_STEP_SUMMARY
-        ls -lR
+        ls -Recurse -Force dist
 
   update_version:
     name: Update version
