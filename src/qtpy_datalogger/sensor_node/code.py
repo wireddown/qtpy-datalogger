@@ -10,8 +10,6 @@ from snsr.rxtx import connect_and_subscribe, create_mqtt_client, unsubscribe_and
 from snsr.settings import settings
 
 settings.boot_time = monotonic()
-print(f"Booted at {settings.boot_time:.3f}")
-
 mqtt_topics = [
     get_broadcast_topic(settings.node_group),
     get_command_topic(settings.node_group, settings.mqtt_client_id),
@@ -27,18 +25,14 @@ def main_loop() -> str:
     response = ""
     while response.lower() not in ["exit", "quit"]:
         uart_connected = settings.uart_connected
-        if uart_connected:
-            paint_uart_line(f"  {settings.uptime:>12.3f}    Poll UART     [ Poll MQTT ]     ")
         did_receive = mqtt_client.loop(timeout=1.0)  # Smallest supported timeout
         if not (did_receive or uart_connected):
             sleep(4)  # Conserve battery by not constantly polling the network
 
         if uart_connected:
-            paint_uart_line(f"  {settings.uptime:>12.3f}  [ Poll UART ]     Poll MQTT       ")
             sleep(0.2)
             if not settings.uart_bytes_waiting:
                 continue
-            print()
             response = read_one_uart_line()
             if not response:
                 response = read_one_uart_line()
@@ -52,7 +46,6 @@ most_recent_error = type(None)
 error_count = 0
 error_limit = 3
 while True:
-    print("Entering root loop")
     try:
         result = main_loop()
         if result.lower() in ["exit", "quit"]:
