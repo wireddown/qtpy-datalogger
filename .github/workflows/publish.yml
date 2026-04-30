@@ -112,7 +112,7 @@ jobs:
         echo '## Version ${{ github.event.release.tag_name }} published' >> $GITHUB_STEP_SUMMARY
         echo '## Release history' >> $GITHUB_STEP_SUMMARY
         echo '- https://pypi.org/project/qtpy-datalogger/#history' >> $GITHUB_STEP_SUMMARY
-        ls -Recurse -Force dist
+        ls -lR dist
 
   update_version:
     name: Update version
