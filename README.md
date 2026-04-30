@@ -47,8 +47,8 @@ graph LR
 - Network / MQTT
 
 **Entry points**
-- Host program: [`qtpy_datalogger/console.py`](./src/qtpy_datalogger/console.py)
-- QT Py program: [`qtpy_datalogger/sensor_node/code.py`](./src/qtpy_datalogger/sensor_node/code.py)
+- Host program: [`qtpy_datalogger/console.py`](https://github.com/wireddown/qt-py-s3-daq-app/blob/main/src/qtpy_datalogger/console.py)
+- QT Py program: [`qtpy_datalogger/sensor_node/code.py`](https://github.com/wireddown/qt-py-s3-daq-app/blob/main/src/qtpy_datalogger/sensor_node/code.py)
 
 ## Preview in 90 seconds
 
@@ -114,7 +114,7 @@ See the [summary and source code] in the `docs/legacy` folder for details.
 
 [MQTT setup and commissioning]: https://github.com/wireddown/qt-py-s3-daq-app/wiki/Walkthrough-5-MQTT
 
-[wiki home page]: ../../wiki/Home
-[Contributing]: ../../wiki/Contributing
-[Design Doc]: ../../wiki/Design-Doc-1-‐-Overview
-[summary and source code]: ./docs/legacy/README.md
+[wiki home page]: https://github.com/wireddown/qt-py-s3-daq-app/wiki
+[Contributing]: https://github.com/wireddown/qt-py-s3-daq-app/wiki/Contributing
+[Design Doc]: https://github.com/wireddown/qt-py-s3-daq-app/wiki/Design-Doc-1-Overview
+[summary and source code]: https://github.com/wireddown/qt-py-s3-daq-app/blob/main/docs/legacy/README.md
