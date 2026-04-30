@@ -8,7 +8,7 @@
 [![Dependabot Updates]](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/dependabot/dependabot-updates)
 [![Publish: Release on PyPI](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/publish.yml/badge.svg)](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/publish.yml)
 
-## Structure
+## [Structure](https://github.com/wireddown/qt-py-s3-daq-app#structure)
 
 ```mermaid
 graph LR
