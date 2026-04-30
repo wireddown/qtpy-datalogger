@@ -131,7 +131,7 @@ class SnsrNotice(NamedTuple):
         in_dev_mode = this_package_parent.name == "src"
         if in_dev_mode:
             if allow_dev_version:
-                my_version = f"{my_version}.post0.dev0"
+                my_version = f"{my_version}rc0.dev0"
 
             most_recent_commit_info = ["git", "log", "--max-count=1", "--format=%h %aI"]
             sha_with_timestamp = subprocess.check_output(most_recent_commit_info).strip()  # noqa: S603 -- command is well-formed and user cannot execute arbitrary code
