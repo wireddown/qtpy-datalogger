@@ -92,16 +92,24 @@ This preview does not demonstrate MQTT communication over WiFi
 
 ### Scanner
 
+```
+qtpy-datalogger run scanner
+```
+
 Scan for nodes by group.
 Select a node to send it messages.
 
 ![Screenshot of the scanner app](https://raw.githubusercontent.com/wireddown/qt-py-s3-daq-app/refs/heads/main/docs/gallery/app-scanner.png)
 
-**`qtpy-datalogger run scanner`**
-
 ### Data Viewer
 
+```
+qtpy-datalogger run data-viewer
+```
+
 Open a CSV file for time series data.
+
+![Screenshot of the data viewer app](https://raw.githubusercontent.com/wireddown/qt-py-s3-daq-app/refs/heads/main/docs/gallery/app-data-viewer.png)
 
 CSV format
 - Series data are in columns
@@ -115,10 +123,6 @@ Time,Sensor 1,Sensor 2
 0.22,1.302,5.536
 ...
 ```
-
-![Screenshot of the data viewer app](https://raw.githubusercontent.com/wireddown/qt-py-s3-daq-app/refs/heads/main/docs/gallery/app-data-viewer.png)
-
-**`qtpy-datalogger run data-viewer`**
 
 ## Questions and help
 
