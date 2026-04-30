@@ -88,6 +88,38 @@ qtpycmd read A0 A1 A2 A3
 This preview does not demonstrate MQTT communication over WiFi
 - Visit the wiki for [MQTT setup and commissioning] for more details
 
+## Gallery
+
+### Scanner
+
+Scan for nodes by group.
+Select a node to send it messages.
+
+![Screenshot of the scanner app](https://raw.githubusercontent.com/wireddown/qt-py-s3-daq-app/refs/heads/main/docs/gallery/app-scanner.png)
+
+**`qtpy-datalogger run scanner`**
+
+### Data Viewer
+
+Open a CSV file for time series data.
+
+CSV format
+- Series data are in columns
+- Series names are in the first row
+- The time axis is in the first column
+  - ISO timestamps and floating point values both accepted
+
+```csv
+Time,Sensor 1,Sensor 2
+0.0,1.284,2.713
+0.22,1.302,5.536
+...
+```
+
+![Screenshot of the data viewer app](https://raw.githubusercontent.com/wireddown/qt-py-s3-daq-app/refs/heads/main/docs/gallery/app-data-viewer.png)
+
+**`qtpy-datalogger run data-viewer`**
+
 ## Questions and help
 
 Please go to the [wiki home page] for guidance.
