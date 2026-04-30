@@ -386,7 +386,7 @@ async def query_nodes_from_mqtt_async(group_id: str) -> dict[str, dict[DetailKey
     """Use a new QTPyController to scan the network for sensor_nodes."""
     controller = QTPyController.for_localhost_server(group_id)
     await controller.connect_and_subscribe()
-    node_information = await controller.scan_for_nodes()
+    node_information = await controller.scan_for_nodes(discovery_timeout=3.25)
     await controller.disconnect()
     return node_information
 

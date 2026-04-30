@@ -28,16 +28,16 @@ class AppInformation(NamedTuple):
 class Catalog:
     """Apps for qtpy_datalogger."""
 
-    default_app = AppInformation("ttkbootstrap-demo", "ttkbootstrap.__main__")
+    default_app = AppInformation("matplotlib-demo", "qtpy_datalogger.apps.matplotlib_demo")
     index = frozenset(
         {
             default_app,
+            AppInformation("ttkbootstrap-demo", "ttkbootstrap.__main__"),
             AppInformation("empty", "qtpy_datalogger.apps.empty"),
             AppInformation("async-demo", "qtpy_datalogger.guikit"),
             AppInformation("scanner", "qtpy_datalogger.apps.scanner"),
             AppInformation("data-viewer", "qtpy_datalogger.apps.data_viewer"),
             AppInformation("8ch-adc-with-adxl", "#TODO"),
-            AppInformation("matplotlib-demo", "qtpy_datalogger.apps.matplotlib_demo"),
         }
     )
 

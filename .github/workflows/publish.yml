@@ -76,9 +76,10 @@ jobs:
 
     - name: Build package
       run: |
-        echo '## :building_construction: Build' >> $env:GITHUB_STEP_SUMMARY
+        echo '# :building_construction: Build distribution packages' >> $env:GITHUB_STEP_SUMMARY
         poetry build --verbose
-        echo '```' >> $env:GITHUB_STEP_SUMMARY
+        echo '## notice.toml' >> $env:GITHUB_STEP_SUMMARY
+        echo '```toml' >> $env:GITHUB_STEP_SUMMARY
         cat src\qtpy_datalogger\sensor_node\snsr\notice.toml >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
 
@@ -104,11 +105,13 @@ jobs:
       with:
         name: release-distribution-packages
         path: dist/
-    # - name: Upload to PyPI
-    #   uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+    - name: 'Upload to PyPI'
+      uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
     - run: |
         echo '# :snake: Upload to PyPI' >> $env:GITHUB_STEP_SUMMARY
-        echo '- [Release history](https://pypi.org/project/qtpy-datalogger/#history)' >> $env:GITHUB_STEP_SUMMARY
+        echo '## Version ${{ github.event.release.tag_name }} published' >> $env:GITHUB_STEP_SUMMARY
+        echo '## Release history' >> $env:GITHUB_STEP_SUMMARY
+        echo '- https://pypi.org/project/qtpy-datalogger/#history' >> $env:GITHUB_STEP_SUMMARY
         ls -Recurse -Force dist
 
   update_version:
