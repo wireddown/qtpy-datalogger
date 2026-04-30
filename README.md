@@ -50,11 +50,10 @@ graph LR
 - Host program: [`qtpy_datalogger/console.py`](./src/qtpy_datalogger/console.py)
 - QT Py program: [`qtpy_datalogger/sensor_node/code.py`](./src/qtpy_datalogger/sensor_node/code.py)
 
-## Preview in 60 seconds
+## Preview in 90 seconds
 
-1. Download the most recent build artifact from `main`
-   - https://github.com/wireddown/qt-py-s3-daq-app/actions?query=branch%3Amain
 1. Connect your QT Py device with USB
+   - _(Optional)_ Back up its `code.py` file
 1. Preview the program in a deletable Python virtual environment
 
 ```pwsh
@@ -64,9 +63,8 @@ cd qtpy-preview
 python -m venv --upgrade-deps .venv
 .\.venv\Scripts\activate.ps1
 
-# Install a build artifact
-# https://github.com/wireddown/qt-py-s3-daq-app/actions?query=branch%3Amain
-pip install C:\Users\name\Downloads\qtpy_datalogger-*-py3-none-any.whl
+# Install
+pip install qtpy-datalogger
 
 # Show the package help
 qtpy-datalogger --help
@@ -77,12 +75,18 @@ qtpy-datalogger connect --discover-only
 # Install the node runtime on a device
 qtpy-datalogger equip
 
-# Open a serial terminal session, use Ctrl-] to quit
+# Open a serial connection, use Ctrl-] to quit
 qtpy-datalogger connect
+
+qtpycmd get_apps
+
+qtpycmd stats
+
+qtpycmd read A0 A1 A2 A3
 ```
 
 This preview does not demonstrate MQTT communication over WiFi
- - Visit the wiki for [MQTT setup and commissioning] to exercise that capability
+- Visit the wiki for [MQTT setup and commissioning] for more details
 
 ## Questions and help
 
