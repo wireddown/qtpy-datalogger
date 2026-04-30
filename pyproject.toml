@@ -1,6 +1,6 @@
 [project]
 name = "qtpy-datalogger"
-version = "0.2.2"
+version = "1.0.0"
 description = "Data acquisition application using Adafruit QT Py S3"
 readme = "README.md"
 requires-python = ">=3.11,<4.0"
@@ -14,7 +14,7 @@ keywords = [
     "qtpy",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Operating System :: Microsoft :: Windows",
