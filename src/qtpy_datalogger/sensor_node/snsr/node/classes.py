@@ -330,3 +330,26 @@ class ActionPayload:
     def sender(self) -> SenderInformation:
         """The sender of the payload."""
         return SenderInformation.from_dict(self.information["sender"])
+
+
+def create_custom_with_input(input_string: str) -> ActionPayload:
+    """Return an ActionPayload for a custom command with the specified input."""
+    payload = ActionPayload(
+        action=ActionInformation(
+            command="custom",
+            parameters={
+                "input": input_string,
+            },
+            message_id="create_custom_with_input",
+        ),
+        sender=SenderInformation(
+            descriptor_topic="unused",
+            sent_at="unused",
+            status=StatusInformation(
+                used_memory="unused",
+                free_memory="unused",
+                cpu_temperature="unused",
+            ),
+        ),
+    )
+    return payload
