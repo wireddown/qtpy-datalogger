@@ -105,8 +105,8 @@ jobs:
       with:
         name: release-distribution-packages
         path: dist/
-    # - name: Upload to PyPI
-    #   uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+    - name: 'Upload to PyPI'
+      uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
     - run: |
         echo '# :snake: Upload to PyPI' >> $env:GITHUB_STEP_SUMMARY
         echo '## Version ${{ github.event.release.tag_name }} published' >> $env:GITHUB_STEP_SUMMARY
