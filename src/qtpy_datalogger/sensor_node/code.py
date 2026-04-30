@@ -7,6 +7,7 @@ from traceback import print_exception
 
 from snsr.core import get_app, read_one_uart_line
 from snsr.handlers import can_handle_message
+from snsr.node.classes import create_custom_with_input
 from snsr.node.mqtt import get_broadcast_topic, get_command_topic
 from snsr.rxtx import connect_and_subscribe, create_mqtt_client, unsubscribe_and_disconnect
 from snsr.settings import settings
@@ -37,13 +38,15 @@ def main_loop() -> str:
                 continue
             uart_input = read_one_uart_line(message="")
             action_payload = can_handle_message(uart_input)
-            if action_payload:
-                app = get_app(action_payload.action)
-                result = app.handle_message()
-                print(dumps(result.as_dict()))
-                app.did_handle_message()
-            else:
-                print(f"Received '{uart_input}' with {settings.used_kb:.3f} kB / {settings.free_kb:.3f} kB  (used/free)")
+            made_custom = False
+            if not action_payload:
+                action_payload = create_custom_with_input(uart_input.strip())
+                made_custom = True
+            app = get_app(action_payload.action)
+            result = app.handle_message()
+            response = result.parameters["output"] if made_custom else dumps(result.as_dict())
+            print(response)
+            app.did_handle_message()
 
     unsubscribe_and_disconnect(mqtt_client, mqtt_topics)
     return uart_input
