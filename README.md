@@ -31,22 +31,22 @@ graph LR
     end
 ```
 
-Supported Python versions
+**Supported Python versions**
 - Host
-  - **Python 3.11**
-  - **Python 3.12**
-  - **Python 3.13**
+  - Python 3.11
+  - Python 3.12
+  - Python 3.13
 - Node
-  - **CircuitPython 9.0**
+  - CircuitPython 9.0
 
-Supported host platforms
+**Supported host platforms**
 - Windows
 
-Supported connection types
-- serial / UART
-- network / MQTT
+**Supported connection types**
+- Serial / UART
+- Network / MQTT
 
-Entry points
+**Entry points**
 - Host program: [`qtpy_datalogger/console.py`](./src/qtpy_datalogger/console.py)
 - QT Py program: [`qtpy_datalogger/sensor_node/code.py`](./src/qtpy_datalogger/sensor_node/code.py)
 
