@@ -1,6 +1,8 @@
 # QT Py S3 DAQ App
 
-A data acquisition application using the [Adafruit QT Py S3] and [CircuitPython].
+**`qtpy-datalogger`** -- A data acquisition application using the [Adafruit QT Py S3] and [CircuitPython].
+
+## Status
 
 [![CI: Tests and Analyzers](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/ci.yml/badge.svg)](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/ci.yml)
 [![Dependabot Updates]](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/dependabot/dependabot-updates)
