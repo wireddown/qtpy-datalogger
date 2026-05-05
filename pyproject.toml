@@ -29,11 +29,11 @@ classifiers = [
 dynamic = ["dependencies"]
 
 [project.urls]
-homepage = "https://github.com/wireddown/qt-py-s3-daq-app"
-source = "https://github.com/wireddown/qt-py-s3-daq-app"
-changelog = "https://github.com/wireddown/qt-py-s3-daq-app/releases"
-documentation = "https://github.com/wireddown/qt-py-s3-daq-app/wiki"
-issues = "https://github.com/wireddown/qt-py-s3-daq-app/issues"
+homepage = "https://github.com/wireddown/qtpy-datalogger"
+source = "https://github.com/wireddown/qtpy-datalogger"
+changelog = "https://github.com/wireddown/qtpy-datalogger/releases"
+documentation = "https://github.com/wireddown/qtpy-datalogger/wiki"
+issues = "https://github.com/wireddown/qtpy-datalogger/issues"
 
 [project.scripts]
 qtpy-datalogger = "qtpy_datalogger.__main__:main"

@@ -8,4 +8,4 @@ This software disclaims any guarantees against security vulnerabilities.
 
 If you encounter a vulnerability, create a [new GitHub Issue].
 
-[new GitHub issue]: https://github.com/wireddown/qt-py-s3-daq-app/issues/new/choose
+[new GitHub issue]: https://github.com/wireddown/qtpy-datalogger/issues/new/choose
