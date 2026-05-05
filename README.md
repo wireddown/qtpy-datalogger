@@ -1,14 +1,14 @@
-# QT Py S3 DAQ App
+# QT Py Datalogger
 
 **`qtpy-datalogger`** -- A data acquisition application using the [Adafruit QT Py S3] and [CircuitPython].
 
 ## Status
 
-[![CI: Tests and Analyzers](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/ci.yml/badge.svg)](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/ci.yml)
-[![Dependabot Updates]](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/dependabot/dependabot-updates)
-[![Publish: Release on PyPI](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/publish.yml/badge.svg)](https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/publish.yml)
+[![CI: Tests and Analyzers](https://github.com/wireddown/qtpy-datalogger/actions/workflows/ci.yml/badge.svg)](https://github.com/wireddown/qtpy-datalogger/actions/workflows/ci.yml)
+[![Dependabot Updates]](https://github.com/wireddown/qtpy-datalogger/actions/workflows/dependabot/dependabot-updates)
+[![Publish: Release on PyPI](https://github.com/wireddown/qtpy-datalogger/actions/workflows/publish.yml/badge.svg)](https://github.com/wireddown/qtpy-datalogger/actions/workflows/publish.yml)
 
-## [Structure](https://github.com/wireddown/qt-py-s3-daq-app#structure)
+## [Structure](https://github.com/wireddown/qtpy-datalogger#structure)
 
 ```mermaid
 graph LR
@@ -47,8 +47,8 @@ graph LR
 - Network / MQTT
 
 **Entry points**
-- Host program: [`qtpy_datalogger/console.py`](https://github.com/wireddown/qt-py-s3-daq-app/blob/main/src/qtpy_datalogger/console.py)
-- QT Py program: [`qtpy_datalogger/sensor_node/code.py`](https://github.com/wireddown/qt-py-s3-daq-app/blob/main/src/qtpy_datalogger/sensor_node/code.py)
+- Host program: [`qtpy_datalogger/console.py`](https://github.com/wireddown/qtpy-datalogger/blob/main/src/qtpy_datalogger/console.py)
+- QT Py program: [`qtpy_datalogger/sensor_node/code.py`](https://github.com/wireddown/qtpy-datalogger/blob/main/src/qtpy_datalogger/sensor_node/code.py)
 
 ## Preview in 90 seconds
 
@@ -99,7 +99,7 @@ qtpy-datalogger run scanner
 Scan for nodes by group.
 Select a node to send it messages.
 
-![Screenshot of the scanner app](https://raw.githubusercontent.com/wireddown/qt-py-s3-daq-app/refs/heads/main/docs/gallery/app-scanner.png)
+![Screenshot of the scanner app](https://raw.githubusercontent.com/wireddown/qtpy-datalogger/refs/heads/main/docs/gallery/app-scanner.png)
 
 ### Data Viewer
 
@@ -109,7 +109,7 @@ qtpy-datalogger run data-viewer
 
 Open a CSV file for time series data.
 
-![Screenshot of the data viewer app](https://raw.githubusercontent.com/wireddown/qt-py-s3-daq-app/refs/heads/main/docs/gallery/app-data-viewer.png)
+![Screenshot of the data viewer app](https://raw.githubusercontent.com/wireddown/qtpy-datalogger/refs/heads/main/docs/gallery/app-data-viewer.png)
 
 CSV format
 - Series data are in columns
@@ -143,14 +143,14 @@ This project replaces a legacy system that uses Python and JeeNodes.
 See the [summary and source code] in the `docs/legacy` folder for details.
 
 
-[Dependabot Updates]: https://github.com/wireddown/qt-py-s3-daq-app/actions/workflows/dependabot/dependabot-updates/badge.svg
+[Dependabot Updates]: https://github.com/wireddown/qtpy-datalogger/actions/workflows/dependabot/dependabot-updates/badge.svg
 
 [Adafruit QT Py S3]: https://learn.adafruit.com/adafruit-qt-py-esp32-s3
 [CircuitPython]: https://circuitpython.org/
 
-[MQTT setup and commissioning]: https://github.com/wireddown/qt-py-s3-daq-app/wiki/Walkthrough-5-MQTT
+[MQTT setup and commissioning]: https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-5-MQTT
 
-[wiki home page]: https://github.com/wireddown/qt-py-s3-daq-app/wiki
-[Contributing]: https://github.com/wireddown/qt-py-s3-daq-app/wiki/Contributing
-[Design Doc]: https://github.com/wireddown/qt-py-s3-daq-app/wiki/Design-Doc-1-Overview
-[summary and source code]: https://github.com/wireddown/qt-py-s3-daq-app/blob/main/docs/legacy/README.md
+[wiki home page]: https://github.com/wireddown/qtpy-datalogger/wiki
+[Contributing]: https://github.com/wireddown/qtpy-datalogger/wiki/Contributing
+[Design Doc]: https://github.com/wireddown/qtpy-datalogger/wiki/Design-Doc-1-Overview
+[summary and source code]: https://github.com/wireddown/qtpy-datalogger/blob/main/docs/legacy/README.md
