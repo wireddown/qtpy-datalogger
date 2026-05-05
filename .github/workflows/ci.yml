@@ -132,9 +132,22 @@ jobs:
         path: dist/*.whl
       if: always()
 
+    - name: Build documentation
+      run: poetry run zensical build --clean
+      if: always()
+
+    - name: Upload documentation
+      id: upload-doc-site
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: qtpy-datalogger-documentation-site
+        path: site/
+      if: always()
+
     - name: Write workflow summary
       run: |
         echo "## :test_tube: [Combined results](https://github.com/${{github.repository}}/runs/$($env:REPORT_ID)?check_suite_focus=true) :small_blue_diamond: ${{ steps.result-report.outputs.passed }} :white_check_mark: :small_blue_diamond: ${{ steps.result-report.outputs.failed }} :x: :small_blue_diamond: ${{ steps.result-report.outputs.skipped }} :next_track_button:" >> $env:GITHUB_STEP_SUMMARY
         echo '' >> $env:GITHUB_STEP_SUMMARY
-        echo '## :arrow_heading_down: [Download](${{ steps.upload-wheel-package.outputs.artifact-url }})' >> $env:GITHUB_STEP_SUMMARY
+        echo '## :arrow_heading_down: Download [the package](${{ steps.upload-wheel-package.outputs.artifact-url }})' >> $env:GITHUB_STEP_SUMMARY
+        echo '## :books: Download [the documentation](${{ steps.upload-doc-site.outputs.artifact-url }})' >> $env:GITHUB_STEP_SUMMARY
       if: always()

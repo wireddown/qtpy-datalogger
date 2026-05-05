@@ -49,7 +49,6 @@ packaging = "^26.1"
 pandas = "^3.0.2"
 psutil = "^7.2.2"
 pyserial = "^3.5"
-python = "^3.11"
 tkfontawesome = "^0.3.2"
 ttkbootstrap = "^1.20.2"
 wmi = "^1.5.1"
@@ -62,9 +61,11 @@ adafruit-circuitpython-minimqtt = "^8.0.0"
 adafruit-circuitpython-neopixel = "^6.3.16"
 
 [tool.poetry.group.dev.dependencies]
+mkdocstrings-python = "^2.0.3"
 pyright = "^1.1.408"
 pytest = "^9.0.2"
 ruff = "^0.15.11"
+zensical = "^0.0.33"
 
 [tool.poe.poetry_hooks]
 pre_build = "prebuild_tasks"
