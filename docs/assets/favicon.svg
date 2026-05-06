@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="drawing.svg"
+   width="512"
+   height="512"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   inkscape:export-filename="favicon.png"
+   inkscape:export-xdpi="12"
+   inkscape:export-ydpi="12"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="1"
+     inkscape:cx="235.49999"
+     inkscape:cy="274.49999"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc. -->
+  <path
+     d="m 255.99999,96.63136 c 0,-52.790894 42.83033,-95.621212 95.62119,-95.621212 h 38.24847 c 49.30468,0 89.24647,39.94176 89.24647,89.246462 v 86.05906 15.93689 183.27392 c 0,74.80368 -60.6597,135.46337 -135.46336,135.46337 -74.80367,0 -135.46338,-60.65969 -135.46338,-135.46337 v -79.6843 c 0,-22.0128 -17.82934,-39.84217 -39.84214,-39.84217 -22.0128,0 -39.84218,17.82937 -39.84218,39.84217 v 167.33707 c 0,26.39545 -21.41513,47.8106 -47.81058,47.8106 -26.395425,0 -47.810594,-21.41515 -47.810594,-47.8106 V 295.84218 c 0,-74.80367 60.659694,-135.46336 135.463354,-135.46336 74.80366,0 135.46337,60.65969 135.46337,135.46336 v 79.6843 c 0,22.01282 17.82935,39.84218 39.84215,39.84218 22.01279,0 39.84215,-17.82936 39.84215,-39.84218 V 192.25256 h -31.87373 c -52.79086,0 -95.62119,-42.83034 -95.62119,-95.6212 z m 143.4318,-7.96845 a 23.905305,23.905305 0 1 0 -47.81061,0 23.905305,23.905305 0 1 0 47.81061,0 z"
+     id="path1"
+     inkscape:label="snek"
+     style="display:inline;fill:#58b800;fill-opacity:1;stroke:none;stroke-width:0.996614;stroke-dasharray:none;stroke-opacity:1" />
+</svg>
