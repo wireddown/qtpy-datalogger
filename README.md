@@ -32,28 +32,32 @@ graph LR
 ```
 
 **Supported Python versions**
+
 - Host
-  - Python 3.11
-  - Python 3.12
-  - Python 3.13
+    - Python 3.11
+    - Python 3.12
+    - Python 3.13
 - Node
-  - CircuitPython 9.0
+    - CircuitPython 9.0
 
 **Supported host platforms**
+
 - Windows
 
 **Supported connection types**
+
 - Serial / UART
 - Network / MQTT
 
 **Entry points**
+
 - Host program: [`qtpy_datalogger/console.py`](https://github.com/wireddown/qtpy-datalogger/blob/main/src/qtpy_datalogger/console.py)
 - QT Py program: [`qtpy_datalogger/sensor_node/code.py`](https://github.com/wireddown/qtpy-datalogger/blob/main/src/qtpy_datalogger/sensor_node/code.py)
 
 ## Preview in 90 seconds
 
 1. Connect your QT Py device with USB
-   - _(Optional)_ Back up its `code.py` file
+    - _(Optional)_ Back up its `code.py` file
 1. Preview the program in a deletable Python virtual environment
 
 ```pwsh
@@ -86,6 +90,7 @@ qtpycmd read A0 A1 A2 A3
 ```
 
 This preview does not demonstrate MQTT communication over WiFi
+
 - Visit the wiki for [MQTT setup and commissioning] for more details
 
 ## Gallery
@@ -112,10 +117,11 @@ Open a CSV file for time series data.
 ![Screenshot of the data viewer app](https://raw.githubusercontent.com/wireddown/qtpy-datalogger/refs/heads/main/docs/gallery/app-data-viewer.png)
 
 CSV format
+
 - Series data are in columns
 - Series names are in the first row
 - The time axis is in the first column
-  - ISO timestamps and floating point values both accepted
+    - ISO timestamps and floating point values both accepted
 
 ```csv
 Time,Sensor 1,Sensor 2
