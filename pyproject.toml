@@ -87,6 +87,10 @@ test.cmd = "pytest"
 _generate_notice = "poetry run qtpy-datalogger --verbose --generate-notice ./src/qtpy_datalogger/sensor_node/snsr/notice.toml"
 prebuild_tasks.sequence = ["_generate_notice"]
 prebuild_tasks.help = "[automated] Run the hooks attached to 'poetry build'."
+_prime_docs = "cp README.md docs/index.md"
+_build_docs = "poetry run zensical build --clean"
+docs.help = "Build the documentation site."
+docs.sequence = ["_prime_docs", "_build_docs"]
 
 [tool.pytest]
 addopts = [
