@@ -133,7 +133,7 @@ jobs:
       if: always()
 
     - name: Build documentation
-      run: poe docs
+      run: poetry run poe docs
       if: always()
 
     - name: Upload documentation
