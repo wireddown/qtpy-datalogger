@@ -133,7 +133,7 @@ jobs:
       if: always()
 
     - name: Build documentation
-      run: poetry run zensical build --clean
+      run: poe docs
       if: always()
 
     - name: Upload documentation
