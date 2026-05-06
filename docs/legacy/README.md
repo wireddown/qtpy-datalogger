@@ -20,11 +20,11 @@ graph LR
 ```
 
 - A Python program on the **PC Host** interfaces with a **JeeNode** to log and plot data
-  - [InfiniteSerialReadP_V4.py](./InfiniteSerialReadP_V4.py)
+    - [InfiniteSerialReadP_V4.py](./InfiniteSerialReadP_V4.py)
 - A **JeeNode** wirelessly relays commands and data with a **JeeNode** inside the centrifuge
-  - [PCBv5Reader_CRB.ino](./PCBv5Reader_CRB.ino)
+    - [PCBv5Reader_CRB.ino](./PCBv5Reader_CRB.ino)
 - A **JeeNode** inside the centrifuge uses battery power and a custom PCB for sensor IO
-  - [PCBv5Centrifuge_CRB.ino](PCBv5Centrifuge_CRB.ino)
+    - [PCBv5Centrifuge_CRB.ino](PCBv5Centrifuge_CRB.ino)
 
 ## Python setup
 
@@ -285,5 +285,5 @@ zict (0.1.2)
 ## Resources
 
 - JeeNode
-  - https://web.archive.org/web/20200503024000/https://jeelabs.net/projects/hardware/wiki/jeenode
-  - https://github.com/bswe/JeeNode/tree/master
+    - https://web.archive.org/web/20200503024000/https://jeelabs.net/projects/hardware/wiki/jeenode
+    - https://github.com/bswe/JeeNode/tree/master
