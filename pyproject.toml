@@ -63,6 +63,7 @@ qtpy-datalogger = "qtpy_datalogger.__main__:main"
 [dependency-groups]
 dev = [
     "mkdocstrings-python>=2.0.3",
+    "poethepoet>=0.45.0",
     "pyright>=1.1.408",
     "pytest>=9.0.2",
     "ruff>=0.15.11",
