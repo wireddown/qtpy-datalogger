@@ -26,7 +26,29 @@ classifiers = [
     "Topic :: Software Development :: Embedded Systems",
     "Topic :: Software Development :: User Interfaces",
 ]
-dynamic = ["dependencies"]
+dependencies = [
+    # Host
+    "beautifulsoup4>=4.14.3",
+    "circup>=3.0.1",
+    "click>=8.3.2",
+    "findimports>=3.0.0",
+    "gmqtt>=0.7.0",
+    "matplotlib>=3.10.8",
+    "packaging>=26.1",
+    "pandas>=3.0.2",
+    "psutil>=7.2.2",
+    "pyserial>=3.5",
+    "tkfontawesome>=0.3.2",
+    "ttkbootstrap>=1.20.2",
+    "wmi>=1.5.1",
+
+    # sensor_node
+    "circuitpython-stubs==9.2.1",
+    "adafruit-circuitpython-adxl37x>=1.2.4",
+    "adafruit-circuitpython-connectionmanager>=3.1.4",
+    "adafruit-circuitpython-minimqtt>=8.0.0",
+    "adafruit-circuitpython-neopixel>=6.3.16",
+]
 
 [project.urls]
 homepage = "https://github.com/wireddown/qtpy-datalogger"
@@ -38,37 +60,14 @@ issues = "https://github.com/wireddown/qtpy-datalogger/issues"
 [project.scripts]
 qtpy-datalogger = "qtpy_datalogger.__main__:main"
 
-[tool.poetry.dependencies]
-beautifulsoup4 = "^4.14.3"
-circup = "^3.0.1"
-click = "^8.3.2"
-findimports = "^3.0.0"
-gmqtt = "^0.7.0"
-matplotlib = "^3.10.8"
-packaging = "^26.1"
-pandas = "^3.0.2"
-psutil = "^7.2.2"
-pyserial = "^3.5"
-tkfontawesome = "^0.3.2"
-ttkbootstrap = "^1.20.2"
-wmi = "^1.5.1"
-
-[tool.poetry.group.circup.dependencies]
-circuitpython-stubs = "==9.2.1"
-adafruit-circuitpython-adxl37x = "^1.2.4"
-adafruit-circuitpython-connectionmanager = "^3.1.4"
-adafruit-circuitpython-minimqtt = "^8.0.0"
-adafruit-circuitpython-neopixel = "^6.3.16"
-
-[tool.poetry.group.dev.dependencies]
-mkdocstrings-python = "^2.0.3"
-pyright = "^1.1.408"
-pytest = "^9.0.2"
-ruff = "^0.15.11"
-zensical = "^0.0.33"
-
-[tool.poe.poetry_hooks]
-pre_build = "prebuild_tasks"
+[dependency-groups]
+dev = [
+    "mkdocstrings-python>=2.0.3",
+    "pyright>=1.1.408",
+    "pytest>=9.0.2",
+    "ruff>=0.15.11",
+    "zensical>=0.0.33",
+]
 
 [tool.poe.tasks]
 _ruff_check = "ruff check"
