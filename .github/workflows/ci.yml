@@ -44,6 +44,7 @@ jobs:
         echo '```' >> $env:GITHUB_STEP_SUMMARY
         uv self version >> $env:GITHUB_STEP_SUMMARY
         uv tree --no-dev >> $env:GITHUB_STEP_SUMMARY
+        uv tree --only-dev >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
 
     - name: Run pytest
