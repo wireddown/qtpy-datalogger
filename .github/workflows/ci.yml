@@ -38,15 +38,15 @@ jobs:
     - name: Install dependencies
       run: |
         echo '# :checkered_flag: Run Tests and Analyzers _(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
-        uv lock --check --verbose
+        uv lock --check
         uv sync --verbose
         echo '## :package: Installed plugins and dependencies' >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
-        echo Get-Command poe >> $env:GITHUB_STEP_SUMMARY
-        echo Get-Command ruff >> $env:GITHUB_STEP_SUMMARY
-        echo Get-Command pyright >> $env:GITHUB_STEP_SUMMARY
-        echo Get-Command circup >> $env:GITHUB_STEP_SUMMARY
-        echo Get-Command zensical >> $env:GITHUB_STEP_SUMMARY
+        Get-Command poe >> $env:GITHUB_STEP_SUMMARY
+        Get-Command ruff >> $env:GITHUB_STEP_SUMMARY
+        Get-Command pyright >> $env:GITHUB_STEP_SUMMARY
+        Get-Command circup >> $env:GITHUB_STEP_SUMMARY
+        Get-Command zensical >> $env:GITHUB_STEP_SUMMARY
         uv self version >> $env:GITHUB_STEP_SUMMARY
         uv tree --no-dev >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
