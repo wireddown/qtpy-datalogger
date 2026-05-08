@@ -107,6 +107,7 @@ exclude = [
     "**/.*",
     "**/node_modules",
     "docs/legacy",
+    "site/**",
 ]
 executionEnvironments = [
     { root = "src/qtpy_datalogger/sensor_node", reportMissingModuleSource = "information", reportAttributeAccessIssue = "information" },
