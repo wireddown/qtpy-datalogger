@@ -136,7 +136,7 @@ Please go to the [wiki home page] for guidance.
 
 ## Contributing
 
-This project manages its Python programs with `poetry`.
+This project manages its Python programs with `uv`.
 
 The environment setup instructions are in the wiki on the [Contributing] page.
 
