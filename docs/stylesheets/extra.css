@@ -1,0 +1,23 @@
+.qtpy {
+  color: #58b800;
+}
+
+/*
+ * https://github.com/WillMatthews/party-css/blob/main/party.css
+ */
+.🦜 {
+  animation: 🎨 0.5s infinite linear;
+}
+
+@keyframes 🎨 {
+  0%,
+  100% { color: #ff8d8b; }
+  11.11% { color: #fed689; }
+  22.22% { color: #88ff89; }
+  33.33% { color: #87ffff; }
+  44.44% { color: #8bb5fe; }
+  55.56% { color: #d78cff; }
+  66.67% { color: #ff8cff; }
+  77.78% { color: #ff68f7; }
+  88.89% { color: #fe6cb7; }
+}
