@@ -53,6 +53,12 @@ nav = [
     { "Develop" = "develop.md" },
   ] },
   { "Legacy system" = "legacy/README.md" },
+  { "Governance" = [
+    { "Support" = "SUPPORT.md" } ,
+    { "Security" = "SECURITY.md" } ,
+    { "License" = "license.md" },
+    { "Code of Conduct" = "CODE_OF_CONDUCT.md" } ,
+  ] },
 ]
 
 # With the "extra_css" option you can add your own CSS styling to customize
