@@ -51,11 +51,11 @@ dependencies = [
 ]
 
 [project.urls]
-homepage = "https://github.com/wireddown/qtpy-datalogger"
-source = "https://github.com/wireddown/qtpy-datalogger"
-changelog = "https://github.com/wireddown/qtpy-datalogger/releases"
-documentation = "https://github.com/wireddown/qtpy-datalogger/wiki"
-issues = "https://github.com/wireddown/qtpy-datalogger/issues"
+Changelog = "https://github.com/wireddown/qtpy-datalogger/releases"
+Documentation = "https://downtothewire.io/qtpy-datalogger/getting-started"
+Homepage = "https://downtothewire.io/qtpy-datalogger"
+Issues = "https://github.com/wireddown/qtpy-datalogger/issues"
+Source = "https://github.com/wireddown/qtpy-datalogger"
 
 [project.scripts]
 qtpy-datalogger = "qtpy_datalogger.__main__:main"
