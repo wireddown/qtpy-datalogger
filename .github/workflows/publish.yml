@@ -20,28 +20,21 @@ jobs:
     - name: Get source code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: Install poetry
-      run: |
-        echo '# :flying_saucer: Release on PyPI _(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
-        pipx install poetry
-        pipx environment --value PIPX_HOME
-        poetry about
-        poetry config --list
-
-    - name: Set up Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+    - name: Install uv
+      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
       with:
         python-version: '3.11'
-        cache: poetry
 
     - name: Install dependencies
       run: |
-        poetry self add 'poethepoet[poetry_plugin]'
-        poetry install
+        echo '# :flying_saucer: Release on PyPI _(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
+        uv lock --check
+        uv sync --verbose
         echo '## :package: Installed plugins and dependencies' >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
-        poetry self show plugins >> $env:GITHUB_STEP_SUMMARY
-        poetry show >> $env:GITHUB_STEP_SUMMARY
+        uv self version >> $env:GITHUB_STEP_SUMMARY
+        uv tree --no-dev >> $env:GITHUB_STEP_SUMMARY
+        uv tree --only-dev >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
 
     - name: Confirm release coherence
@@ -56,7 +49,7 @@ jobs:
 
         # Confirm the release tag version matches the package version
         tag_version = packaging.version.Version(tag_name)
-        str_version = subprocess.check_output(["poetry", "version", "--short"]).strip().decode()
+        str_version = subprocess.check_output(["uv", "version", "--short"]).strip().decode()
         pkg_version = packaging.version.Version(str_version)
         if tag_version != pkg_version:
             error_messages.append(f"Version mismatch: tag is {tag_version} and package is {pkg_version}")
@@ -72,12 +65,12 @@ jobs:
         if error_messages:
             exit_message = "\n".join(error_messages)
             raise ValueError(exit_message)
-      shell: poetry run python {0}
+      shell: uv run python {0}
 
     - name: Build package
       run: |
         echo '# :building_construction: Build distribution packages' >> $env:GITHUB_STEP_SUMMARY
-        poetry build --verbose
+        uv run poe build
         echo '## notice.toml' >> $env:GITHUB_STEP_SUMMARY
         echo '```toml' >> $env:GITHUB_STEP_SUMMARY
         cat src\qtpy_datalogger\sensor_node\snsr\notice.toml >> $env:GITHUB_STEP_SUMMARY
@@ -125,28 +118,21 @@ jobs:
     - name: Get source code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: Install poetry
-      run: |
-        echo '# :sparkle: Update package version' >> $env:GITHUB_STEP_SUMMARY
-        pipx install poetry
-        poetry about
-        poetry config --list
-
-    - name: Set up Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+    - name: Install uv
+      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
       with:
         python-version: '3.11'
-        cache: poetry
 
     - name: Install dependencies
       run: |
-        poetry self add 'poethepoet[poetry_plugin]'
-        poetry install
+        echo '# :sparkle: Update package version' >> $env:GITHUB_STEP_SUMMARY
+        uv lock --check
+        uv sync --verbose
 
     - name: Update package version
       id: update_version
       run: |
-        $new_version = $(poetry version patch --short)
+        $new_version = $(uv version --short --bump patch)
         echo "new_version=$new_version" >> $env:GITHUB_OUTPUT
         echo "## New version: $new_version" >> $env:GITHUB_STEP_SUMMARY
 

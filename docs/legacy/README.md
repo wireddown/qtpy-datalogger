@@ -1,3 +1,10 @@
+---
+icon: lucide/archive
+tags:
+  - Legacy DAQ
+  - JeeNode
+---
+
 # Legacy DAQ application
 
 ## Structure
