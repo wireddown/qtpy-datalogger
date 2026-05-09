@@ -48,6 +48,7 @@ Copyright &copy; 2026 Joe Friedrichsen
 # Read more: https://zensical.org/docs/setup/navigation/
 nav = [
   { "Home" = "index.md" },
+  { "Get started" = "get-started.md" },
   { "Legacy system" = "legacy/README.md" },
 ]
 
