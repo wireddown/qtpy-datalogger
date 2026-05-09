@@ -309,6 +309,12 @@ icon = "fontawesome/brands/github-alt"
 link = "https://github.com/wireddown"
 
 # ----------------------------------------------------------------------------
+# Custom overrides
+# ----------------------------------------------------------------------------
+[project.theme.icon.admonition]
+tip = "lucide/arrow-big-right"
+
+# ----------------------------------------------------------------------------
 # In this section you can configure the Markdown extensions that are used when
 # rendering your documentation. We enable the most useful extensions by default,
 # but you can customize this list to your needs.
