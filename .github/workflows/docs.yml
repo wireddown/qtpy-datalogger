@@ -18,32 +18,24 @@ jobs:
     - name: Get source code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: Install poetry
-      run: |
-        echo '# :books: Build docs _(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
-        pipx install poetry
-        pipx environment --value PIPX_HOME
-        poetry about
-        poetry config --list
-
-    - name: Set up Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+    - name: Install uv
+      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
       with:
         python-version: '3.11'
-        cache: poetry
 
     - name: Install dependencies
       run: |
-        poetry self add 'poethepoet[poetry_plugin]'
-        poetry install
+        uv lock --check
+        uv sync --verbose
         echo '## :package: Installed plugins and dependencies' >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
-        poetry self show plugins >> $env:GITHUB_STEP_SUMMARY
-        poetry show >> $env:GITHUB_STEP_SUMMARY
+        uv self version >> $env:GITHUB_STEP_SUMMARY
+        uv tree --no-dev >> $env:GITHUB_STEP_SUMMARY
+        uv tree --only-dev >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
 
     - name: Build documentation
-      run: poetry poe docs
+      run: uv run poe docs
 
     - name: Upload site artifact
       uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
@@ -59,8 +51,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     permissions:
-        pages: write
-        id-token: write
+      pages: write
+      id-token: write
     steps:
     - name: Deploy doc site
       id: deployment
