@@ -49,6 +49,9 @@ Copyright &copy; 2026 Joe Friedrichsen
 nav = [
   { "Home" = "index.md" },
   { "Get started" = "get-started.md" },
+  { "Develop" = [
+    { "Develop" = "develop.md" },
+  ] },
   { "Legacy system" = "legacy/README.md" },
 ]
 
