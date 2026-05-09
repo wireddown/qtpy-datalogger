@@ -27,6 +27,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        echo '# :flying_saucer: Release on PyPI _(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
         uv lock --check
         uv sync --verbose
         echo '## :package: Installed plugins and dependencies' >> $env:GITHUB_STEP_SUMMARY
@@ -124,6 +125,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        echo '# :sparkle: Update package version' >> $env:GITHUB_STEP_SUMMARY
         uv lock --check
         uv sync --verbose
 
