@@ -114,7 +114,10 @@ uv run qtpy-datalogger [OPTIONS]
 
 ### PC dev loop
 
-!!! info "Use `qtpy-datalogger server --observe` to monitor the messages sent between nodes and the host"
+??? info "Monitor the messages sent between nodes and the host"
+    ```pwsh
+    uv run qtpy-datalogger server --observe
+    ```
 
 ```pwsh
 # ✍️ Save source code changes
@@ -134,9 +137,15 @@ uv run poe fix
 
 ### QT Py dev loop
 
-!!! info "Use `qtpy-datalogger server --observe` to monitor the messages sent between nodes and the host"
+??? info "Monitor the messages sent between nodes and the host"
+    ```pwsh
+    uv run qtpy-datalogger server --observe
+    ```
 
-!!! info "Use `qtpy-datalogger connect --port COMxx` to monitor the main run loop on the QT Py node"
+??? info "Monitor the main run loop on the QT Py node"
+    ```pwsh
+    uv run qtpy-datalogger connect --port COMxx
+    ```
 
 !!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
 
