@@ -54,6 +54,9 @@ nav = [
     { "Get started" = "get-started.md" },
     { "Customize" = "customize.md" },
   ] },
+  { "Help" = [
+    { "Troubleshoot" = "troubleshoot.md" },
+  ] },
   { "Develop" = [
     { "Develop" = "develop.md" },
   ] },
