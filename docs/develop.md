@@ -13,7 +13,7 @@ This is a crash course introducing the tools and libraries used in the project.
 
 ??? question "New to git and Python?"
 
-    If these tools and commands are not on your system, go to the section [First time setup](#first-time-setup) at the bottom.
+    If these tools and commands are not on your system, follow the introductory [Guide pages](/eng/intro/tools).
 
 ### Requirements
 
@@ -234,13 +234,3 @@ Design documents for this project are in the wiki under the [**Design Doc X**](h
 ## Pull requests and Issues
 
 See the sections under the [Project Workflows](https://github.com/wireddown/qtpy-datalogger/wiki/Project-Workflows) wiki page for outlines.
-
-## First time setup
-
-If the tools and commands referenced above are not on your system, follow the instructions in these walkthroughs to install and configure them.
-
-1. [Tools](https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-1-Tools)
-1. [Git](https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-2-Git)
-1. [Python](https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-3-Python)
-1. [QT Py](https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-4-QT-Py)
-1. [MQTT](https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-5-MQTT)
