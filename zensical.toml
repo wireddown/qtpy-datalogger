@@ -48,7 +48,12 @@ Copyright &copy; 2026 Joe Friedrichsen
 # Read more: https://zensical.org/docs/setup/navigation/
 nav = [
   { "Home" = "index.md" },
-  { "Get started" = "get-started.md" },
+  { "Get started" = [
+    { "Features" = "features.md" },
+    { "Gallery"  = "gallery.md" },
+    { "Get started" = "get-started.md" },
+    { "Customize" = "customize.md" },
+  ] },
   { "Develop" = [
     { "Develop" = "develop.md" },
   ] },
