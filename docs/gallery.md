@@ -7,7 +7,7 @@ tags:
 
 # Gallery
 
-### Scanner
+## Scanner
 
 ```
 qtpy-datalogger run scanner
@@ -18,7 +18,7 @@ Select a node to send it messages.
 
 ![Screenshot of the scanner app](https://raw.githubusercontent.com/wireddown/qtpy-datalogger/refs/heads/main/docs/gallery/app-scanner.png)
 
-### Data Viewer
+## Data Viewer
 
 ```
 qtpy-datalogger run data-viewer
