@@ -326,6 +326,8 @@ link = "https://github.com/wireddown"
 # Custom overrides
 # ----------------------------------------------------------------------------
 [project.theme.icon.admonition]
+info = "lucide/message-circle-heart"
+question = "fontawesome/solid/circle-question"
 tip = "lucide/arrow-big-right"
 
 # ----------------------------------------------------------------------------
