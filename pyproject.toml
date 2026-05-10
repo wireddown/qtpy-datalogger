@@ -1,7 +1,7 @@
 [project]
 name = "qtpy-datalogger"
 version = "1.0.5"
-description = "Data acquisition application using Adafruit QT Py S3"
+description = "A remote control and data acquisition system using Adafruit QT Py S3"
 readme = "README.md"
 requires-python = ">=3.11,<4.0"
 license = "Apache-2.0"
@@ -9,9 +9,12 @@ authors = [
     {name = "Down to the Wire", email = "all.wired.down@gmail.com"},
 ]
 keywords = [
+    "acquisition",
     "circuitpython",
+    "control",
     "daq",
     "qtpy",
+    "remote",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -52,7 +55,7 @@ dependencies = [
 
 [project.urls]
 Changelog = "https://github.com/wireddown/qtpy-datalogger/releases"
-Documentation = "https://downtothewire.io/qtpy-datalogger/getting-started"
+Documentation = "https://downtothewire.io/qtpy-datalogger/get-started"
 Homepage = "https://downtothewire.io/qtpy-datalogger"
 Issues = "https://github.com/wireddown/qtpy-datalogger/issues"
 Source = "https://github.com/wireddown/qtpy-datalogger"
@@ -88,10 +91,11 @@ _generate_notice = "uv run qtpy-datalogger --verbose --generate-notice ./src/qtp
 _build_dist = "uv build --verbose"
 build.sequence = ["_generate_notice", "_build_dist"]
 build.help = "Build the package for release."
-_prime_docs = "cp README.md docs/index.md"
+_reset_license = "git checkout HEAD -- docs/license.md"
+_prime_license.shell = "cat LICENSE >> docs/license.md"
 _build_docs = "uv run zensical build --clean"
 docs.help = "Build the documentation site."
-docs.sequence = ["_prime_docs", "_build_docs"]
+docs.sequence = ["_reset_license", "_prime_license", "_build_docs"]
 
 [tool.pytest]
 addopts = [

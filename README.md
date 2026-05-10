@@ -1,6 +1,10 @@
 # QT Py Datalogger
 
-**`qtpy-datalogger`** -- A data acquisition application using the [Adafruit QT Py S3] and [CircuitPython].
+**`qtpy-datalogger`** -- A remote control and data acquisition system using the [Adafruit QT Py S3] and [CircuitPython]
+
+## Documentation
+
+Available at [downtothewire.io/**qtpy-datalogger**](https://downtothewire.io/qtpy-datalogger)
 
 ## Status
 
@@ -30,6 +34,8 @@ graph LR
         AP<-.->|🛜 WiFi|QTPy
     end
 ```
+
+The PC host controls and communicates with any number of sensor nodes on the wireless network.
 
 **Supported Python versions**
 

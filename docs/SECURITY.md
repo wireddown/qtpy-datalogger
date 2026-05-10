@@ -1,4 +1,11 @@
-# 🔐 Security
+---
+icon: fontawesome/solid/shield-halved
+tags:
+  - Governance
+  - Security
+---
+
+# Security
 
 ## No guarantees
 

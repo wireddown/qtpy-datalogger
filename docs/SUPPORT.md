@@ -1,4 +1,11 @@
-# 🐞 Support
+---
+icon: lucide/life-buoy
+tags:
+  - Governance
+  - Support
+---
+
+# Support
 
 This project uses [GitHub Issues] to track bugs and feature requests.
 

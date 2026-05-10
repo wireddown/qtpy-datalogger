@@ -48,8 +48,22 @@ Copyright &copy; 2026 Joe Friedrichsen
 # Read more: https://zensical.org/docs/setup/navigation/
 nav = [
   { "Home" = "index.md" },
-  { "Get started" = "get-started.md" },
+  { "Get started" = [
+    { "Features" = "features.md" },
+    { "Gallery"  = "gallery.md" },
+    { "Get started" = "get-started.md" },
+    { "Customize" = "customize.md" },
+  ] },
+  { "Develop" = [
+    { "Develop" = "develop.md" },
+  ] },
   { "Legacy system" = "legacy/README.md" },
+  { "Governance" = [
+    { "Support" = "SUPPORT.md" } ,
+    { "Security" = "SECURITY.md" } ,
+    { "License" = "license.md" },
+    { "Code of Conduct" = "CODE_OF_CONDUCT.md" } ,
+  ] },
 ]
 
 # With the "extra_css" option you can add your own CSS styling to customize
@@ -60,7 +74,7 @@ nav = [
 #
 # Read more: https://zensical.org/docs/customization/#additional-css
 #
-#extra_css = ["stylesheets/extra.css"]
+extra_css = ["stylesheets/extra.css"]
 
 # With the `extra_javascript` option you can add your own JavaScript to your
 # project to customize the behavior according to your needs.
@@ -307,6 +321,12 @@ toggle.name = "Switch to light mode"
 [[project.extra.social]]
 icon = "fontawesome/brands/github-alt"
 link = "https://github.com/wireddown"
+
+# ----------------------------------------------------------------------------
+# Custom overrides
+# ----------------------------------------------------------------------------
+[project.theme.icon.admonition]
+tip = "lucide/arrow-big-right"
 
 # ----------------------------------------------------------------------------
 # In this section you can configure the Markdown extensions that are used when
