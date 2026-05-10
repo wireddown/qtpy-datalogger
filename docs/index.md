@@ -41,7 +41,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     ---
 
-    Read and write both **analog** and **digital** pins. Control **SPI** and **I^2^C** peripherals. Blink the **NeoPixel**!
+    Read and write both **analog** and **digital** pins. Control **SPI** and **I^2^C** peripherals. Blink the **NeoPixel** :lucide-siren:{ .🦜 }
 
     :octicons-arrow-right-24: [Features](/features)
 

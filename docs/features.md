@@ -15,7 +15,7 @@ tags:
 | :fontawesome-solid-wave-square:&nbsp; Digital pins | :lucide-circle-check:{ .qtpy } | :lucide-circle-check:{ .qtpy } |
 | :fontawesome-solid-microchip:&nbsp; SPI bus        | :lucide-circle-check:{ .qtpy } | :lucide-circle-check:{ .qtpy } |
 | :fontawesome-solid-microchip:&nbsp; I^2^C bus      | :lucide-circle-check:{ .qtpy } | :lucide-circle-check:{ .qtpy } |
-| :lucide-siren:&nbsp; NeoPixel                      |                                | :lucide-circle-check:{ .qtpy } |
+| :lucide-siren:&nbsp; NeoPixel                      |                                | :lucide-circle-check:{ .🦜 }   |
 
 ## Connectivity
 
