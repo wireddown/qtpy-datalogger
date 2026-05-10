@@ -59,6 +59,11 @@ nav = [
   ] },
   { "Develop" = [
     { "Develop" = "develop.md" },
+    { "Guides" = [
+      { "Tools" = "eng/intro/tools.md" },
+      { "Python" = "eng/intro/python.md" },
+      { "Recap" = "eng/intro/recap.md" },
+      ] },
   ] },
   { "Legacy system" = "legacy/README.md" },
   { "Governance" = [
