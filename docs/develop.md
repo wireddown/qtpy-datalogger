@@ -71,6 +71,9 @@ uv sync
 # Confirm dependencies are satisfied
 uv sync --check
 
+# Confirm GUI component readiness
+uv run qtpy-datalogger run data-viewer
+
 # Confirm MQTT server readiness
 uv run qtpy-datalogger server
 
@@ -80,8 +83,8 @@ uv run qtpy-datalogger connect --discover-only
 # Confirm node readiness
 uv run qtpy-datalogger equip --compare
 
-# Install or upgrade node runtime
-uv run qtpy-datalogger equip
+# Send a message to the QT Py over WiFi
+uv run qtpy-datalogger run scanner
 ```
 
 ## Workflows
