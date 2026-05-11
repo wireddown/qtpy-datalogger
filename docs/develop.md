@@ -140,6 +140,8 @@ uv run poe fix
 
 ### QT Py dev loop
 
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
+
 ??? info "Monitor the messages sent between nodes and the host"
     ```pwsh
     uv run qtpy-datalogger server --observe
@@ -149,8 +151,6 @@ uv run poe fix
     ```pwsh
     uv run qtpy-datalogger connect --port COMxx
     ```
-
-!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
 
 ```pwsh
 # ✍️ Save source code changes
