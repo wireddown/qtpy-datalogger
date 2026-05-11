@@ -68,16 +68,24 @@ uv run qtpy-datalogger run data-viewer
 
 # Install an MQTT broker
 winget install --exact --id=EclipseFoundation.Mosquitto
-```
 
-!!! failure "Before continuing, [configure](https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-5-MQTT) the MQTT broker"
+# Configure Mosquitto
+$mqttSettings = @(
+    "listener 1883"
+    "allow_anonymous true"
+)
+Add-Content -Path "C:\Program Files\mosquitto\mosquitto.conf" -Value $mqttSettings
+
+# Configure Windows firewall
+netsh advfirewall firewall add rule name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any description='This rule allows MQTT clients on the local subnet to connect to this host' profile=private localip=any remoteip=localsubnet localport=1883 remoteport=any protocol=tcp interfacetype=any
+
+# Confirm MQTT server readiness
+uv run qtpy-datalogger server
+```
 
 !!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
 
 ```pwsh
-# Confirm MQTT server readiness
-uv run qtpy-datalogger server
-
 # Confirm QT Py detection
 uv run qtpy-datalogger connect --discover-only
 
