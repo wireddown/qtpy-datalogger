@@ -8,12 +8,10 @@ tags:
 
 # Recap
 
-All the steps for tool installation and environment initialization are on this page.
+All the steps for installing tools and initializing the environment are on this page.
+Collected from the [Guides](eng/intro/tools) and [Develop](develop) pages, these terminal commands prepare a **new** workstation for development.
 
-- [Guides](eng/intro/tools) -- tool installation
-- [Develop](develop) -- environment initialization
-
-Visit the **Develop** page for [Workflows](develop/#workflows) and [References](develop/#references).
+For [Workflows](develop/#workflows) and [References](develop/#references), visit the **Develop** page.
 
 ## Recipe
 
