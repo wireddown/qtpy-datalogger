@@ -41,7 +41,7 @@ uv sync
 **3. Setup the MQTT broker**
 
 ```pwsh
-# Install an MQTT broker
+# Install Mosquitto Broker
 winget install --exact --id=EclipseFoundation.Mosquitto
 ```
 
