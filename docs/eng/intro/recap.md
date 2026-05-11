@@ -10,10 +10,10 @@ tags:
 
 All the steps for tool installation and environment initialization are on this page.
 
-- [Guides](/eng/intro/tools) -- tool installation
-- [Develop](/develop) -- environment initialization
+- [Guides](eng/intro/tools) -- tool installation
+- [Develop](develop) -- environment initialization
 
-Visit the **Develop** page for [Workflows](/develop/#workflows) and [References](/develop/#references).
+Visit the **Develop** page for [Workflows](develop/#workflows) and [References](develop/#references).
 
 ## Recipe
 
@@ -46,7 +46,7 @@ winget install --exact --id=Git.Git
 winget install --exact --id=GitHub.GitHubDesktop
 ```
 
-!!! failure "Before continuing, [disable](/eng/intro/python/#disable-python-aliases) the Python aliases in Windows Settings"
+!!! failure "Before continuing, [disable](eng/intro/python/#disable-python-aliases) the Python aliases in Windows Settings"
 
 ```pwsh
 # Install uv
