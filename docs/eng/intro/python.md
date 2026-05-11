@@ -44,6 +44,13 @@ Further reading on this Python tooling, its uses, and how it works:
     | **App Installer** | `python.exe`  |
     | **App Installer** | `python3.exe` |
 
+??? quote "Disable from PowerShell"
+    ```pwsh
+    # Disable the Windows Python aliases
+    rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python.exe"
+    rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python3.exe"
+    ```
+
 ### Install uv
 
 Open PowerShell in Windows Terminal and [install **uv**] with `winget`.
