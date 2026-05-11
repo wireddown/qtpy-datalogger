@@ -44,8 +44,8 @@ tags:
     # Ctrl-] to quit
     ```
 
-This preview does not demonstrate MQTT communication over WiFi
+1. Optionally, delete the folder `qtpy-preview` when you are done.
 
-- Visit the wiki for [MQTT setup and commissioning] for more details
+!!! info "This preview does not demonstrate communication over WiFi"
 
-[MQTT setup and commissioning]: https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-5-MQTT
+    Visit the [MQTT](eng/intro/mqtt) page to install and run a broker service
