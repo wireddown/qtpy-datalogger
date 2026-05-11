@@ -43,7 +43,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     Read and write both **analog** and **digital** pins. Control **SPI** and **I^2^C** peripherals. Blink the **NeoPixel** :lucide-siren:{ .🦜 }
 
-    :octicons-arrow-right-24: [Features](/features)
+    :octicons-arrow-right-24: [Features](features)
 
 -   :lucide-square-activity:{ .lg .middle .qtpy }&nbsp; __Adapt to any use case__
 
@@ -51,7 +51,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     Use the app API to deploy custom code for remote acquisition and control.
 
-    :octicons-arrow-right-24: [Customize](/customize)
+    :octicons-arrow-right-24: [Customize](customize)
 
 </div>
 
@@ -63,7 +63,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     Includes built-in GUI applications for detecting sensor nodes and viewing data.
 
-    :octicons-arrow-right-24: [Gallery](/gallery)
+    :octicons-arrow-right-24: [Gallery](gallery)
 
 -   :lucide-zap:{ .lg .middle .qtpy }&nbsp; __Set up in 5 minutes__
 
@@ -71,7 +71,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     Install `qtpy-datalogger` with `pip` and get up and running in minutes.
 
-    :octicons-arrow-right-24: [Get started](/get-started)
+    :octicons-arrow-right-24: [Get started](get-started)
 
 </div>
 

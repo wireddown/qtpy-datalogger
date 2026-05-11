@@ -13,7 +13,7 @@ This is a crash course introducing the tools and libraries used in the project.
 
 ??? question "New to git and Python?"
 
-    If these tools and commands are not on your system, follow the introductory [Guide pages](/eng/intro/tools).
+    If these tools and commands are not on your system, follow the introductory [Guide pages](eng/intro/tools).
 
 ### Requirements
 
