@@ -8,7 +8,7 @@ tags:
 
 # Python
 
-## Installation
+## Install
 
 ### Outline
 
@@ -80,7 +80,7 @@ uv python find --show-version
 uv python list --only-installed
 ```
 
-## Testing
+## Testing code
 
 This project focuses on writing and running tests that exercise either entire features or single functions.
 As bugs are fixed, we add tests that confirm the bug remains fixed.
@@ -111,7 +111,7 @@ uv run pytest --verbose
 The Python extension in VS Code automatically [discovers the tests] for this project and lists them in the testing side panel.
 In this view, you can also run tests and debug them.
 
-## Analyzers
+## Analyzing code
 
 This project focuses on writing readable and unsurprising code.
 We run format, structure, and type analysis tools to identify code that doesn't match Python convention.
@@ -165,7 +165,7 @@ uv run pyright
 Fixes are made by hand because `pyright` does not have a fix option.
 However, the Python extension in VS Code can identify these problems and often has suggested fixes.
 
-## poe
+## Poe runner
 
 The [tool **poe**] makes running the tests and analyzers easier because we use [sequence tasks] that call `pytest`, `ruff`, and `pyright` with their parameters.
 
