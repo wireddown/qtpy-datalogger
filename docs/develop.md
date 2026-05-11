@@ -43,9 +43,19 @@ uv sync
 ```pwsh
 # Install Mosquitto Broker
 winget install --exact --id=EclipseFoundation.Mosquitto
+
+# Configure Mosquitto
+$mqttSettings = @(
+    "listener 1883"
+    "allow_anonymous true"
+)
+Add-Content -Path "C:\Program Files\mosquitto\mosquitto.conf" -Value $mqttSettings
+
+# Configure Windows firewall
+netsh advfirewall firewall add rule name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any description='This rule allows MQTT clients on the local subnet to connect to this host' profile=private localip=any remoteip=localsubnet localport=1883 remoteport=any protocol=tcp interfacetype=any
 ```
 
-Once installed, [configure](https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-5-MQTT) the MQTT broker
+!!! info "For details, see the [MQTT](eng/intro/mqtt) page"
 
 **4. Initialize QT Py device**
 
