@@ -42,11 +42,11 @@ winget install --exact --id=Git.Git
 
 # Install GitHub Desktop
 winget install --exact --id=GitHub.GitHubDesktop
-```
 
-!!! failure "Before continuing, [disable](eng/intro/python/#disable-python-aliases) the Python aliases in Windows Settings"
+# Disable the Windows Python aliases
+rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python.exe"
+rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python3.exe"
 
-```pwsh
 # Install uv
 winget install --exact --id=astral-sh.uv
 
