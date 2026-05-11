@@ -37,7 +37,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
 <div class="grid cards" markdown>
 
--   :fontawesome-solid-microchip:{ .middle }&nbsp; __Use every subsystem__
+-   :fontawesome-solid-microchip:{ .lg .middle .qtpy }&nbsp; __Use every subsystem__
 
     ---
 
@@ -45,7 +45,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     :octicons-arrow-right-24: [Features](/features)
 
--   :lucide-square-activity:{ .lg .middle }&nbsp; __Adapt to any use case__
+-   :lucide-square-activity:{ .lg .middle .qtpy }&nbsp; __Adapt to any use case__
 
     ---
 
@@ -57,7 +57,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
 <div class="grid cards" markdown>
 
--   :fontawesome-solid-image:{ .middle }&nbsp; __GUI applications__
+-   :lucide-chart-spline:{ .lg .middle .qtpy }&nbsp; __GUI applications__
 
     ---
 
@@ -65,7 +65,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     :octicons-arrow-right-24: [Gallery](/gallery)
 
--   :material-clock-fast:{ .lg .middle }&nbsp; __Set up in 5 minutes__
+-   :lucide-zap:{ .lg .middle .qtpy }&nbsp; __Set up in 5 minutes__
 
     ---
 

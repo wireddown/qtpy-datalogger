@@ -9,13 +9,13 @@ tags:
 
 ## Subsystems
 
-| Function                                           | Input                          | Output                         |
-|----------------------------------------------------|:------------------------------:|:------------------------------:|
-| :lucide-audio-waveform:&nbsp; Analog pins          | :lucide-circle-check:{ .qtpy } | :lucide-circle-check:{ .qtpy } |
-| :fontawesome-solid-wave-square:&nbsp; Digital pins | :lucide-circle-check:{ .qtpy } | :lucide-circle-check:{ .qtpy } |
-| :fontawesome-solid-microchip:&nbsp; SPI bus        | :lucide-circle-check:{ .qtpy } | :lucide-circle-check:{ .qtpy } |
-| :fontawesome-solid-microchip:&nbsp; I^2^C bus      | :lucide-circle-check:{ .qtpy } | :lucide-circle-check:{ .qtpy } |
-| :lucide-siren:&nbsp; NeoPixel                      |                                | :lucide-circle-check:{ .🦜 }   |
+| Function                                                          | Input                              | Output                             |
+|-------------------------------------------------------------------|:----------------------------------:|:----------------------------------:|
+| :lucide-audio-waveform:{ .lg .middle }&nbsp; Analog pins          | :lucide-circle-check:{ .lg .qtpy } | :lucide-circle-check:{ .lg .qtpy } |
+| :fontawesome-solid-wave-square:{ .lg .middle }&nbsp; Digital pins | :lucide-circle-check:{ .lg .qtpy } | :lucide-circle-check:{ .lg .qtpy } |
+| :fontawesome-solid-microchip:{ .lg .middle }&nbsp; SPI bus        | :lucide-circle-check:{ .lg .qtpy } | :lucide-circle-check:{ .lg .qtpy } |
+| :fontawesome-solid-microchip:{ .lg .middle }&nbsp; I^2^C bus      | :lucide-circle-check:{ .lg .qtpy } | :lucide-circle-check:{ .lg .qtpy } |
+| :lucide-siren:{ .lg }&nbsp; NeoPixel                              |                                    | :lucide-circle-check:{ .lg .🦜 }   |
 
 ## Connectivity
 
