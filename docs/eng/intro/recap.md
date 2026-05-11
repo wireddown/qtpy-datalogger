@@ -8,12 +8,10 @@ tags:
 
 # Recap
 
-All the steps for tool installation and environment initialization are on this page.
+All the steps for installing tools and initializing the environment are on this page.
+Collected from the [Guides](tools) and [Develop](../../develop) pages, these terminal commands prepare a **new** workstation for development.
 
-- [Guides](eng/intro/tools) -- tool installation
-- [Develop](develop) -- environment initialization
-
-Visit the **Develop** page for [Workflows](develop/#workflows) and [References](develop/#references).
+For [Workflows](../../develop/#workflows) and [References](../../develop/#references), visit the **Develop** page.
 
 ## Recipe
 
@@ -44,11 +42,11 @@ winget install --exact --id=Git.Git
 
 # Install GitHub Desktop
 winget install --exact --id=GitHub.GitHubDesktop
-```
 
-!!! failure "Before continuing, [disable](eng/intro/python/#disable-python-aliases) the Python aliases in Windows Settings"
+# Disable the Windows Python aliases
+rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python.exe"
+rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python3.exe"
 
-```pwsh
 # Install uv
 winget install --exact --id=astral-sh.uv
 
@@ -70,16 +68,24 @@ uv run qtpy-datalogger run data-viewer
 
 # Install an MQTT broker
 winget install --exact --id=EclipseFoundation.Mosquitto
-```
 
-!!! failure "Before continuing, [configure](https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-5-MQTT) the MQTT broker"
+# Configure Mosquitto
+$mqttSettings = @(
+    "listener 1883"
+    "allow_anonymous true"
+)
+Add-Content -Path "C:\Program Files\mosquitto\mosquitto.conf" -Value $mqttSettings
+
+# Configure Windows firewall
+netsh advfirewall firewall add rule name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any description='This rule allows MQTT clients on the local subnet to connect to this host' profile=private localip=any remoteip=localsubnet localport=1883 remoteport=any protocol=tcp interfacetype=any
+
+# Confirm MQTT server readiness
+uv run qtpy-datalogger server
+```
 
 !!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
 
 ```pwsh
-# Confirm MQTT server readiness
-uv run qtpy-datalogger server
-
 # Confirm QT Py detection
 uv run qtpy-datalogger connect --discover-only
 

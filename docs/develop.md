@@ -41,11 +41,21 @@ uv sync
 **3. Setup the MQTT broker**
 
 ```pwsh
-# Install an MQTT broker
+# Install Mosquitto Broker
 winget install --exact --id=EclipseFoundation.Mosquitto
+
+# Configure Mosquitto
+$mqttSettings = @(
+    "listener 1883"
+    "allow_anonymous true"
+)
+Add-Content -Path "C:\Program Files\mosquitto\mosquitto.conf" -Value $mqttSettings
+
+# Configure Windows firewall
+netsh advfirewall firewall add rule name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any description='This rule allows MQTT clients on the local subnet to connect to this host' profile=private localip=any remoteip=localsubnet localport=1883 remoteport=any protocol=tcp interfacetype=any
 ```
 
-Once installed, [configure](https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-5-MQTT) the MQTT broker
+!!! info "For details, see the [MQTT](eng/intro/mqtt) page"
 
 **4. Initialize QT Py device**
 
@@ -140,6 +150,8 @@ uv run poe fix
 
 ### QT Py dev loop
 
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
+
 ??? info "Monitor the messages sent between nodes and the host"
     ```pwsh
     uv run qtpy-datalogger server --observe
@@ -149,8 +161,6 @@ uv run poe fix
     ```pwsh
     uv run qtpy-datalogger connect --port COMxx
     ```
-
-!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
 
 ```pwsh
 # ✍️ Save source code changes

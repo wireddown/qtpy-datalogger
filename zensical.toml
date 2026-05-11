@@ -62,6 +62,7 @@ nav = [
     { "Guides" = [
       { "Tools" = "eng/intro/tools.md" },
       { "Python" = "eng/intro/python.md" },
+      { "MQTT" = "eng/intro/mqtt.md" },
       { "Recap" = "eng/intro/recap.md" },
       ] },
   ] },
@@ -334,6 +335,7 @@ link = "https://github.com/wireddown"
 # Custom overrides
 # ----------------------------------------------------------------------------
 [project.theme.icon.admonition]
+danger = "fontawesome/solid/explosion"
 info = "lucide/message-circle-heart"
 question = "fontawesome/solid/circle-question"
 tip = "lucide/arrow-big-right"
