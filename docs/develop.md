@@ -52,9 +52,11 @@ Continue reading if you want to contribute to or customize `qtpy_datalogger`.
 
 ### Do once
 
+Before you can start developing, you need to download the source and install the software requirements on your workstation.
+
 **1. Get the source**
 
-```pwsh
+```pwsh title="Powershell"
 # Clone from GitHub
 git clone https://github.com/wireddown/qtpy-datalogger.git
 cd qtpy-datalogger
@@ -62,14 +64,18 @@ cd qtpy-datalogger
 
 **2. Initialize the environment**
 
-```pwsh
+```pwsh title="Powershell"
 # Install the package's dependencies
 uv sync
 ```
 
 **3. Setup the MQTT broker**
 
-```pwsh
+Run these commands to install and configure the Mosquitto MQTT broker.
+
+!!! info "For details, see the [MQTT](eng/intro/mqtt) page"
+
+```pwsh title="Powershell"
 # Install Mosquitto Broker
 winget install --exact --id=EclipseFoundation.Mosquitto
 
@@ -81,19 +87,27 @@ $mqttSettings = @(
 Add-Content -Path "C:\Program Files\mosquitto\mosquitto.conf" -Value $mqttSettings
 
 # Configure Windows firewall
-netsh advfirewall firewall add rule name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any description='This rule allows MQTT clients on the local subnet to connect to this host' profile=private localip=any remoteip=localsubnet localport=1883 remoteport=any protocol=tcp interfacetype=any
+netsh advfirewall firewall add rule `
+  name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' `
+  program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any `
+  description='Allow MQTT clients on the local subnet to connect to this host' `
+  profile=private localip=any remoteip=localsubnet `
+  localport=1883 remoteport=any protocol=tcp interfacetype=any
 ```
-
-!!! info "For details, see the [MQTT](eng/intro/mqtt) page"
 
 **4. Initialize QT Py device**
 
 !!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
 
-```pwsh
+```pwsh title="Powershell"
 # Install and configure the sensor node runtime
 uv run qtpy-datalogger equip --secrets -
 ```
+
+When prompted:
+
+- set the WiFi SSID and password
+- set the broker IP address
 
 ### Ready check
 
