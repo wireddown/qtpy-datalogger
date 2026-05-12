@@ -318,11 +318,15 @@ repo = "fontawesome/brands/github-alt"
 scheme = "default"
 toggle.icon = "lucide/sun"
 toggle.name = "Switch to dark mode"
+primary = "indigo"
+accent = "indigo"
 
 [[project.theme.palette]]
 scheme = "slate"
 toggle.icon = "lucide/moon"
 toggle.name = "Switch to light mode"
+primary = "indigo"
+accent = "light green"
 
 # ----------------------------------------------------------------------------
 # The "extra" section contains miscellaneous settings.
