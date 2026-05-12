@@ -55,6 +55,7 @@ nav = [
     { "Customize" = "customize.md" },
   ] },
   { "Help" = [
+    { "Welcome" = "welcome.md" },
     { "Troubleshoot" = "troubleshoot.md" },
   ] },
   { "Develop" = [
