@@ -11,20 +11,20 @@ tags:
 
 If you're using the package but something isn't working correctly, open a PowerShell window in the package's folder and run these commands to show information about its environment.
 
-```pwsh
+```pwsh title="PowerShell"
 # Activate the package's environment
 .\.venv\Scripts\activate.ps1
 
 # Connect the QT Py with USB and confirm detection
 qtpy-datalogger connect --discover-only
 
-# Detect and show differences between the QT Py and the package
+# Detect and show differences between the QT Py sensor node and the package
 qtpy-datalogger equip --compare
 
 # Confirm MQTT server readiness
 qtpy-datalogger server
 
-# Find and communicate with the QT Py over the network
+# Find and communicate with the QT Py sensor node over the network
 qtpy-datalogger run scanner
 ```
 
@@ -32,7 +32,7 @@ qtpy-datalogger run scanner
 
 If you're customizing or contributing, run these commands to show information about the tools' versions and configuration.
 
-```pwsh
+```pwsh title="PowerShell"
 # What are the environment variables?
 env
 
