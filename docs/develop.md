@@ -113,12 +113,12 @@ When prompted:
 
 !!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
 
-```pwsh
-# Get latest from upstream
+Run these commands to confirm that your workstation is ready to develop.
+
+```pwsh title="Powershell"
+# Get latest source and dependencies from upstream
 git switch main
 git pull
-
-# Install the dependencies
 uv sync
 
 # Confirm dependencies are satisfied
