@@ -79,9 +79,8 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
 ## Questions and help
 
-Please go to the [wiki home page] for guidance.
+Please go to the [Welcome](welcome) page for questions and help.
 
 
 [Adafruit QT Py S3]: https://learn.adafruit.com/adafruit-qt-py-esp32-s3
 [CircuitPython]: https://circuitpython.org/
-[wiki home page]: https://github.com/wireddown/qtpy-datalogger/wiki
