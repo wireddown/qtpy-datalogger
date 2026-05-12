@@ -45,7 +45,7 @@ Further reading on this Python tooling, its uses, and how it works:
     | **App Installer** | `python3.exe` |
 
 ??? quote "Disable from PowerShell"
-    ```pwsh
+    ```pwsh title="PowerShell"
     # Disable the Windows Python aliases
     rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python.exe"
     rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python3.exe"
@@ -55,7 +55,7 @@ Further reading on this Python tooling, its uses, and how it works:
 
 Open PowerShell in Windows Terminal and [install **uv**] with `winget`.
 
-```pwsh
+```pwsh title="PowerShell"
 # Install with winget
 winget install --exact --id=astral-sh.uv
 
@@ -67,7 +67,7 @@ uv self version
 
 Open PowerShell and [use **uv**] to install Python.
 
-```pwsh
+```pwsh title="PowerShell"
 # Show the available versions of Python
 uv python list
 
@@ -104,7 +104,7 @@ Input values in tests may be purposefully incorrect or inapplicable to validate 
 
 We use the [tool **pytest**] to run all of the project's tests.
 
-```pwsh
+```pwsh title="PowerShell"
 # Run the tests
 uv run pytest
 
@@ -126,7 +126,7 @@ We use the [tool **ruff**] to check and fix [format] and [structure] problems.
 
 **Analyze**
 
-```pwsh
+```pwsh title="PowerShell"
 # Find differences from Python convention
 uv run ruff check
 
@@ -143,7 +143,7 @@ uv run ruff rule Z123 | mdv -
 
 **Fix**
 
-```pwsh
+```pwsh title="PowerShell"
 # Fix differences from Python convention
 uv run ruff check --fix
 
@@ -159,7 +159,7 @@ We use the [tool **pyright**] to check that functions accept and return [compati
 
 **Analyze**
 
-```pwsh
+```pwsh title="PowerShell"
 # Find incompatible or incorrect uses of variables and classes
 uv run pyright
 ```
@@ -174,7 +174,7 @@ However, the Python extension in VS Code can identify these problems and often h
 The [tool **poe**] makes running the tests and analyzers easier because we use [sequence tasks] that call `pytest`, `ruff`, and `pyright` with their parameters.
 
 
-```pwsh
+```pwsh title="PowerShell"
 # Runs 'pytest'
 uv run poe test
 
