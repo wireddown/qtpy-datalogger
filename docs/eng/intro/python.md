@@ -8,6 +8,8 @@ tags:
 
 # Python
 
+This project uses `uv` to manage its Python environments and dependencies.
+
 ## Install
 
 ### Outline
@@ -20,13 +22,12 @@ tags:
     - This manages the project and Python environments instead
 1. Install **Python**
 
-Further reading on this Python tooling, its uses, and how it works:
+??? abstract "Further reading on this Python tooling, its uses, and how it works"
 
-- [**uv**: A Complete Guide]
-    - Explains the efficiencies and convenient workflows in `uv`
-- [Python Virtual Environments: A Primer]
-    - Explains what Python virtual environments are, why they are useful, and how they work
-
+    - [**uv**: A Complete Guide]
+        - Explains the efficiencies and convenient workflows in `uv`
+    - [Python Virtual Environments: A Primer]
+        - Explains what Python virtual environments are, why they are useful, and how they work
 
 !!! info "Why we use `uv run ...`"
     - `uv` manages the virtual environment and its commands for the project **automatically**
@@ -68,6 +69,7 @@ uv self version
 ### 3. Install Python
 
 Open PowerShell and [use **uv**] to install Python.
+We recommend **Python 3.11** because it is the lowest version supported by the package.
 
 ```pwsh title="PowerShell"
 # Show the available versions of Python
