@@ -1,5 +1,5 @@
 ---
-icon: lucide/message-square-quote
+icon: lucide/message-square-code
 tags:
   - Develop
   - Introduction
@@ -15,7 +15,7 @@ For [Workflows](../../develop/#workflows) and [References](../../develop/#refere
 
 ## Recipe
 
-```pwsh
+```pwsh title="PowerShell"
 # Install VS Code
 winget install --exact --id=Microsoft.VisualStudioCode
 winget install --exact --id=Microsoft.VisualStudioCode.CLI
@@ -77,24 +77,29 @@ $mqttSettings = @(
 Add-Content -Path "C:\Program Files\mosquitto\mosquitto.conf" -Value $mqttSettings
 
 # Configure Windows firewall
-netsh advfirewall firewall add rule name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any description='This rule allows MQTT clients on the local subnet to connect to this host' profile=private localip=any remoteip=localsubnet localport=1883 remoteport=any protocol=tcp interfacetype=any
+netsh advfirewall firewall add rule `
+  name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' `
+  program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any `
+  description='Allow MQTT clients on the local subnet to connect to this host' `
+  profile=private localip=any remoteip=localsubnet `
+  localport=1883 remoteport=any protocol=tcp interfacetype=any
 
 # Confirm MQTT server readiness
 uv run qtpy-datalogger server
 ```
 
-!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
-```pwsh
+```pwsh title="PowerShell"
 # Confirm QT Py detection
 uv run qtpy-datalogger connect --discover-only
 
 # Install and configure the sensor node runtime
 uv run qtpy-datalogger equip --secrets -
 
-# Confirm node readiness
+# Confirm sensor node readiness
 uv run qtpy-datalogger equip --compare
 
-# Send a message to the QT Py over WiFi
+# Send a message to the QT Py sensor node over WiFi
 uv run qtpy-datalogger run scanner
 ```
