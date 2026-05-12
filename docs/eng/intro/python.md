@@ -31,7 +31,7 @@ Further reading on this Python tooling, its uses, and how it works:
     - `uv run ...` activates the environment for the command that follows
     - `uv` invokes these managed commands and won't use a system-wide tool of the same name by accident
 
-### Disable Python aliases
+### 1. Disable Python aliases
 
 1. Open the **Windows Settings** app and navigate to:
 
@@ -51,7 +51,7 @@ Further reading on this Python tooling, its uses, and how it works:
     rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python3.exe"
     ```
 
-### Install uv
+### 2. Install uv
 
 Open PowerShell in Windows Terminal and [install **uv**] with `winget`.
 
@@ -63,7 +63,7 @@ winget install --exact --id=astral-sh.uv
 uv self version
 ```
 
-### Install Python
+### 3. Install Python
 
 Open PowerShell and [use **uv**] to install Python.
 
