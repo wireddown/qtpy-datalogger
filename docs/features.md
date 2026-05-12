@@ -7,7 +7,7 @@ tags:
 
 # Features
 
-## Subsystems
+## QT Py Subsystems
 
 | Function                                                          | Input                              | Output                             |
 |-------------------------------------------------------------------|:----------------------------------:|:----------------------------------:|
@@ -19,20 +19,45 @@ tags:
 
 ## Connectivity
 
-- Serial / UART
-- Network / MQTT
+<div class="grid" markdown>
+
+:lucide-wifi:{ .lg .middle .qtpy }&nbsp; __Network / MQTT__
+{ .card }
+
+:lucide-cable:{ .lg .middle .qtpy }&nbsp; __Serial / UART__
+{ .card }
+
+</div>
 
 ## Environments
 
-### Host
+<div class="grid" markdown>
 
-- Windows
+:fontawesome-solid-worm:{ .lg .middle .qtpy }&nbsp; __CircuitPython 9.x__
+{ .card }
 
-### Python
+> :fontawesome-solid-worm:{ .lg .middle }&nbsp; __CircuitPython 10.x__ &nbsp;_untested_
 
-- Host
-    - Python 3.11
-    - Python 3.12
-    - Python 3.13
-- Sensor node
-    - CircuitPython 9.0
+:fontawesome-brands-windows:{ .lg .middle .qtpy }&nbsp; __Windows 11 / 10__
+{ .card }
+
+> :fontawesome-solid-apple-whole:{ .lg }&nbsp; __POSIX__ &nbsp;_partial, untested_
+
+</div>
+
+## Python
+
+<div class="grid" markdown>
+
+:fontawesome-brands-python:{ .lg .middle .qtpy }&nbsp; __Python 3.11__
+{ .card }
+
+:fontawesome-brands-python:{ .lg .middle .qtpy }&nbsp; __Python 3.12__
+{ .card }
+
+:fontawesome-brands-python:{ .lg .middle .qtpy }&nbsp; __Python 3.13__
+{ .card }
+
+> :fontawesome-brands-python:{ .lg .middle }&nbsp; __Python 3.14__ &nbsp;_in work_
+
+</div>
