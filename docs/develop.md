@@ -7,19 +7,48 @@ tags:
 
 # Develop
 
-This is a crash course introducing the tools and libraries used in the project.
+## Use in your project
 
-## Setup
+If you want to add this package to your own project and use it in your code, add it using your project's dependency manager.
 
-??? question "New to git and Python?"
+=== "uv"
 
-    If these tools and commands are not on your system, follow the introductory [Guide pages](eng/intro/tools).
+    ```pwsh title="Powershell"
+    uv add qtpy-datalogger
+    ```
 
-### Requirements
+=== "pdm"
+
+    ```pwsh title="Powershell"
+    pdm add qtpy-datalogger
+    ```
+
+=== "poetry"
+
+    ```poetry title="Powershell"
+    poetry add qtpy-datalogger
+    ```
+
+Then import the package like any other in your source code.
+
+```py title="my_program.py"
+from qtpy_datalogger import guikit as gk
+```
+
+## Setup for development
+
+The rest of this page is a crash course introducing the tools and libraries used in the project.
+Continue reading if you want to contribute to or customize `qtpy_datalogger`.
+
+### Software requirements
 
 - :fontawesome-brands-git-alt:{ .lg .middle }&nbsp; `git`
 - :fontawesome-brands-python:{ .lg .middle }&nbsp; Python and `uv`
 - :fontawesome-solid-wifi:{ .lg }&nbsp; MQTT broker
+
+??? question "New to git and Python?"
+
+    If these tools and commands are not on your system, follow the introductory [Guide pages](eng/intro/tools).
 
 ### Do once
 
