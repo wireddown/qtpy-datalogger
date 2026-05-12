@@ -14,8 +14,10 @@ tags:
 
 !!! success "Order is important because each step relies on a previous one"
 
-1. **Disable** the Python aliases included with Windows because they interfere with these tools
-1. Install the tool **`uv`** because it manages the project and Python environments
+1. **Disable** the Python aliases included with Windows
+    - Otherwise, they interfere with these tools
+1. Install the tool **`uv`**
+    - This manages the project and Python environments instead
 1. Install **Python**
 
 Further reading on this Python tooling, its uses, and how it works:
