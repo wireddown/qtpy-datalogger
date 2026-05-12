@@ -5,15 +5,16 @@ tags:
   - Get started
 ---
 
-# Get started
+# Get started in 5 minutes
 
-## Preview in 90 seconds
+## :lucide-audio-waveform: Analog data in 90 seconds
 
-1. Connect your QT Py device with USB
-    - _(Optional)_ Back up its `code.py` file
-1. Preview the program in a deletable Python virtual environment
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
-    ```pwsh
+- Back up the `code.py` file on the QT Py
+- Preview the program in a deletable Python virtual environment
+
+    ```pwsh title="PowerShell"
     # Create and enter a new Python virtual environment
     mkdir qtpy-preview
     cd qtpy-preview
@@ -29,7 +30,7 @@ tags:
     # Search for devices
     qtpy-datalogger connect --discover-only
 
-    # Install the node runtime on a device
+    # Install the sensor node runtime on a device
     qtpy-datalogger equip
 
     # Open a serial connection, use Ctrl-] to quit
@@ -44,8 +45,15 @@ tags:
     # Ctrl-] to quit
     ```
 
-1. Optionally, delete the folder `qtpy-preview` when you are done.
+- Optionally, delete the folder `qtpy-preview` when you are done
+
+## :lucide-wifi: WiFi control in 3 minutes
 
 !!! info "This preview does not demonstrate communication over WiFi"
 
-    Visit the [MQTT](eng/intro/mqtt) page to install and run a broker service
+In order to communicate on the WiFi network, the QT Py sensor node must also have
+
+- an MQTT broker
+- WiFi credentials
+
+Continue to the [MQTT](eng/intro/mqtt) page if you want to try the [Scanner](gallery/#scanner) GUI app.
