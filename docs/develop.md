@@ -9,7 +9,7 @@ tags:
 
 ## Use in your project
 
-If you want to add this package to your own project and use it in your code, add it using your project's dependency manager.
+If you want to add this package to your own project and use it in your code, add `qtpy-datalogger` using your project's dependency manager.
 
 === "uv"
 
@@ -38,10 +38,11 @@ from qtpy_datalogger import guikit as gk
 ## Setup for development
 
 The rest of this page is a crash course introducing the tools and libraries used in the project.
-Continue reading if you want to contribute to or customize `qtpy_datalogger`.
+Continue reading if you want to contribute to or customize `qtpy-datalogger`.
 
 ### Software requirements
 
+- :fontawesome-brands-windows:{ .lg .middle }&nbsp; Windows 11 or Windows 10
 - :fontawesome-brands-git-alt:{ .lg .middle }&nbsp; `git`
 - :fontawesome-brands-python:{ .lg .middle }&nbsp; Python and `uv`
 - :fontawesome-solid-wifi:{ .lg }&nbsp; MQTT broker
@@ -95,9 +96,9 @@ netsh advfirewall firewall add rule `
   localport=1883 remoteport=any protocol=tcp interfacetype=any
 ```
 
-**4. Initialize QT Py device**
+**4. Initialize the QT Py**
 
-!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
 ```pwsh title="Powershell"
 # Install and configure the sensor node runtime
@@ -111,7 +112,7 @@ When prompted:
 
 ### Ready check
 
-!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
 Run these commands to confirm that your workstation is ready to develop.
 
@@ -133,10 +134,10 @@ uv run qtpy-datalogger server
 # Confirm QT Py detection
 uv run qtpy-datalogger connect --discover-only
 
-# Confirm node readiness
+# Confirm sensor node readiness
 uv run qtpy-datalogger equip --compare
 
-# Send a message to the QT Py over WiFi
+# Send a message to the QT Py sensor node over WiFi
 uv run qtpy-datalogger run scanner
 ```
 
@@ -144,7 +145,7 @@ uv run qtpy-datalogger run scanner
 
 ### Create a branch
 
-```pwsh
+```pwsh title="Powershell"
 # Get upstream changes
 git switch main
 git pull
@@ -153,13 +154,13 @@ git pull
 git switch --create users/__YOU__/__NEW_TOPIC__
 
 # Or update an existing branch
-# * Switch to your branch
-#   git switch users/__YOU__/__EXISTING_TOPIC__
-# * Rebase or merge
-#   A: Replay and resolve your changes on the latest main
-#      git rebase origin/main
-#   B: Merge and resolve your changes with the latest main
-#      git merge origin/main
+# 1. Switch to your branch
+#    git switch users/__YOU__/__EXISTING_TOPIC__
+# 2. Rebase or merge
+#    A. Replay and resolve your changes on the latest main
+#       git rebase origin/main
+#    B. Merge and resolve your changes with the latest main
+#       git merge origin/main
 
 # Install dependency updates
 uv sync
@@ -170,12 +171,12 @@ uv run qtpy-datalogger [OPTIONS]
 
 ### PC dev loop
 
-??? info "Monitor the messages sent between nodes and the host"
+??? info "Monitor the messages sent between sensor nodes and the host"
     ```pwsh
     uv run qtpy-datalogger server --observe
     ```
 
-```pwsh
+```pwsh title="Powershell"
 # ✍️ Save source code changes
 
 # Run the new code
@@ -193,22 +194,22 @@ uv run poe fix
 
 ### QT Py dev loop
 
-!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
-??? info "Monitor the messages sent between nodes and the host"
+??? info "Monitor the messages sent between sensor nodes and the host"
     ```pwsh
     uv run qtpy-datalogger server --observe
     ```
 
-??? info "Monitor the main run loop on the QT Py node"
+??? info "Monitor the main run loop on the sensor node"
     ```pwsh
     uv run qtpy-datalogger connect --port COMxx
     ```
 
-```pwsh
+```pwsh title="Powershell"
 # ✍️ Save source code changes
 
-# Update the code on the QT Py device
+# Update the code on the QT Py
 uv run qtpy-datalogger equip --newer-files-only
 
 # When changes require new support libraries
@@ -229,7 +230,7 @@ uv run poe fix
 
 ### Documentation dev loop
 
-```pwsh
+```pwsh title="Powershell"
 # Build the documentation site
 uv run poe docs
 
