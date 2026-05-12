@@ -67,11 +67,11 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     :octicons-arrow-right-24: [Gallery](gallery)
 
--   :lucide-zap:{ .lg .middle .qtpy }&nbsp; __Set up in 5 minutes__
+-   :lucide-zap:{ .lg .middle .qtpy }&nbsp; __Preview in 5 minutes__
 
     ---
 
-    Install `qtpy-datalogger` with `pip` and get up and running in minutes.
+    Install `qtpy-datalogger` with `pip` and get up and logging in minutes.
 
     :octicons-arrow-right-24: [Get started](get-started)
 
