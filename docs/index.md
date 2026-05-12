@@ -33,6 +33,8 @@ graph LR
 
 The PC host controls and communicates with any number of sensor nodes on the wireless network.
 
+[Preview in 5 minutes &nbsp;:lucide-cable:{ .lg .middle }](get-started){ .md-button .md-button--primary }
+
 ## Complete and custom
 
 <div class="grid cards" markdown>
