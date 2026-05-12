@@ -8,6 +8,17 @@ tags:
 
 # Core tools
 
+If you haven't worked with code from GitHub, you might need to install some core tools on your workstation.
+
+In addition to the **Git** source code management program, you need a **text editor** and a **command terminal**.
+You are welcome to use your preferred programs to develop in the way you like.
+These are our recommendations for new contributors.
+
+- VS Code
+- Windows Terminal
+- PowerShell
+- ScreenToGif
+
 ## Visual Studio Code
 
 Install the [Visual Studio Code] text editor and review the [getting started tutorial]. There are also guides for [using git] and for [developing Python].
@@ -15,7 +26,7 @@ Install the [Visual Studio Code] text editor and review the [getting started tut
 We recommend this because it is an excellent and mature general purpose programming application with syntax highlighting, debugging, and extensions.
 
 ??? quote "Install with `winget`"
-    ```pwsh
+    ```pwsh title="PowerShell"
     winget install --exact --id=Microsoft.VisualStudioCode
     winget install --exact --id=Microsoft.VisualStudioCode.CLI
     ```
@@ -53,7 +64,7 @@ Install the [Windows Terminal] application and configure it for your preferences
 We recommend this because it hosts shells in tabs like a web browser and supports typical copy-paste actions.
 
 ??? quote "Install with `winget`"
-    ```pwsh
+    ```pwsh title="PowerShell"
     winget install --exact --id=Microsoft.WindowsTerminal
     ```
 
@@ -74,7 +85,7 @@ Optionally, install [PowerShell]. This new version is named `pwsh` and installs 
 We recommend this because it's the newest and fastest shell for Windows.
 
 ??? quote "Install with `winget`"
-    ```pwsh
+    ```pwsh title="PowerShell"
     winget install --exact --id=Microsoft.PowerShell
     ```
 
@@ -98,7 +109,7 @@ Optionally, install the [ScreenToGif] application. This tool records both the sc
 We recommend this because its recordings help demonstrate program behavior.
 
 ??? quote "Install with `winget`"
-    ```pwsh
+    ```pwsh title="PowerShell"
     winget install --exact --id=NickeManarin.ScreenToGif
     ```
 
@@ -111,7 +122,7 @@ Optionally, install [GitHub Desktop] and [authenticate with GitHub].
 We recommend GitHub Desktop because it is designed to be an application for git and GitHub actions.
 
 ??? quote "Install with `winget`"
-    ```pwsh
+    ```pwsh title="PowerShell"
     winget install --exact --id=Git.Git
     winget install --exact --id=GitHub.GitHubDesktop
     ```
