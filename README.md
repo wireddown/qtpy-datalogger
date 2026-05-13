@@ -160,7 +160,7 @@ See the [summary and source code] in the `docs/legacy` folder for details.
 [Adafruit QT Py S3]: https://learn.adafruit.com/adafruit-qt-py-esp32-s3
 [CircuitPython]: https://circuitpython.org/
 
-[MQTT setup and commissioning]: https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-5-MQTT
+[MQTT setup and commissioning]: https://wireddown.github.io/qtpy-datalogger/eng/intro/mqtt/
 
 [wiki home page]: https://github.com/wireddown/qtpy-datalogger/wiki
 [Contributing]: https://github.com/wireddown/qtpy-datalogger/wiki/Contributing
