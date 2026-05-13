@@ -1,6 +1,6 @@
 ---
 name: Help request
-about: "🛟 Ask for help running the program or setting up your computer"
+about: "🛟 Ask for help running the program or setting up your workstation"
 title: ''
 labels: help me, inbox
 assignees: ''
