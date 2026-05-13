@@ -20,10 +20,10 @@ class Links(enum.StrEnum):
     """URLs for references and help."""
 
     Source = "https://github.com/wireddown/qtpy-datalogger"
-    Homepage = "https://downtothewire.io/qtpy-datalogger"
+    Homepage = "https://downtothewire.io/qtpy-datalogger/"
     New_Bug = "https://github.com/wireddown/qtpy-datalogger/issues/new?template=bug-report.md"
     Board_Support_Matrix = "https://docs.circuitpython.org/en/stable/shared-bindings/support_matrix.html"
-    MQTT_Walkthrough = "https://github.com/wireddown/qtpy-datalogger/wiki/Walkthrough-5-MQTT"
+    MQTT_Walkthrough = "https://wireddown.github.io/qtpy-datalogger/eng/intro/mqtt/"
 
 
 class ExitCode(enum.IntEnum):
