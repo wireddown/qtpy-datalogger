@@ -4,7 +4,7 @@ The `snsr` folder and its subfolders are an overlay for a CircuitPython device.
 The code adds functions to perform data logging from analog channels and I2C devices.
 
 - Homepage
-  - https://downtothewire.io/qtpy-datalogger
+  - https://downtothewire.io/qtpy-datalogger/
 - Source code
   - https://github.com/wireddown/qtpy-datalogger/tree/main/src/qtpy_datalogger/sensor_node
 
