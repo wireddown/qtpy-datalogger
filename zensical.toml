@@ -55,6 +55,7 @@ nav = [
     { "Customize" = "customize.md" },
   ] },
   { "Help" = [
+    { "Welcome" = "welcome.md" },
     { "Troubleshoot" = "troubleshoot.md" },
   ] },
   { "Develop" = [
@@ -318,11 +319,15 @@ repo = "fontawesome/brands/github-alt"
 scheme = "default"
 toggle.icon = "lucide/sun"
 toggle.name = "Switch to dark mode"
+primary = "indigo"
+accent = "indigo"
 
 [[project.theme.palette]]
 scheme = "slate"
 toggle.icon = "lucide/moon"
 toggle.name = "Switch to light mode"
+primary = "indigo"
+accent = "light green"
 
 # ----------------------------------------------------------------------------
 # The "extra" section contains miscellaneous settings.
@@ -338,6 +343,7 @@ link = "https://github.com/wireddown"
 danger = "fontawesome/solid/explosion"
 info = "lucide/message-circle-heart"
 question = "fontawesome/solid/circle-question"
+quote = "lucide/message-square-code"
 tip = "lucide/arrow-big-right"
 
 # ----------------------------------------------------------------------------

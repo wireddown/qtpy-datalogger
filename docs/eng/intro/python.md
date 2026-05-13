@@ -8,30 +8,33 @@ tags:
 
 # Python
 
+This project uses `uv` to manage its Python environments and dependencies.
+
 ## Install
 
 ### Outline
 
 !!! success "Order is important because each step relies on a previous one"
 
-1. **Disable** the Python aliases included with Windows because they interfere with these tools
-1. Install the tool **`uv`** because it manages the project and Python environments
+1. **Disable** the Python aliases included with Windows
+    - Otherwise, they interfere with these tools
+1. Install the tool **`uv`**
+    - This manages the project and Python environments instead
 1. Install **Python**
 
-Further reading on this Python tooling, its uses, and how it works:
+??? abstract "Further reading on this Python tooling, its uses, and how it works"
 
-- [**uv**: A Complete Guide]
-    - Explains the efficiencies and convenient workflows in `uv`
-- [Python Virtual Environments: A Primer]
-    - Explains what Python virtual environments are, why they are useful, and how they work
-
+    - [**uv**: A Complete Guide]
+        - Explains the efficiencies and convenient workflows in `uv`
+    - [Python Virtual Environments: A Primer]
+        - Explains what Python virtual environments are, why they are useful, and how they work
 
 !!! info "Why we use `uv run ...`"
     - `uv` manages the virtual environment and its commands for the project **automatically**
     - `uv run ...` activates the environment for the command that follows
     - `uv` invokes these managed commands and won't use a system-wide tool of the same name by accident
 
-### Disable Python aliases
+### 1. Disable Python aliases
 
 1. Open the **Windows Settings** app and navigate to:
 
@@ -45,17 +48,17 @@ Further reading on this Python tooling, its uses, and how it works:
     | **App Installer** | `python3.exe` |
 
 ??? quote "Disable from PowerShell"
-    ```pwsh
+    ```pwsh title="PowerShell"
     # Disable the Windows Python aliases
     rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python.exe"
     rm "$env:USERPROFILE\AppData\Local\Microsoft\WindowsApps\python3.exe"
     ```
 
-### Install uv
+### 2. Install uv
 
 Open PowerShell in Windows Terminal and [install **uv**] with `winget`.
 
-```pwsh
+```pwsh title="PowerShell"
 # Install with winget
 winget install --exact --id=astral-sh.uv
 
@@ -63,11 +66,12 @@ winget install --exact --id=astral-sh.uv
 uv self version
 ```
 
-### Install Python
+### 3. Install Python
 
 Open PowerShell and [use **uv**] to install Python.
+We recommend **Python 3.11** because it is the lowest version supported by the package.
 
-```pwsh
+```pwsh title="PowerShell"
 # Show the available versions of Python
 uv python list
 
@@ -104,7 +108,7 @@ Input values in tests may be purposefully incorrect or inapplicable to validate 
 
 We use the [tool **pytest**] to run all of the project's tests.
 
-```pwsh
+```pwsh title="PowerShell"
 # Run the tests
 uv run pytest
 
@@ -126,7 +130,7 @@ We use the [tool **ruff**] to check and fix [format] and [structure] problems.
 
 **Analyze**
 
-```pwsh
+```pwsh title="PowerShell"
 # Find differences from Python convention
 uv run ruff check
 
@@ -143,7 +147,7 @@ uv run ruff rule Z123 | mdv -
 
 **Fix**
 
-```pwsh
+```pwsh title="PowerShell"
 # Fix differences from Python convention
 uv run ruff check --fix
 
@@ -159,7 +163,7 @@ We use the [tool **pyright**] to check that functions accept and return [compati
 
 **Analyze**
 
-```pwsh
+```pwsh title="PowerShell"
 # Find incompatible or incorrect uses of variables and classes
 uv run pyright
 ```
@@ -174,7 +178,7 @@ However, the Python extension in VS Code can identify these problems and often h
 The [tool **poe**] makes running the tests and analyzers easier because we use [sequence tasks] that call `pytest`, `ruff`, and `pyright` with their parameters.
 
 
-```pwsh
+```pwsh title="PowerShell"
 # Runs 'pytest'
 uv run poe test
 

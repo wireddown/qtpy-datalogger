@@ -33,6 +33,8 @@ graph LR
 
 The PC host controls and communicates with any number of sensor nodes on the wireless network.
 
+[Preview in 5 minutes &nbsp;:lucide-cable:{ .lg .middle }](get-started){ .md-button .md-button--primary }
+
 ## Complete and custom
 
 <div class="grid cards" markdown>
@@ -65,11 +67,11 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     :octicons-arrow-right-24: [Gallery](gallery)
 
--   :lucide-zap:{ .lg .middle .qtpy }&nbsp; __Set up in 5 minutes__
+-   :lucide-zap:{ .lg .middle .qtpy }&nbsp; __Preview in 5 minutes__
 
     ---
 
-    Install `qtpy-datalogger` with `pip` and get up and running in minutes.
+    Install `qtpy-datalogger` with `pip` and get up and logging in minutes.
 
     :octicons-arrow-right-24: [Get started](get-started)
 
@@ -77,9 +79,8 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
 ## Questions and help
 
-Please go to the [wiki home page] for guidance.
+Please go to the [Welcome](welcome) page for questions and help.
 
 
 [Adafruit QT Py S3]: https://learn.adafruit.com/adafruit-qt-py-esp32-s3
 [CircuitPython]: https://circuitpython.org/
-[wiki home page]: https://github.com/wireddown/qtpy-datalogger/wiki

@@ -4,7 +4,7 @@
 
 ## Documentation
 
-Available at [downtothewire.io/**qtpy-datalogger**](https://downtothewire.io/qtpy-datalogger)
+Available at [downtothewire.io/**qtpy-datalogger/welcome**](https://downtothewire.io/qtpy-datalogger/welcome)
 
 ## Status
 

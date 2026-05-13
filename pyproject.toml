@@ -55,8 +55,8 @@ dependencies = [
 
 [project.urls]
 Changelog = "https://github.com/wireddown/qtpy-datalogger/releases"
-Documentation = "https://downtothewire.io/qtpy-datalogger/get-started"
-Homepage = "https://downtothewire.io/qtpy-datalogger"
+Documentation = "https://wireddown.github.io/qtpy-datalogger/develop/"
+Homepage = "https://wireddown.github.io/qtpy-datalogger/"
 Issues = "https://github.com/wireddown/qtpy-datalogger/issues"
 Source = "https://github.com/wireddown/qtpy-datalogger"
 

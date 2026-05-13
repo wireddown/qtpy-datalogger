@@ -6,9 +6,9 @@ tags:
   - MQTT
 ---
 
-# MQTT broker service
+# MQTT control
 
-Network communication with QT Py devices requires an MQTT broker service available on the network.
+Network communication with QT Py sensor nodes requires an MQTT broker service available on the network.
 If your facility does not have a service, you can install and host one on your workstation.
 
 ## Mosquitto
@@ -19,7 +19,7 @@ We recommend the [Mosquitto MQTT server] from the Eclipse Foundation.
 1. Run the installer and keep the default options
 
 ??? quote "Install with `winget`"
-    ```pwsh
+    ```pwsh title="PowerShell"
     winget install --exact --id=EclipseFoundation.Mosquitto
     ```
 
@@ -32,10 +32,9 @@ We recommend the [Mosquitto MQTT server] from the Eclipse Foundation.
     - Find the entry for `Mosquitto Broker`
     - Confirm the value in the `Startup Type` column shows `Automatic`
 1. Update the server configuration to listen for connections on the conventional MQTT port
-    - Open the [Mosquitto configuration file] in a text editor
-        - `C:\Program Files\mosquitto\mosquitto.conf`
-    - Add these lines to the bottom
-        ```txt
+    - Open the **Mosquitto configuration file** in a text editor
+    - Add these lines to the bottom ([file reference])
+        ```txt title="C:\Program Files\mosquitto\mosquitto.conf"
         listener 1883
         allow_anonymous true
         ```
@@ -44,20 +43,26 @@ We recommend the [Mosquitto MQTT server] from the Eclipse Foundation.
     ??? info "Restore after upgrading"
 
         - When you upgrade the server, the installer **replaces** the configuration file with a **new** copy
-        - Update the configuration file like before and **restart** the server
+        - Update the configuration file as above and **restart** the server
 
 ### System firewall
 
-Before QT Py devices can connect to the MQTT server, the Windows firewall must allow external connections.
+Before QT Py sensor nodes can connect to the MQTT server, the Windows firewall must allow external connections.
 We optimize the firewall by constraining the new rule to match against the **local subnet** for the server's **_exact_ program** and **configured port**.
 
-Run this command in an **Administrator** terminal to configure the firewall for the Mosquitto program
-   ```pwsh
-   netsh advfirewall firewall add rule name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any description='This rule allows MQTT clients on the local subnet to connect to this host' profile=private localip=any remoteip=localsubnet localport=1883 remoteport=any protocol=tcp interfacetype=any
+!!! warning "Run this command in an **Administrator** terminal to configure the firewall for the Mosquitto program"
+
+   ```pwsh title="PowerShell"
+   netsh advfirewall firewall add rule `
+      name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' `
+      program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any `
+      description='Allow MQTT clients on the local subnet to connect to this host' `
+      profile=private localip=any remoteip=localsubnet `
+      localport=1883 remoteport=any protocol=tcp interfacetype=any
    ```
 
 ??? note "Option-by-option explanation for [**netsh advfirewall**]"
-    ```pwsh
+    ```pwsh title="PowerShell"
     # Add a new firewall rule
     netsh advfirewall firewall add rule
 
@@ -108,7 +113,9 @@ Run this command in an **Administrator** terminal to configure the firewall for 
 Use the command **`qtpy-datalogger server`** to confirm the readiness of the MQTT service.
 
 ???+ success "Running and ready"
-    **`> qtpy-datalogger server`**
+    ```pwsh
+    qtpy-datalogger server
+    ```
     ```
     INFO     Eclipse Mosquitto MQTT v5/v3.1.1 broker
     INFO            State  Running
@@ -120,7 +127,9 @@ Use the command **`qtpy-datalogger server`** to confirm the readiness of the MQT
     ```
 
 ??? danger "Installed, but not configured"
-    **`> qtpy-datalogger server`**
+    ```pwsh
+    qtpy-datalogger server
+    ```
     ```
     INFO     Eclipse Mosquitto MQTT v5/v3.1.1 broker
     INFO            State  Running
@@ -135,7 +144,7 @@ Use the command **`qtpy-datalogger server`** to confirm the readiness of the MQT
 
 Use the command **`qtpy-datalogger server --observe`** to confirm the MQTT service accepts client connections.
 
-```pwsh
+```pwsh title="PowerShell"
 # Confirm whether the MQTT service accepts client connections
 qtpy-datalogger server --observe
 ```
@@ -147,17 +156,17 @@ If there is a problem connecting, the command exits with a description of what i
 
 ## QT Py Control
 
-In order to communicate on the WiFi network, the QT Py must have:
+In order to communicate on the WiFi network, the QT Py sensor node must have:
 
 - the sensor node runtime installed
 - the MQTT broker, WiFi, and node details
 
 ### Equip
 
-!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
 1. Create a file named `settings.toml` in the **root folder** of the QT Py
-    ```toml
+    ```toml title="E:\settings.toml"
     CIRCUITPY_WIFI_SSID="__YOUR_WIFI_NETWORK_NAME__"
     CIRCUITPY_WIFI_PASSWORD="__YOUR_WIFI_NETWORK_PASSWORD__"
     QTPY_BROKER_IP_ADDRESS="__YOUR_MQTT_BROKER_IP_ADDRESS__"
@@ -166,14 +175,14 @@ In order to communicate on the WiFi network, the QT Py must have:
     - Set the WiFi SSID and password
     - Set the broker IP address
     ??? info "When using Mosquitto, the broker's IP address is the IP address of your workstation"
-        ```pwsh
+        ```pwsh title="PowerShell"
         # All active IPv4 addresses
         Get-NetIPAddress -AddressFamily IPv4 |
-            Where-Object {$_.AddressState -eq "Preferred" -and $_.InterfaceAlias -notlike "Loopback"} |
-            Select-Object InterfaceAlias, IPAddress
+          Where-Object {$_.AddressState -eq "Preferred" -and $_.InterfaceAlias -notlike "Loopback"} |
+          Select-Object InterfaceAlias, IPAddress
         ```
 1. Install and confirm the sensor node runtime
-    ```pwsh
+    ```pwsh title="PowerShell"
     # Install the sensor node runtime and confirm settings.toml
     qtpy-datalogger equip --secrets
     ```
@@ -182,13 +191,13 @@ In order to communicate on the WiFi network, the QT Py must have:
 
 Use the [**Scanner app**](../../gallery/#scanner) to confirm communication.
 
-```pwsh
+```pwsh title="PowerShell"
 # Run the Scanner app
 qtpy-datalogger run scanner
 ```
 
 
 [Mosquitto MQTT server]: https://mosquitto.org/download/
-[Mosquitto configuration file]: https://mosquitto.org/man/mosquitto-conf-5.html
+[file reference]: https://mosquitto.org/man/mosquitto-conf-5.html
 
 [**netsh advfirewall**]: https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/dd734783(v=ws.10)

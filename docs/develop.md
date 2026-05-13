@@ -7,25 +7,57 @@ tags:
 
 # Develop
 
-This is a crash course introducing the tools and libraries used in the project.
+## Use in your project
 
-## Setup
+If you want to add this package to your own project and use it in your code, add `qtpy-datalogger` using your project's dependency manager.
+
+=== "uv"
+
+    ```pwsh title="Powershell"
+    uv add qtpy-datalogger
+    ```
+
+=== "pdm"
+
+    ```pwsh title="Powershell"
+    pdm add qtpy-datalogger
+    ```
+
+=== "poetry"
+
+    ```poetry title="Powershell"
+    poetry add qtpy-datalogger
+    ```
+
+Then import the package like any other in your source code.
+
+```py title="my_program.py"
+from qtpy_datalogger import guikit as gk
+```
+
+## Setup for development
+
+The rest of this page is a crash course introducing the tools and libraries used in the project.
+Continue reading if you want to contribute to or customize `qtpy-datalogger`.
+
+### Software requirements
+
+- :fontawesome-brands-windows:{ .lg .middle }&nbsp; Windows 11 or Windows 10
+- :fontawesome-brands-git-alt:{ .lg .middle }&nbsp; `git`
+- :fontawesome-brands-python:{ .lg .middle }&nbsp; Python and `uv`
+- :fontawesome-solid-wifi:{ .lg }&nbsp; MQTT broker
 
 ??? question "New to git and Python?"
 
     If these tools and commands are not on your system, follow the introductory [Guide pages](eng/intro/tools).
 
-### Requirements
-
-- :fontawesome-brands-git-alt:{ .lg .middle }&nbsp; `git`
-- :fontawesome-brands-python:{ .lg .middle }&nbsp; Python and `uv`
-- :fontawesome-solid-wifi:{ .lg }&nbsp; MQTT broker
-
 ### Do once
+
+Before you can start developing, you need to download the source and install the software requirements on your workstation.
 
 **1. Get the source**
 
-```pwsh
+```pwsh title="Powershell"
 # Clone from GitHub
 git clone https://github.com/wireddown/qtpy-datalogger.git
 cd qtpy-datalogger
@@ -33,14 +65,18 @@ cd qtpy-datalogger
 
 **2. Initialize the environment**
 
-```pwsh
+```pwsh title="Powershell"
 # Install the package's dependencies
 uv sync
 ```
 
 **3. Setup the MQTT broker**
 
-```pwsh
+Run these commands to install and configure the Mosquitto MQTT broker.
+
+!!! info "For details, see the [MQTT](eng/intro/mqtt) page"
+
+```pwsh title="Powershell"
 # Install Mosquitto Broker
 winget install --exact --id=EclipseFoundation.Mosquitto
 
@@ -52,30 +88,38 @@ $mqttSettings = @(
 Add-Content -Path "C:\Program Files\mosquitto\mosquitto.conf" -Value $mqttSettings
 
 # Configure Windows firewall
-netsh advfirewall firewall add rule name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any description='This rule allows MQTT clients on the local subnet to connect to this host' profile=private localip=any remoteip=localsubnet localport=1883 remoteport=any protocol=tcp interfacetype=any
+netsh advfirewall firewall add rule `
+  name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' `
+  program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any `
+  description='Allow MQTT clients on the local subnet to connect to this host' `
+  profile=private localip=any remoteip=localsubnet `
+  localport=1883 remoteport=any protocol=tcp interfacetype=any
 ```
 
-!!! info "For details, see the [MQTT](eng/intro/mqtt) page"
+**4. Initialize the QT Py**
 
-**4. Initialize QT Py device**
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
-!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
-
-```pwsh
+```pwsh title="Powershell"
 # Install and configure the sensor node runtime
 uv run qtpy-datalogger equip --secrets -
 ```
 
+When prompted:
+
+- set the WiFi SSID and password
+- set the broker IP address
+
 ### Ready check
 
-!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
-```pwsh
-# Get latest from upstream
+Run these commands to confirm that your workstation is ready to develop.
+
+```pwsh title="Powershell"
+# Get latest source and dependencies from upstream
 git switch main
 git pull
-
-# Install the dependencies
 uv sync
 
 # Confirm dependencies are satisfied
@@ -90,10 +134,10 @@ uv run qtpy-datalogger server
 # Confirm QT Py detection
 uv run qtpy-datalogger connect --discover-only
 
-# Confirm node readiness
+# Confirm sensor node readiness
 uv run qtpy-datalogger equip --compare
 
-# Send a message to the QT Py over WiFi
+# Send a message to the QT Py sensor node over WiFi
 uv run qtpy-datalogger run scanner
 ```
 
@@ -101,7 +145,7 @@ uv run qtpy-datalogger run scanner
 
 ### Create a branch
 
-```pwsh
+```pwsh title="Powershell"
 # Get upstream changes
 git switch main
 git pull
@@ -110,13 +154,13 @@ git pull
 git switch --create users/__YOU__/__NEW_TOPIC__
 
 # Or update an existing branch
-# * Switch to your branch
-#   git switch users/__YOU__/__EXISTING_TOPIC__
-# * Rebase or merge
-#   A: Replay and resolve your changes on the latest main
-#      git rebase origin/main
-#   B: Merge and resolve your changes with the latest main
-#      git merge origin/main
+# 1. Switch to your branch
+#    git switch users/__YOU__/__EXISTING_TOPIC__
+# 2. Rebase or merge
+#    A. Replay and resolve your changes on the latest main
+#       git rebase origin/main
+#    B. Merge and resolve your changes with the latest main
+#       git merge origin/main
 
 # Install dependency updates
 uv sync
@@ -127,12 +171,12 @@ uv run qtpy-datalogger [OPTIONS]
 
 ### PC dev loop
 
-??? info "Monitor the messages sent between nodes and the host"
+??? info "Monitor the messages sent between sensor nodes and the host"
     ```pwsh
     uv run qtpy-datalogger server --observe
     ```
 
-```pwsh
+```pwsh title="Powershell"
 # ✍️ Save source code changes
 
 # Run the new code
@@ -150,22 +194,22 @@ uv run poe fix
 
 ### QT Py dev loop
 
-!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py device to your workstation with USB"
+!!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
-??? info "Monitor the messages sent between nodes and the host"
+??? info "Monitor the messages sent between sensor nodes and the host"
     ```pwsh
     uv run qtpy-datalogger server --observe
     ```
 
-??? info "Monitor the main run loop on the QT Py node"
+??? info "Monitor the main run loop on the sensor node"
     ```pwsh
     uv run qtpy-datalogger connect --port COMxx
     ```
 
-```pwsh
+```pwsh title="Powershell"
 # ✍️ Save source code changes
 
-# Update the code on the QT Py device
+# Update the code on the QT Py
 uv run qtpy-datalogger equip --newer-files-only
 
 # When changes require new support libraries
@@ -186,7 +230,7 @@ uv run poe fix
 
 ### Documentation dev loop
 
-```pwsh
+```pwsh title="Powershell"
 # Build the documentation site
 uv run poe docs
 
