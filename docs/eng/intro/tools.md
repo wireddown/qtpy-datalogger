@@ -41,6 +41,7 @@ This table lists useful [VS Code extensions] for this project.
 | [ms-python.**python**]                | :lucide-signpost:{ .lg }&nbsp; Adds navigation and API suggestions <br /> :lucide-bug-play:{ .lg .middle }&nbsp; Adds Python debugging and refactoring |
 | [bierner.**github-markdown-preview**] | :lucide-text-initial:{ .lg .middle }&nbsp; Apply GitHub's style to your markdown files |
 | [charliermarsh.**ruff**]              | :lucide-brush-cleaning:{ .lg }&nbsp; Lint and format Python code on file-save |
+| [astral-sh.**ty**]                    | :lucide-search-code:{ .lg }&nbsp; Find and explain Python type mismatches |
 | [tamasfe.**even-better-toml**]        | :lucide-list-check:{ .lg .middle }&nbsp; Syntax highlighting and validation for `toml` files |
 | [ms-toolsai.**jupyter**]              | :lucide-chart-spline:{ .lg }&nbsp; Use your own venv as a Jupyter kernel |
 
@@ -144,6 +145,7 @@ We recommend GitHub Desktop because it is designed to be an application for git 
 [ms-python.**python**]: https://marketplace.visualstudio.com/items?itemName=ms-python.python
 [bierner.**github-markdown-preview**]: https://marketplace.visualstudio.com/items?itemName=bierner.github-markdown-preview
 [charliermarsh.**ruff**]: https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff
+[astral-sh.**ty**]: https://marketplace.visualstudio.com/items?itemName=astral-sh.ty
 [tamasfe.**even-better-toml**]: https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml
 [ms-toolsai.**jupyter**]: https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter
 [getting started tutorial]: https://code.visualstudio.com/docs/getstarted/getting-started
