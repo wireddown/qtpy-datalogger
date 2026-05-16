@@ -1,5 +1,5 @@
-# 💻 [Contributing]
+# 💻 Contributing
 
-_(maintained in the documentation)_
+Thank you for your interest! Please go to the [Develop] page for instructions on setting up your system.
 
-[Contributing]: https://downtothewire.io/qtpy-datalogger/develop/
+[Develop]: https://downtothewire.io/qtpy-datalogger/develop/#setup-for-development
