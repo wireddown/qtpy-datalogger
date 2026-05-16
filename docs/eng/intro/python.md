@@ -155,37 +155,44 @@ uv run ruff check --fix
 uv run ruff format
 ```
 
-The Python extension in VS Code can identify these problems and often has suggested fixes.
+The Python extensions in VS Code can also identify these problems and often have suggested fixes.
 
-### pyright
+### ty
 
-We use the [tool **pyright**] to check that functions accept and return [compatible types and variables].
+We use the [tool **ty**] to check that functions accept and return [compatible types and variables].
 
 **Analyze**
 
 ```pwsh title="PowerShell"
 # Find incompatible or incorrect uses of variables and classes
-uv run pyright
+uv run ty check
+
+# Describe the rule 'missing-argument'
+uv run ty explain rule missing-argument | mdv -
 ```
 
 **Fix**
 
-Fixes are made by hand because `pyright` does not have a fix option.
-However, the Python extension in VS Code can identify these problems and often has suggested fixes.
+```pwsh title="PowerShell"
+# Apply available fixes for rule violations
+uv run ty check --fix
+```
+
+The Python extensions in VS Code can also identify these problems and often have suggested fixes.
 
 ## Poe runner
 
-The [tool **poe**] makes running the tests and analyzers easier because we use [sequence tasks] that call `pytest`, `ruff`, and `pyright` with their parameters.
+The [tool **poe**] makes running the tests and analyzers easier because we use [sequence tasks] that call `pytest`, `ruff`, and `ty` with their parameters.
 
 
 ```pwsh title="PowerShell"
 # Runs 'pytest'
 uv run poe test
 
-# Runs 'ruff check'  then  'ruff format --diff'  then  'pyright --dependencies'
+# Runs 'ruff check'  then  'ruff format --diff'  then  'ty check'
 uv run poe lint
 
-# Runs 'ruff check --fix'  then  'ruff format'
+# Runs 'ruff check --fix'  then  'ruff format'  then  'ty check --fix'
 uv run poe fix
 ```
 
@@ -200,8 +207,8 @@ uv run poe fix
 [tool **ruff**]: https://docs.astral.sh/ruff/
 [structure]: https://docs.astral.sh/ruff/linter/
 [format]: https://docs.astral.sh/ruff/formatter/
-[tool **pyright**]: https://microsoft.github.io/pyright/#/type-concepts
-[compatible types and variables]: https://microsoft.github.io/pyright/#/features
+[tool **ty**]: https://docs.astral.sh/ty/
+[compatible types and variables]: https://docs.astral.sh/ty/features/type-system/
 
 [tool **poe**]: https://poethepoet.natn.io/index.html
 [sequence tasks]: https://poethepoet.natn.io/tasks/task_types/sequence.html
