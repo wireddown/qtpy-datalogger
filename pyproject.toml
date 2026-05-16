@@ -125,6 +125,13 @@ include = ["src/qtpy_datalogger/sensor_node/snsr/node/classes.py"]
 invalid-argument-type = "ignore"
 invalid-return-type = "ignore"
 
+# Do not leave suppressions in example code which might be used in projects that use other type checkers
+[[tool.ty.overrides]]
+include = ["examples"]
+
+[tool.ty.overrides.rules]
+invalid-argument-type = "ignore"
+
 [tool.ty.src]
 exclude = [
     "docs/legacy",
@@ -195,6 +202,13 @@ ignore = [
     "INP001",       # Allow implicit namespaces
     "PLC0415",      # Allow non-toplevel imports for clarity
     "S101",         # Allow the 'assert' keyword
+]
+# Examples
+"examples/**.py" = [
+    "C401",         # Allow unnecessary generators to support explicit initialization
+    "INP001",       # Examples are not namespace packages and don't use __init__.py either
+    "PLR0912",      # Allow many if/else branches to support feature demonstations
+    "PLR0915",      # Allow long functions for detailed unoptimized demonstrations
 ]
 # Templates
 "src/qtpy_datalogger/apps/empty.py" = [
