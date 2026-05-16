@@ -116,6 +116,14 @@ include = ["src/qtpy_datalogger/sensor_node/snsr/pysh/**"]
 [tool.ty.overrides.rules]
 possibly-unresolved-reference = "ignore"
 
+# Submodule snsr.node.classes uses loose typing rather than full classes to support CircuitPython json constraints
+[[tool.ty.overrides]]
+include = ["src/qtpy_datalogger/sensor_node/snsr/node/classes.py"]
+
+[tool.ty.overrides.rules]
+invalid-argument-type = "ignore"
+invalid-return-type = "ignore"
+
 [tool.ty.src]
 exclude = [
     "docs/legacy",
