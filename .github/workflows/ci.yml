@@ -81,12 +81,13 @@ jobs:
       if: ${{ failure() && steps.ruff-check.conclusion == 'failure' }}
       continue-on-error: true
 
-    - name: Run pyright
+    - name: Run ty
       run: |
-        uv run pyright --dependencies
-        echo '## :microscope: pyright results' >> $env:GITHUB_STEP_SUMMARY
+        uv run ty check --output-format github
+        uv run ty check --output-format junit --output-file junit/ty-check-results-${{ runner.os }}-${{ matrix.python_version }}.xml
+        echo '## :microscope: ty results' >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
-        uv run pyright --dependencies >> $env:GITHUB_STEP_SUMMARY
+        uv run ty check --output-format concise >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
       if: always()
 
