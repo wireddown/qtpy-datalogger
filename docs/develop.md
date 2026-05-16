@@ -261,7 +261,7 @@ Design documents for this project are in the wiki under the [**Design Doc X**](h
 | uv              | :fontawesome-solid-gear:{ .lg }&nbsp;                                Core tool | [astral.sh](https://docs.astral.sh/uv/) |
 | poe             | :fontawesome-solid-gear:{ .lg }&nbsp;                                Core tool | [natn.io](https://poethepoet.natn.io/index.html) |
 | ruff            | :fontawesome-solid-microscope:{ .lg }&nbsp;                      Code analyzer | [astral.sh](https://docs.astral.sh/ruff/) |
-| pyright         | :fontawesome-solid-microscope:{ .lg }&nbsp;                      Code analyzer | [github.io](https://microsoft.github.io/pyright) |
+| ty              | :fontawesome-solid-microscope:{ .lg }&nbsp;                      Code analyzer | [github.io](https://docs.astral.sh/ty/) |
 | pytest          | :fontawesome-solid-flask:{ .lg }&nbsp;                             Test runner | [pytest.org](https://docs.pytest.org/en/stable/) |
 | zensical        | :fontawesome-solid-book:{ .lg }&nbsp;                            Documentation | [zensical.org](https://zensical.org/docs/get-started/) |
 | click           | :fontawesome-solid-terminal:{ .lg .middle }&nbsp;       Command line interface | [palletsprojects.com](https://click.palletsprojects.com/en/stable/) |
