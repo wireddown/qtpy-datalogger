@@ -195,7 +195,7 @@ def test_handle_connect_with_no_devices(  # noqa: PLR0913 -- allow more than 5 p
     behavior: discovery.Behavior,
     node: str,
     port: str,
-    raised_exception: type,
+    raised_exception: type[BaseException],
     expected_exit_code: int,
 ) -> None:
     """Does it correctly handle connect() when there are no QT Py devices?"""
@@ -227,7 +227,7 @@ def test_handle_connect_with_one_usb_device(  # noqa: PLR0913 -- allow more than
     behavior: discovery.Behavior,
     node: str,
     port: str,
-    raised_exception: type,
+    raised_exception: type[BaseException],
     expected_exit_code: int,
 ) -> None:
     """Does it correctly handle connect() when there is only one QT Py device?"""
@@ -266,7 +266,7 @@ def test_handle_connect_with_two_usb_devices(  # noqa: PLR0913 -- allow more tha
     behavior: discovery.Behavior,
     node: str,
     port: str,
-    raised_exception: type,
+    raised_exception: type[BaseException],
     expected_exit_code: int,
 ) -> None:
     """Does it correctly handle connect() when there are two QT Py devices?"""
@@ -314,7 +314,7 @@ def test_handle_connect_with_one_mqtt_device(  # noqa: PLR0913 -- allow more tha
     behavior: discovery.Behavior,
     node: str,
     port: str,
-    raised_exception: type,
+    raised_exception: type[BaseException],
     expected_exit_code: int,
 ) -> None:
     """Does it correctly handle connect() when there is only one QT Py device?"""
@@ -352,7 +352,7 @@ def test_handle_connect_with_two_dual_mode_devices(  # noqa: PLR0913 -- allow mo
     behavior: discovery.Behavior,
     node: str,
     port: str,
-    raised_exception: type,
+    raised_exception: type[BaseException],
     expected_exit_code: int,
 ) -> None:
     """Does it correctly handle connect() when there are two QT Py devices with both USB and WiFi?"""
