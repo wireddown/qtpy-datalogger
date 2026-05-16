@@ -21,6 +21,7 @@ winget install --exact --id=Microsoft.VisualStudioCode
 winget install --exact --id=Microsoft.VisualStudioCode.CLI
 
 # Install VS Code extensions
+code --install-extension  astral-sh.ty
 code --install-extension  bierner.github-markdown-preview
 code --install-extension  charliermarsh.ruff
 code --install-extension  donjayamanne.git-extension-pack
