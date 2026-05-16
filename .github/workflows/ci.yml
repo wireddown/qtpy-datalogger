@@ -48,13 +48,13 @@ jobs:
         echo '```' >> $env:GITHUB_STEP_SUMMARY
 
     - name: Run pytest
-      run: uv run pytest --verbose --junit-xml=junit/pytest-results-${{ runner.os }}-${{ matrix.python_version }}.xml
+      run: uv run pytest --verbose --junit-xml=junit/pytest-results-py${{ matrix.python_version }}-${{ runner.os }}.xml
 
     - name: Run ruff check
       id: ruff-check
       run: |
         uv run ruff check --output-format github
-        uv run ruff check --output-format junit --output-file junit/ruff-check-results-${{ runner.os }}-${{ matrix.python_version }}.xml
+        uv run ruff check --output-format junit --output-file junit/ruff-check-results-py${{ matrix.python_version }}-${{ runner.os }}.xml
       if: always()
 
     - name: Run ruff format --diff
@@ -83,11 +83,11 @@ jobs:
 
     - name: Run ty
       run: |
-        uv run ty check --output-format github
-        uv run ty check --output-format junit --output-file junit/ty-check-results-${{ runner.os }}-${{ matrix.python_version }}.xml
+        uv run ty check --python-version ${{ matrix.python_version }} --output-format github
+        uv run ty check --python-version ${{ matrix.python_version }} --output-format junit >> junit/ty-check-results-py${{ matrix.python_version }}-${{ runner.os }}.xml
         echo '## :microscope: ty results' >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
-        uv run ty check --output-format concise >> $env:GITHUB_STEP_SUMMARY
+        uv run ty check --python-version ${{ matrix.python_version }} --output-format concise >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
       if: always()
 
@@ -135,7 +135,7 @@ jobs:
       id: upload-doc-site
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
-        name: qtpy-datalogger-documentation-site-${{ runner.os }}-py${{ matrix.python_version }}
+        name: qtpy-datalogger-documentation-site-py${{ matrix.python_version }}-${{ runner.os }}
         path: site/
       if: always()
 
