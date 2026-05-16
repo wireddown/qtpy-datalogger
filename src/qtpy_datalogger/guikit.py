@@ -1121,7 +1121,7 @@ def hex_string_for_style(style_name: str, theme_name: str = "") -> str:
             raise ValueError()
         theme_name = style.theme.name
     palette = ttk_themes.STANDARD_THEMES[theme_name]["colors"]
-    return palette[style_name]
+    return palette[style_name]  # ty: ignore[invalid-argument-type] -- the "colors" entry is a dict[str, str]
 
 
 def open_folder(path: pathlib.Path) -> None:

@@ -39,7 +39,7 @@ class Settings:
 
     def _initialize_constants(self) -> None:
         """Initialize the readonly settings from the device."""
-        from os import uname
+        from os import uname  # ty: ignore[unresolved-import] -- this is a builtin CircuitPython extension
         from sys import implementation, version_info
 
         from snsr.node.mqtt import format_mqtt_client_id
@@ -119,12 +119,12 @@ class Settings:
     @property
     def used_kb(self) -> float:
         """Return the used memory in kB."""
-        return gc.mem_alloc() / 1024.0
+        return gc.mem_alloc() / 1024.0  # ty: ignore[unresolved-attribute] -- this is a builtin CircuitPython extension
 
     @property
     def free_kb(self) -> float:
         """Return the free memory in kB."""
-        return gc.mem_free() / 1024.0
+        return gc.mem_free() / 1024.0  # ty: ignore[unresolved-attribute] -- this is a builtin CircuitPython extension
 
     @property
     def uptime(self) -> float:
@@ -235,7 +235,7 @@ class Settings:
     def get_stemma_i2c(self) -> busio.I2C:
         """Initialize the Stemma as an I2C port."""
         if not self._stemma_bus:
-            self._stemma_bus = board.STEMMA_I2C()
+            self._stemma_bus = board.STEMMA_I2C()  # ty: ignore[unresolved-attribute] -- this is a builtin CircuitPython extension
         return self._stemma_bus
 
     def get_app_settings(self, app_name: str) -> dict:
