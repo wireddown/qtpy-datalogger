@@ -67,20 +67,20 @@ qtpy-datalogger = "qtpy_datalogger.__main__:main"
 dev = [
     "mkdocstrings-python>=2.0.3",
     "poethepoet>=0.45.0",
-    "pyright>=1.1.408",
     "pytest>=9.0.2",
     "ruff>=0.15.11",
+    "ty>=0.0.37",
     "zensical>=0.0.33",
 ]
 
 [tool.poe.tasks]
 _ruff_check = "uv run ruff check"
 _ruff_diff = "uv run ruff format --diff"
-_pyright = "uv run pyright --dependencies"
+_ty_check = "uv run ty check"
 _ruff_check_fix = "uv run ruff check --fix"
 _ruff_format = "uv run ruff format"
 lint.help = "Run the analyzers for the package."
-lint.sequence = ["_ruff_check", "_ruff_diff", "_pyright"]
+lint.sequence = ["_ruff_check", "_ruff_diff", "_ty_check"]
 lint.ignore_fail = "return_zero"
 fix.help = "Run the code formatter on the package."
 fix.sequence = ["_ruff_check_fix", "_ruff_format"]
@@ -102,20 +102,22 @@ addopts = [
     "--showlocals",
 ]
 
-[tool.pyright]
-venvPath = ".venv"
-verboseOutput = true
+[tool.ty.analysis]
+respect-type-ignore-comments = false  # Disable support for `type: ignore` comments
+
+[tool.ty.rules]
+all = "error"
+
+# Submodule snsr.pysh uses PC-only imports to help with development and testing
+[[tool.ty.overrides]]
+include = ["src/qtpy_datalogger/sensor_node/snsr/pysh/**"]
+
+[tool.ty.overrides.rules]
+possibly-unresolved-reference = "ignore"
+
+[tool.ty.src]
 exclude = [
-    ".venv",
-    "**/__pycache__",
-    "**/.*",
-    "**/node_modules",
     "docs/legacy",
-    "site/**",
-]
-executionEnvironments = [
-    { root = "src/qtpy_datalogger/sensor_node", reportMissingModuleSource = "information", reportAttributeAccessIssue = "information" },
-    { root = "." },
 ]
 
 [tool.ruff]
