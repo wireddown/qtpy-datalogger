@@ -301,7 +301,7 @@ class ActionDialog(AsyncDialog):
             ActionDialog.Action.Cancel: ActionDialog.Information(
                 text="Cancel",
                 command=self.exit,
-                style=(bootstyle.OUTLINE, bootstyle.WARNING),  # pyright: ignore reportArgumentType -- the type hints do not understand tuples
+                style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
             ),
         }
 
@@ -872,7 +872,7 @@ class DemoWithAnimation(AsyncWindow):
             main_frame,
             text="Modal",
             command=functools.partial(self.open_dialog, DialogBehavior.Modal),
-            style=(bootstyle.SECONDARY, bootstyle.INFO),  # pyright: ignore reportArgumentType -- the type hints do not understand tuples
+            style=(bootstyle.SECONDARY, bootstyle.INFO),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
         )
         modal_button.grid(column=0, row=3, sticky=tk.EW, padx=8)
 
@@ -880,7 +880,7 @@ class DemoWithAnimation(AsyncWindow):
             main_frame,
             text="Modeless",
             command=functools.partial(self.open_dialog, DialogBehavior.Modeless),
-            style=(bootstyle.SECONDARY, bootstyle.INFO),  # pyright: ignore reportArgumentType -- the type hints do not understand tuples
+            style=(bootstyle.SECONDARY, bootstyle.INFO),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
         )
         modeless_button.grid(column=1, row=3, sticky=tk.EW, pady=8)
 
@@ -941,7 +941,7 @@ def create_demo_ui(
     progressbar = ttk.Progressbar(
         root,
         length=280,
-        style=(bootstyle.STRIPED, bootstyle.SUCCESS),  # pyright: ignore reportArgumentType -- the type hints do not understand tuples
+        style=(bootstyle.STRIPED, bootstyle.SUCCESS),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
     )
     progressbar.grid(
         row=1,

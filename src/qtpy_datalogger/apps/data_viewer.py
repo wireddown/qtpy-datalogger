@@ -683,7 +683,7 @@ class DataViewer(guikit.AsyncWindow):
         for index, (name, series) in enumerate(data_series.items()):
             needs_title = False
             try:
-                float(name)  # pyright: ignore reportArgumentType -- we're type checking at run time
+                float(name)  # ty: ignore[invalid-argument-type] -- we're type checking at run time
                 needs_title = True
             except ValueError:
                 pass

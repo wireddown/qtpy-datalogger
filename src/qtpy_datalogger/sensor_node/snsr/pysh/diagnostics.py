@@ -126,8 +126,8 @@ class TracedSession:
         self._autoecho = autoecho
         self._tracer = IOTracer(input_stream=in_stream, output_stream=out_stream)
         self._session = PromptSession(
-            in_stream=self._tracer.input_stream,  # type: ignore -- we're swapping a builtin type for our own
-            out_stream=self._tracer.output_stream,  # type: ignore -- we're swapping a builtin type for our own
+            in_stream=self._tracer.input_stream,  # ty: ignore[invalid-argument-type] -- we're swapping a builtin type for our own
+            out_stream=self._tracer.output_stream,  # ty: ignore[invalid-argument-type] -- we're swapping a builtin type for our own
         )
 
     def prompt(self, message: str) -> bytes:

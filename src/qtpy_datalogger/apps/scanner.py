@@ -142,7 +142,7 @@ class ScannerApp(guikit.AsyncWindow):
             scan_frame,
             text="Clear results",
             command=self.clear_results,
-            style=(bootstyle.OUTLINE, bootstyle.WARNING),  # pyright: ignore reportArgumentType -- the type hint for library uses strings
+            style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
         )
         clear_button.pack(side=tk.LEFT, padx=(8, 0))
 
@@ -202,8 +202,8 @@ class ScannerApp(guikit.AsyncWindow):
         self.message_log = ttk_scrolled.ScrolledText(comms_frame, state=tk.DISABLED, wrap="word")
         self.message_log.pack(side=tk.TOP, expand=True, fill=tk.BOTH)
         # Add handlers for 'Ctrl-A' / select all
-        self.message_log.select_range = self.select_message_log_range  # pyright: ignore reportAttributeAccessIssue -- we are adding this at run time
-        self.message_log.icursor = self.set_message_log_cursor  # pyright: ignore reportAttributeAccessIssue -- we are adding this at run time
+        self.message_log.select_range = self.select_message_log_range  # ty: ignore[unresolved-attribute] -- we are adding this at run time
+        self.message_log.icursor = self.set_message_log_cursor  # ty: ignore[unresolved-attribute] -- we are adding this at run time
 
         # App commands
         action_frame = ttk.Frame(main, name="action_frame", borderwidth=0, relief=tk.SOLID)
@@ -212,14 +212,14 @@ class ScannerApp(guikit.AsyncWindow):
             action_frame,
             text="Copy all",
             command=self.copy_log,
-            style=(bootstyle.OUTLINE, bootstyle.PRIMARY),  # pyright: ignore reportArgumentType -- the type hint for library uses strings
+            style=(bootstyle.OUTLINE, bootstyle.PRIMARY),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
         )
         copy_log_button.pack(side=tk.LEFT)
         clear_log_button = ttk.Button(
             action_frame,
             text="Clear all",
             command=self.clear_log,
-            style=(bootstyle.OUTLINE, bootstyle.WARNING),  # pyright: ignore reportArgumentType -- the type hint for library uses strings
+            style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
         )
         clear_log_button.pack(side=tk.LEFT, padx=(8, 0))
         help_button = ttk.Button(action_frame, text="Online help", command=self.launch_help, style=bootstyle.OUTLINE)

@@ -22,7 +22,7 @@ def read_one_uart_line(message: str = "[uart] ") -> str:
     if not serial:
         return ""
 
-    line = prompt(message=message, in_stream=serial, out_stream=serial)  # type: ignore -- CircuitPython Serial objects have no parents
+    line = prompt(message=message, in_stream=serial, out_stream=serial)  # ty: ignore[invalid-argument-type] -- CircuitPython Serial objects have no parents
     _ = serial.read(serial.in_waiting)
     return line
 
@@ -39,7 +39,7 @@ def paint_uart_line(line: str) -> None:
         # Switching to usb_cdc.data for serial IO with host
         serial = usb_cdc.data
 
-    redraw_line(line, out_stream=serial)  # type: ignore -- CircuitPython Serial objects have no parents
+    redraw_line(line, out_stream=serial)  # ty: ignore[invalid-argument-type] -- CircuitPython Serial objects have no parents
 
 
 def get_app(received_action: ActionInformation) -> SnsrApp:

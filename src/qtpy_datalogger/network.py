@@ -112,7 +112,7 @@ class QTPyController:
             """Handle a message on topic with payload."""
             payload_string = payload.decode("UTF-8")
             logger.debug(f"Received '{payload_string}' on '{topic}' with qos='{qos}' properties='{properties}'")
-            as_self: QTPyController = client.context  # pyright: ignore reportAssignmentType -- the type for context is client-defined
+            as_self: QTPyController = client.context  # ty: ignore[invalid-assignment] -- the type for context is client-defined
             await as_self.message_queue.put(MqttMessage(topic, payload_string))
 
         def on_mqtt_disconnect(client: MqttClientWithContext, packet: bytes) -> None:
