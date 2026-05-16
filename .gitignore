@@ -1,4 +1,5 @@
 # Custom ignores
+.ruff_cache/
 ignored/
 
 # Byte-compiled / optimized / DLL files
