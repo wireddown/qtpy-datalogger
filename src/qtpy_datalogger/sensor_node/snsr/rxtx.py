@@ -56,12 +56,12 @@ def create_mqtt_client(node_group: str, node_identifier: str) -> minimqtt.MQTT:
     )
 
     # Connect callback handlers to mqtt_client
-    mqtt_client.on_connect = on_connect  # type: ignore -- we're assigning callbacks
-    mqtt_client.on_disconnect = on_disconnect  # type: ignore -- we're assigning callbacks
-    mqtt_client.on_subscribe = on_subscribe  # type: ignore -- we're assigning callbacks
-    mqtt_client.on_unsubscribe = on_unsubscribe  # type: ignore -- we're assigning callbacks
-    mqtt_client.on_publish = on_publish  # type: ignore -- we're assigning callbacks
-    mqtt_client.on_message = on_message  # type: ignore -- we're assigning callbacks
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_disconnect = on_disconnect
+    mqtt_client.on_subscribe = on_subscribe
+    mqtt_client.on_unsubscribe = on_unsubscribe
+    mqtt_client.on_publish = on_publish
+    mqtt_client.on_message = on_message
     return mqtt_client
 
 

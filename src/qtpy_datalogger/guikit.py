@@ -659,7 +659,7 @@ class AxisToolDialog(AsyncDialog):
         min_limit_label = ttk.Label(tool_frame, text="Minimum")
         min_limit_label.grid(column=0, row=2, padx=(0, 12), pady=(8, 8), sticky=tk.EW)
         scale_label = ttk.Label(tool_frame, text="Scale")
-        scale_label.grid(column=0, row=3, padx=(0, 12), pady=(8, 8), sticky=(tk.EW, tk.N))  # pyright: ignore reportArgumentType -- the type hints don't understand tuples
+        scale_label.grid(column=0, row=3, padx=(0, 12), pady=(8, 8), sticky=(tk.EW, tk.N))
 
         viewing_range = Range.from_matplotlib(axis_view_limits)
 
@@ -711,7 +711,7 @@ class AxisToolDialog(AsyncDialog):
             justify=bootstyle.RIGHT,
             completion=handle_scale_selection,
         )
-        scale_input.grid(column=1, row=3, sticky=(tk.EW, tk.N))  # pyright: ignore reportArgumentType -- the type hints don't understand tuples
+        scale_input.grid(column=1, row=3, sticky=(tk.EW, tk.N))
         scale_input.set(axis_scale.capitalize())
 
         return tool_frame

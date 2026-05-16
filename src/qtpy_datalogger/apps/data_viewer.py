@@ -234,7 +234,7 @@ class DataViewer(guikit.AsyncWindow):
         self.file_message.grid(row=1, columnspan=5, sticky=tk.W, pady=(8, 0))
 
         toolbar_frame = ttkbootstrap_matplotlib.create_styled_plot_toolbar(toolbar_row, self.canvas_figure)
-        toolbar_frame.grid(column=1, row=0, sticky=(tk.EW, tk.N), padx=(8, 0))  # pyright: ignore reportArgumentType -- the type hint for library uses strings
+        toolbar_frame.grid(column=1, row=0, sticky=(tk.EW, tk.N), padx=(8, 0))
 
         self.canvas_cover = ttk.Frame(main, name="canvas_cover", style=bootstyle.LIGHT)
         self.canvas_cover.grid(column=0, row=0, sticky=tk.NSEW)
@@ -471,7 +471,7 @@ class DataViewer(guikit.AsyncWindow):
         with self.state.demo_folder.joinpath("Data Viewer Demo.csv").open(
             encoding="UTF-8", mode="w", newline=""
         ) as demo_file:
-            data_frame = pd.DataFrame(data_samples, columns=column_titles)  # pyright: ignore reportArgumentType
+            data_frame = pd.DataFrame(data_samples, columns=column_titles)
             data_frame.to_csv(demo_file, index=False)
         self.state.data_file = pathlib.Path(demo_file.name)
 
@@ -520,8 +520,8 @@ class DataViewer(guikit.AsyncWindow):
         time_values = time_series[above_limit & below_limit]
         visible_series = [v.get() for v in self.plots_variables]
 
-        data_to_export = full_data_set.loc[time_values.index, visible_series]  # pyright: ignore reportAttributeAccessIssue
-        data_to_export = data_to_export.set_index(time_values.values)  # pyright: ignore reportAttributeAccessIssue
+        data_to_export = full_data_set.loc[time_values.index, visible_series]
+        data_to_export = data_to_export.set_index(time_values.values)
         data_to_export.index.name = "time"
         data_to_export.to_csv(file_path)
 
@@ -777,7 +777,7 @@ class DataViewer(guikit.AsyncWindow):
             time_coordinates = time_index.to_list()
 
         measurement_series = data_file_df[data_file_df.columns[1:]].select_dtypes(include=np.number)
-        return time_coordinates, measurement_series  # pyright: ignore reportReturnType
+        return time_coordinates, measurement_series
 
 
 def main() -> None:

@@ -99,7 +99,7 @@ class ScannerApp(guikit.AsyncWindow):
 
         # Main layout
         main = ttk.Frame(self.root_window, name="main_frame", padding=16)
-        main.grid(column=0, row=0, sticky=(tk.N, tk.S, tk.E, tk.W))  # pyright: ignore reportArgumentType -- the type hint for library uses strings
+        main.grid(column=0, row=0, sticky=(tk.N, tk.S, tk.E, tk.W))
         main.columnconfigure(0, weight=1)
         main.rowconfigure(0, weight=0)
         main.rowconfigure(1, weight=0)
@@ -129,7 +129,7 @@ class ScannerApp(guikit.AsyncWindow):
 
         # Scan group
         scan_frame = ttk.Frame(main, name="scan_frame", borderwidth=0, relief=tk.SOLID)
-        scan_frame.grid(column=0, row=1, sticky=(tk.N, tk.E, tk.W), pady=(8, 0))  # pyright: ignore reportArgumentType -- the type hint for library uses strings
+        scan_frame.grid(column=0, row=1, sticky=(tk.N, tk.E, tk.W), pady=(8, 0))
         group_input_label = ttk.Label(scan_frame, text="Group name")
         group_input_label.pack(side=tk.LEFT)
         self.group_input = ttk.Entry(scan_frame)
@@ -148,7 +148,7 @@ class ScannerApp(guikit.AsyncWindow):
 
         # Results group
         results_frame = ttk.Frame(main, name="result_frame", borderwidth=0, relief=tk.SOLID)
-        results_frame.grid(column=0, row=2, sticky=(tk.N, tk.E, tk.W), pady=(8, 0))  # pyright: ignore reportArgumentType -- the type hint for library uses strings
+        results_frame.grid(column=0, row=2, sticky=(tk.N, tk.E, tk.W), pady=(8, 0))
         result_columns = [
             {"text": "Group", "stretch": False, "width": 60},
             {"text": "Node ID", "stretch": False, "width": 150},
@@ -161,7 +161,7 @@ class ScannerApp(guikit.AsyncWindow):
             results_frame,
             coldata=result_columns,
             height=9,  # Unit is lines of text
-            stripecolor=(guikit.hex_string_for_style(bootstyle.LIGHT), None),  # pyright: ignore reportAttributeAccessIssue -- the type hint for bootstrap omits its own additions
+            stripecolor=(guikit.hex_string_for_style(bootstyle.LIGHT), None),
         )
         self.scan_results_table.view.configure(selectmode=tk.BROWSE)
         self.scan_results_table.view.bind("<<TreeviewSelect>>", self.on_row_selected)
@@ -175,7 +175,7 @@ class ScannerApp(guikit.AsyncWindow):
 
         # Node communication
         comms_frame = ttk.Frame(main, name="comms_frame", borderwidth=0, relief=tk.SOLID)
-        comms_frame.grid(column=0, row=3, sticky=(tk.N, tk.E, tk.W))  # pyright: ignore reportArgumentType -- the type hint for library uses strings
+        comms_frame.grid(column=0, row=3, sticky=(tk.N, tk.E, tk.W))
         selection_status_frame = ttk.Frame(comms_frame, name="selection_frame", borderwidth=0, relief=tk.SOLID)
         selection_status_frame.pack(side=tk.TOP, expand=True, fill=tk.X)
         self.status_icon_label = ttk.Label(selection_status_frame)
@@ -207,7 +207,7 @@ class ScannerApp(guikit.AsyncWindow):
 
         # App commands
         action_frame = ttk.Frame(main, name="action_frame", borderwidth=0, relief=tk.SOLID)
-        action_frame.grid(column=0, row=5, sticky=(tk.S, tk.E, tk.W), pady=(8, 0))  # pyright: ignore reportArgumentType -- the type hint for library uses strings
+        action_frame.grid(column=0, row=5, sticky=(tk.S, tk.E, tk.W), pady=(8, 0))
         copy_log_button = ttk.Button(
             action_frame,
             text="Copy all",

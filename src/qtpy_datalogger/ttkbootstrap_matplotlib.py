@@ -12,7 +12,7 @@ import ttkbootstrap.themes.standard as ttk_themes
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg,
-    NavigationToolbar2Tk,  # pyright: ignore reportPrivateImportUsage -- matplotlib exposes this indirectly
+    NavigationToolbar2Tk,
 )
 from matplotlib.figure import Figure
 from matplotlib.legend import Legend
