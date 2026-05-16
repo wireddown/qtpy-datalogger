@@ -158,6 +158,7 @@ class AsyncDialog:
         self.root_window.deiconify()  # Render and present
         self.initial_focus.focus_set()
         self.root_window.wait_visibility()
+        self.root_window.update()
 
         if behavior == DialogBehavior.Modal:
             self.root_window.grab_set()
@@ -235,7 +236,8 @@ class AsyncWindow:
         """Show the window and cooperatively run with asyncio."""
         self.on_show()
         self.root_window.deiconify()
-        self.root_window.wait_visibility(self.root_window)
+        self.root_window.wait_visibility()
+        self.root_window.update()
 
         while self.should_run_loop:
             await asyncio.sleep(0)
