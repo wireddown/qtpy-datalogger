@@ -144,7 +144,7 @@ Please go to the [wiki home page] for guidance.
 
 This project manages its Python programs with `uv`.
 
-The environment setup instructions are in the wiki on the [Contributing] page.
+The environment setup instructions are on the [Develop] page.
 
 The design documentation is in the wiki under the [Design Doc] pages.
 
@@ -163,6 +163,6 @@ See the [summary and source code] in the `docs/legacy` folder for details.
 [MQTT setup and commissioning]: https://wireddown.github.io/qtpy-datalogger/eng/intro/mqtt/
 
 [wiki home page]: https://github.com/wireddown/qtpy-datalogger/wiki
-[Contributing]: https://github.com/wireddown/qtpy-datalogger/wiki/Contributing
+[Develop]: https://wireddown.github.io/qtpy-datalogger/develop/
 [Design Doc]: https://github.com/wireddown/qtpy-datalogger/wiki/Design-Doc-1-Overview
 [summary and source code]: https://github.com/wireddown/qtpy-datalogger/blob/main/docs/legacy/README.md
