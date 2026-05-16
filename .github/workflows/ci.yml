@@ -83,7 +83,7 @@ jobs:
 
     - name: Run ty
       run: |
-        uv run ty check --python-version ${{ matrix.python_version }} --output-format github
+        uv run ty check --python-version ${{ matrix.python_version }} --output-format github --verbose
         uv run ty check --python-version ${{ matrix.python_version }} --output-format junit >> junit/ty-check-results-py${{ matrix.python_version }}-${{ runner.os }}.xml
         echo '## :microscope: ty results' >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
