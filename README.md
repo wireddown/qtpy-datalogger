@@ -97,7 +97,12 @@ qtpycmd read A0 A1 A2 A3
 
 This preview does not demonstrate MQTT communication over WiFi
 
-- Visit the wiki for [MQTT setup and commissioning] for more details
+In order to communicate on the WiFi network, the QT Py sensor node must also have
+
+- an MQTT broker
+- WiFi credentials
+
+Visit the [MQTT setup] page for more details
 
 ## Gallery
 
@@ -160,7 +165,7 @@ See the [summary and source code] in the `docs/legacy` folder for details.
 [Adafruit QT Py S3]: https://learn.adafruit.com/adafruit-qt-py-esp32-s3
 [CircuitPython]: https://circuitpython.org/
 
-[MQTT setup and commissioning]: https://wireddown.github.io/qtpy-datalogger/eng/intro/mqtt/
+[MQTT setup]: https://wireddown.github.io/qtpy-datalogger/eng/intro/mqtt/
 
 [wiki home page]: https://github.com/wireddown/qtpy-datalogger/wiki
 [Develop]: https://wireddown.github.io/qtpy-datalogger/develop/
