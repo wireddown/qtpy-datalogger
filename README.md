@@ -143,7 +143,7 @@ Time,Sensor 1,Sensor 2
 
 ## Questions and help
 
-Please go to the [wiki home page] for guidance.
+Please go to the [Welcome] page for questions and help.
 
 ## Contributing
 
@@ -167,7 +167,7 @@ See the [summary and source code] in the `docs/legacy` folder for details.
 
 [MQTT setup]: https://wireddown.github.io/qtpy-datalogger/eng/intro/mqtt/
 
-[wiki home page]: https://github.com/wireddown/qtpy-datalogger/wiki
+[Welcome]: https://downtothewire.io/qtpy-datalogger/welcome/
 [Develop]: https://wireddown.github.io/qtpy-datalogger/develop/
 [Design Doc]: https://github.com/wireddown/qtpy-datalogger/wiki/Design-Doc-1-Overview
 [summary and source code]: https://github.com/wireddown/qtpy-datalogger/blob/main/docs/legacy/README.md
