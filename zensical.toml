@@ -36,7 +36,7 @@ repo_url = "https://github.com/wireddown/qtpy-datalogger"
 #
 # Read more: https://zensical.org/docs/setup/basics/#copyright
 copyright = """
-Copyright &copy; 2026 Joe Friedrichsen
+Copyright &copy; 2026 <a href="https://downtothewire.io">Joe Friedrichsen</a>
 """
 
 # Zensical supports both implicit navigation and explicitly defined navigation.
