@@ -97,7 +97,12 @@ qtpycmd read A0 A1 A2 A3
 
 This preview does not demonstrate MQTT communication over WiFi
 
-- Visit the wiki for [MQTT setup and commissioning] for more details
+In order to communicate on the WiFi network, the QT Py sensor node must also have
+
+- an MQTT broker
+- WiFi credentials
+
+Visit the [MQTT setup] page for more details
 
 ## Gallery
 
@@ -138,13 +143,13 @@ Time,Sensor 1,Sensor 2
 
 ## Questions and help
 
-Please go to the [wiki home page] for guidance.
+Please go to the [Welcome] page for questions and help.
 
 ## Contributing
 
 This project manages its Python programs with `uv`.
 
-The environment setup instructions are in the wiki on the [Contributing] page.
+The environment setup instructions are on the [Develop] page.
 
 The design documentation is in the wiki under the [Design Doc] pages.
 
@@ -160,9 +165,9 @@ See the [summary and source code] in the `docs/legacy` folder for details.
 [Adafruit QT Py S3]: https://learn.adafruit.com/adafruit-qt-py-esp32-s3
 [CircuitPython]: https://circuitpython.org/
 
-[MQTT setup and commissioning]: https://wireddown.github.io/qtpy-datalogger/eng/intro/mqtt/
+[MQTT setup]: https://wireddown.github.io/qtpy-datalogger/eng/intro/mqtt/
 
-[wiki home page]: https://github.com/wireddown/qtpy-datalogger/wiki
-[Contributing]: https://github.com/wireddown/qtpy-datalogger/wiki/Contributing
+[Welcome]: https://downtothewire.io/qtpy-datalogger/welcome/
+[Develop]: https://wireddown.github.io/qtpy-datalogger/develop/
 [Design Doc]: https://github.com/wireddown/qtpy-datalogger/wiki/Design-Doc-1-Overview
 [summary and source code]: https://github.com/wireddown/qtpy-datalogger/blob/main/docs/legacy/README.md
