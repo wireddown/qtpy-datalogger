@@ -101,6 +101,7 @@ docs.sequence = ["_reset_license", "_prime_license", "_build_docs"]
 [tool.pytest]
 addopts = [
     "--showlocals",
+    "--durations=20",
 ]
 
 [tool.ty.analysis]
