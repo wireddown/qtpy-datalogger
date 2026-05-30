@@ -10,7 +10,6 @@ Supported connection types
 """
 
 import asyncio
-import contextlib
 import dataclasses
 import logging
 import os
@@ -19,11 +18,9 @@ import sys
 from enum import StrEnum
 
 import click
-import serial
 import toml
-from serial.tools import miniterm as mt
 
-from qtpy_datalogger import network
+from qtpy_datalogger import network, uart
 
 from .datatypes import CaptionCorrections, ConnectionTransport, Default, DetailKey, ExitCode, SnsrNotice, SnsrPath
 
@@ -117,7 +114,7 @@ def handle_connect(behavior: Behavior, group_id: str, node: str, port: str) -> N
         raise SystemExit(ExitCode.COM1_Failure)
 
     if communication_transport == ConnectionTransport.UART_Serial:
-        open_session_on_port(port)
+        uart.open_session_on_port(port)
     elif communication_transport == ConnectionTransport.MQTT_WiFi:
         network.open_session_on_node(group_id, node)
         group_option = "" if group_id == Default.MqttGroup else f"--group {group_id}"
@@ -132,7 +129,7 @@ async def discover_qtpy_devices_async(group_id: str) -> dict[str, QTPyDevice]:
     logger.info("Discovering serial ports")
     logger.info(f"Scanning the network for sensor_node devices in group '{group_id}'")
     discovered_serial_ports, discovered_nodes = await asyncio.gather(
-        asyncio.to_thread(_query_ports_from_serial),
+        asyncio.to_thread(uart.query_ports_from_serial),
         network.query_nodes_from_mqtt_async(group_id),
     )
 
@@ -148,7 +145,7 @@ def discover_qtpy_devices(group_id: str) -> dict[str, QTPyDevice]:
     """Scan for QT Py devices and return a dictionary of QTPyDevice instances indexed by serial_number."""
     # A QT Py COM port has a serial number
     logger.info("Discovering serial ports")
-    discovered_serial_ports = _query_ports_from_serial()
+    discovered_serial_ports = uart.query_ports_from_serial()
 
     # And its disk drive uses the same serial number
     logger.info("Discovering disk volumes")
@@ -223,62 +220,6 @@ def _process_query_results(
     return qtpy_devices
 
 
-def open_session_on_port(port: str) -> None:
-    """Open a terminal connection to the specified serial port."""
-    serial_options = {
-        "url": port,
-        "baudrate": 115200,
-        "bytesize": 8,
-        "parity": "N",
-        "stopbits": 1,
-        "rtscts": False,
-        "xonxoff": False,
-        "do_not_open": True,
-    }
-    logger.debug(serial_options)
-    com_port = serial.serial_for_url(**serial_options)
-
-    if not hasattr(com_port, "cancel_read"):
-        # Enable timeout for alive flag polling if cancel_read is not available
-        com_port.timeout = 1
-
-    if isinstance(com_port, serial.Serial):
-        com_port.exclusive = True
-
-    com_port.open()
-
-    miniterm_options = {
-        "serial_instance": com_port,
-        "echo": False,
-        "eol": "crlf",
-        "filters": ["direct"],
-    }
-    logger.debug(miniterm_options)
-    miniterm = mt.Miniterm(**miniterm_options)
-
-    miniterm.exit_character = "\x1d"
-    miniterm.menu_character = "\x14"
-    miniterm.raw = False
-    miniterm.set_rx_encoding("UTF-8")
-    miniterm.set_tx_encoding("UTF-8")
-
-    quit_command = mt.key_description(miniterm.exit_character)
-    help_command = mt.key_description(miniterm.menu_character)
-    logger.info(
-        f"---   Miniterm on {miniterm.serial.name}   Opts: {miniterm.serial.baudrate},{miniterm.serial.bytesize},{miniterm.serial.parity},{miniterm.serial.stopbits}    ---"
-    )
-    logger.info(f"---   Quit: {quit_command}        Help: {help_command} then H   ---")
-
-    miniterm.start()
-    with contextlib.suppress(KeyboardInterrupt):
-        miniterm.join(True)
-    miniterm.join()
-    miniterm.close()
-
-    logger.info("")
-    logger.info(f"Reconnect with 'qtpy-datalogger connect --port {port}'")
-
-
 def discover_and_select_qtpy(
     group_id: str,
     transport: ConnectionTransport = ConnectionTransport.AutoSelect,
@@ -351,30 +292,6 @@ def discover_and_select_qtpy(
 
     logger.info(f"{selected_reason} '{selected_device.device_description}' as {transport_message}")
     return (selected_device, selected_transport)
-
-
-def _query_ports_from_serial() -> dict[str, dict[DetailKey, str]]:
-    """
-    Scan the system for serial ports and return a dictionary of information.
-
-    Returned entries, grouped by com_port
-    - com_port
-    - com_id
-    - serial_number
-    """
-    # Other approaches include WMI's Win32_SerialPort
-    from serial.tools.list_ports_windows import comports  # noqa: PLC0415 -- dynamic import at runtime for Windows
-
-    discovered_comports = {
-        comport.device: {
-            DetailKey.com_port: comport.device,
-            DetailKey.com_id: comport.hwid,
-            DetailKey.serial_number: comport.serial_number,
-        }
-        for comport in sorted(comports())
-    }
-    logger.debug(discovered_comports)
-    return discovered_comports
 
 
 def _query_volumes_from_wmi() -> dict[str, dict[DetailKey, str]]:
