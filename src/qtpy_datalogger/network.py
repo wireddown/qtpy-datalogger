@@ -392,7 +392,7 @@ async def query_nodes_from_mqtt_async(group_id: str) -> dict[str, dict[DetailKey
         return {}
     controller = QTPyController.for_localhost_server(group_id)
     await controller.connect_and_subscribe()
-    node_information = await controller.scan_for_nodes(discovery_timeout=3.25)
+    node_information = await controller.scan_for_nodes(discovery_timeout=5.1)
     await controller.disconnect()
     return node_information
 
