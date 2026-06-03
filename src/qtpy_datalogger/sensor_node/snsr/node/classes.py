@@ -199,6 +199,11 @@ class SenderInformation:
         status_information = StatusInformation.from_dict(dictionary["status"])
         return SenderInformation(dictionary["descriptor_topic"], dictionary["sent_at"], status_information)
 
+    @staticmethod
+    def create_empty() -> "SenderInformation":
+        """Return an empty object. Useful as a sentinel value."""
+        return SenderInformation("", "", StatusInformation("", "", ""))
+
     def as_dict(self) -> dict:
         """Return a dictionary representation."""
         return self.information
