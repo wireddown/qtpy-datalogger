@@ -7,6 +7,8 @@ tags:
 
 # Gallery
 
+In addition to the command line tools, the `qtpy-datalogger` package includes these GUI apps.
+
 ## Scanner
 
 ```
@@ -41,3 +43,8 @@ Time,Sensor 1,Sensor 2
 0.22,1.302,5.536
 ...
 ```
+
+## Demo apps
+
+The GitHub repo has more example GUI apps that you can copy and run.
+Go to the [Customize](customize/) page if you want to try them.
