@@ -4,7 +4,7 @@ import click
 import pytest
 import serial
 
-from qtpy_datalogger import discovery, network
+from qtpy_datalogger import discovery, network, uart
 from qtpy_datalogger.datatypes import Default, DetailKey, ExitCode
 from qtpy_datalogger.sensor_node.snsr.node import classes as node_classes
 
@@ -451,7 +451,7 @@ def test_windows_discovery(monkeypatch: pytest.MonkeyPatch) -> None:
             },
         }
 
-    monkeypatch.setattr(discovery, "_query_ports_from_serial", override_ports_from_serial)
+    monkeypatch.setattr(uart, "query_ports_from_serial", override_ports_from_serial)
     monkeypatch.setattr(discovery, "_query_volumes_from_wmi", override_volumes_from_wmi)
     monkeypatch.setattr(network, "query_nodes_from_mqtt", override_nodes_from_mqtt)
 
