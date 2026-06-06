@@ -234,7 +234,7 @@ class AsyncWindow:
 
     async def show(self) -> None:
         """Show the window and cooperatively run with asyncio."""
-        self.on_show()
+        await self.on_showing()
         self.root_window.deiconify()
         self.root_window.wait_visibility()
         self.root_window.update()
@@ -244,19 +244,19 @@ class AsyncWindow:
             await self.on_loop()
             self.root_window.update()
 
-        self.on_closing()
+        await self.on_closing()
         self.root_window.quit()
 
     def create_user_interface(self) -> None:
         """Create the layout and widget event handlers."""
 
-    def on_show(self) -> None:
+    async def on_showing(self) -> None:
         """Initialize the window before entering main loop."""
 
     async def on_loop(self) -> None:
         """Update window elements and poll asyncio resources."""
 
-    def on_closing(self) -> None:
+    async def on_closing(self) -> None:
         """Finalize the window after exiting main loop."""
 
     def exit(self) -> None:

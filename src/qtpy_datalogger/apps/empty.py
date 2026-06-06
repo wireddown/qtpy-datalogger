@@ -20,13 +20,13 @@ class EmptyApp(guikit.AsyncWindow):
     def create_user_interface(self) -> None:
         """Create the main window and connect event handlers."""
 
-    def on_show(self) -> None:
+    async def on_showing(self) -> None:
         """Initialize window before entering main loop."""
 
     async def on_loop(self) -> None:
         """Update the window with new information."""
 
-    def on_closing(self) -> None:
+    async def on_closing(self) -> None:
         """Finalize the window after exiting main loop."""
 
 

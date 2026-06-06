@@ -131,7 +131,7 @@ class PlottingApp(guikit.AsyncWindow):
         """Update the window with new information."""
         await asyncio.sleep(1e-6)
 
-    def on_closing(self) -> None:
+    async def on_closing(self) -> None:
         """Finalize the window after exiting main loop."""
 
     def update_frequency(self, new_val: str) -> None:
