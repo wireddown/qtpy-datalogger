@@ -61,7 +61,7 @@ jobs:
       id: ruff-format
       run: |
         uv run ruff format --preview --check --output-format github
-        uv run ruff format --preview --check --output-format junit
+        uv run ruff format --preview --check --output-format junit > junit/ruff-format-results-py${{ matrix.python_version }}-${{ runner.os }}.xml
       if: always()
 
     - name: Run ruff format --diff
