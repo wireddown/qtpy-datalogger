@@ -1466,7 +1466,7 @@ wheels = [
 
 [[package]]
 name = "qtpy-datalogger"
-version = "1.0.8"
+version = "1.0.9"
 source = { editable = "." }
 dependencies = [
     { name = "adafruit-circuitpython-adxl37x" },
