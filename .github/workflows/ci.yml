@@ -57,6 +57,13 @@ jobs:
         uv run ruff check --output-format junit --output-file junit/ruff-check-results-py${{ matrix.python_version }}-${{ runner.os }}.xml
       if: always()
 
+    - name: Run ruff format
+      id: ruff-format
+      run: |
+        uv run ruff format --check --output-format github
+        uv run ruff format --check --output-format --output-file junit/ruff-format-results-py${{ matrix.python_version }}-${{ runner.os }}.xml
+      if: always()
+
     - name: Run ruff format --diff
       run: |
         uv run ruff format --diff
@@ -78,7 +85,7 @@ jobs:
         echo '```' >> $env:GITHUB_STEP_SUMMARY
         echo ' - :green_circle: Use `ruff format` to fix errors' >> $env:GITHUB_STEP_SUMMARY
         echo '' >> $env:GITHUB_STEP_SUMMARY
-      if: ${{ failure() && steps.ruff-check.conclusion == 'failure' }}
+      if: ${{ failure() && steps.ruff-format.conclusion == 'failure' }}
       continue-on-error: true
 
     - name: Run ty
