@@ -276,9 +276,7 @@ class QTPyController:
         """Disconnect from the MQTT broker and return any unprocessed messages."""
         unprocessed_messages = []
         if not self.message_queue.empty():
-            logger.warning(
-                f"Leaving {self.message_queue.qsize()} MQTT messages unprocessed."
-            )
+            logger.warning(f"Leaving {self.message_queue.qsize()} MQTT messages unprocessed.")
             unprocessed_messages = self.clear_messages()
             for unprocessed_message in unprocessed_messages:
                 logger.debug(unprocessed_message._asdict())
