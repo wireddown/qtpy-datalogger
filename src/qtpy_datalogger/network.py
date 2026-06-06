@@ -208,7 +208,7 @@ class QTPyController:
         parameters_and_sender = ()
         other_messages = []
         action_id = action.message_id
-        logger.debug(f"Monitoring MQTT messages for the '{action_id}' result from '{node_id}'")
+        logger.debug(f"Monitoring MQTT messages for result matching '{action_id}' from node '{node_id}'")
         async with asyncio.timeout(timeout):
             while not parameters_and_sender:
                 topic_and_message = await self.message_queue.get()
@@ -223,7 +223,7 @@ class QTPyController:
                     sending_node = node_mqtt.node_from_topic(payload.sender.descriptor_topic)
                     result_id = payload.action.message_id
                     if node_id in (sending_node, "+") and result_id == action_id:
-                        logger.debug(f"Matched result '{payload.action.parameters}'")
+                        logger.debug(f"Matched result from '{sending_node}'")
                         parameters_and_sender = (payload.action.parameters, payload.sender)
                     else:
                         other_messages.append(topic_and_message)
@@ -233,6 +233,23 @@ class QTPyController:
         for other_message in other_messages:
             self._requeue_or_discard(other_message)
         return parameters_and_sender
+
+    async def wait_until_matching_node_response(
+        self, action: node_classes.ActionInformation
+    ) -> tuple[dict, node_classes.SenderInformation]:
+        """Cooperatively wait until the first sensor_node responds to the specified action."""
+        result = {}
+        sender = node_classes.SenderInformation.create_empty()
+        sender_id = ""
+        while not sender_id.startswith("node-"):
+            try:
+                result, sender = await self.get_matching_result(node_id="+", action=action, timeout=0)
+                sender_id = node_mqtt.node_from_topic(sender.descriptor_topic)
+                logger.debug(f"Node '{sender_id}' responded with {result}")
+            except TimeoutError:
+                # Expected with no-wait calls (timeout=0), sleep and let the node finish responding
+                await asyncio.sleep(1e-3)
+        return (result, sender)
 
     def post_retained_group_action(self, action: node_classes.ActionInformation) -> None:
         """Publish an action to the group's broadcast topic and retain it."""
