@@ -213,6 +213,10 @@ class QTPyController:
             while not parameters_and_sender:
                 topic_and_message = await self.message_queue.get()
                 response_json = topic_and_message.message
+                if not response_json:
+                    # The message is empty when a topic's retained message is cleared
+                    self.message_queue.task_done()
+                    continue
                 response = json.loads(response_json)
                 if "action" in response:
                     payload = node_classes.ActionPayload.from_dict(response)
