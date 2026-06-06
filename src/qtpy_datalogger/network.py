@@ -246,19 +246,29 @@ class QTPyController:
         """Remove the retained action on the group's broadcast topic."""
         self.client.publish(self.broadcast_topic, "", retain=True)
 
-    async def disconnect(self) -> None:
-        """Disconnect from the MQTT broker."""
+    def clear_messages(self) -> list[MqttMessage]:
+        """Remove all unprocessed messages from the queue and return them."""
+        unprocessed_messages = []
+        while not self.message_queue.empty():
+            unprocessed_message = self.message_queue.get_nowait()
+            unprocessed_messages.append(unprocessed_message)
+            self.message_queue.task_done()
+        return unprocessed_messages
+
+    async def disconnect(self) -> list[MqttMessage]:
+        """Disconnect from the MQTT broker and return any unprocessed messages."""
+        unprocessed_messages = []
         if not self.message_queue.empty():
             logger.warning(
-                f"Leaving {self.message_queue.qsize()} MQTT messages unprocessed. Add '--verbose' to see them."
+                f"Leaving {self.message_queue.qsize()} MQTT messages unprocessed."
             )
-            while not self.message_queue.empty():
-                unprocessed_message = self.message_queue.get_nowait()
+            unprocessed_messages = self.clear_messages()
+            for unprocessed_message in unprocessed_messages:
                 logger.debug(unprocessed_message._asdict())
-                self.message_queue.task_done()
         with suppress_unless_debug():
             await self.client.disconnect()
         self.subscribed_topics.clear()
+        return unprocessed_messages
 
     def _publish_descriptor(self) -> None:
         """Publish the descriptor to the topic for this controller."""
@@ -388,9 +398,11 @@ def open_session_on_node(group_id: str, node_id: str) -> None:
 
 async def query_nodes_from_mqtt_async(group_id: str) -> dict[str, dict[DetailKey, str]]:
     """Use a new QTPyController to scan the network for sensor_nodes."""
+    if not group_id:
+        return {}
     controller = QTPyController.for_localhost_server(group_id)
     await controller.connect_and_subscribe()
-    node_information = await controller.scan_for_nodes(discovery_timeout=3.25)
+    node_information = await controller.scan_for_nodes(discovery_timeout=5.1)
     await controller.disconnect()
     return node_information
 
