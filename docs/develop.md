@@ -32,8 +32,13 @@ If you want to add this package to your own project and use it in your code, add
 Then import the package like any other in your source code.
 
 ```py title="my_program.py"
-from qtpy_datalogger import guikit as gk
+from qtpy_datalogger.network import QTPyController
 ```
+
+See the summary workflows below for recommended steps when working on
+
+- [Host](#pc-dev-loop) code
+- [Node](#qt-py-dev-loop) code
 
 ## Setup for development
 

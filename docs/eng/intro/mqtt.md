@@ -82,7 +82,7 @@ We optimize the firewall by constraining the new rule to match against the **loc
         service=any
 
         # Free-text description
-        description='This rule allows MQTT clients on the local subnet to connect to this host'
+        description='Allow MQTT clients on the local subnet to connect to this host'
 
         # Which security zone
         profile=private
@@ -108,7 +108,7 @@ We optimize the firewall by constraining the new rule to match against the **loc
 
 ## Ready check
 
-### Server
+### Server online
 
 Use the command **`qtpy-datalogger server`** to confirm the readiness of the MQTT service.
 
@@ -140,7 +140,7 @@ Use the command **`qtpy-datalogger server`** to confirm the readiness of the MQT
     WARNING      Firewall  Unconfigured
     ```
 
-### Client
+### Clients accepted
 
 Use the command **`qtpy-datalogger server --observe`** to confirm the MQTT service accepts client connections.
 
