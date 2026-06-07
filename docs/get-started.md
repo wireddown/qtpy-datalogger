@@ -12,7 +12,7 @@ tags:
 !!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
 - Back up the `code.py` file on the QT Py
-- Preview the program in a deletable Python virtual environment
+- Preview the package in a deletable Python virtual environment
 
     ```pwsh title="PowerShell"
     # Create and enter a new Python virtual environment
@@ -30,7 +30,7 @@ tags:
     # Search for devices
     qtpy-datalogger connect --discover-only
 
-    # Install the sensor node runtime on a device
+    # Install the sensor node runtime on the QT Py
     qtpy-datalogger equip
 
     # Open a serial connection, use Ctrl-] to quit
@@ -45,6 +45,8 @@ tags:
     # Ctrl-] to quit
     ```
 
+- Plot data in the [**Analog Plotter**](customize/#analog-plotter) demo GUI app
+    ![Screenshot of Analog Plotter demo app](gallery/ex-analog-plotter.png)
 - Optionally, delete the folder `qtpy-preview` when you are done
 
 ## :lucide-wifi: WiFi control in 3 minutes
@@ -56,4 +58,4 @@ In order to communicate on the WiFi network, the QT Py sensor node must also hav
 - an MQTT broker
 - WiFi credentials
 
-Continue to the [MQTT](eng/intro/mqtt) page if you want to try the [Scanner](gallery/#scanner) GUI app.
+Continue to the [MQTT](eng/intro/mqtt/) page if you want to try [the demo apps](customize/) over the network.

@@ -4,7 +4,7 @@
 
 ## Documentation
 
-Available at [downtothewire.io/**qtpy-datalogger/welcome**](https://downtothewire.io/qtpy-datalogger/welcome)
+Available at [downtothewire.io/**qtpy-datalogger/welcome**]
 
 ## Status
 
@@ -37,74 +37,57 @@ graph LR
 
 The PC host controls and communicates with any number of sensor nodes on the wireless network.
 
-**Supported Python versions**
-
-- Host
-    - Python 3.11
-    - Python 3.12
-    - Python 3.13
-- Node
-    - CircuitPython 9.0
-
-**Supported host platforms**
-
-- Windows
-
-**Supported connection types**
-
-- Serial / UART
-- Network / MQTT
-
-**Entry points**
-
-- Host program: [`qtpy_datalogger/console.py`](https://github.com/wireddown/qtpy-datalogger/blob/main/src/qtpy_datalogger/console.py)
-- QT Py program: [`qtpy_datalogger/sensor_node/code.py`](https://github.com/wireddown/qtpy-datalogger/blob/main/src/qtpy_datalogger/sensor_node/code.py)
-
 ## Preview in 90 seconds
 
 1. Connect your QT Py device with USB
     - _(Optional)_ Back up its `code.py` file
 1. Preview the program in a deletable Python virtual environment
+    ```pwsh
+    # Create and enter a new Python virtual environment
+    mkdir qtpy-preview
+    cd qtpy-preview
+    python -m venv --upgrade-deps .venv
+    .\.venv\Scripts\activate.ps1
 
-```pwsh
-# Create and enter a new Python virtual environment
-mkdir qtpy-preview
-cd qtpy-preview
-python -m venv --upgrade-deps .venv
-.\.venv\Scripts\activate.ps1
+    # Install
+    pip install qtpy-datalogger
 
-# Install
-pip install qtpy-datalogger
+    # Show the package help
+    qtpy-datalogger --help
 
-# Show the package help
-qtpy-datalogger --help
+    # Search for devices
+    qtpy-datalogger connect --discover-only
 
-# Search for devices
-qtpy-datalogger connect --discover-only
+    # Install the sensor node runtime the device
+    qtpy-datalogger equip
 
-# Install the node runtime on a device
-qtpy-datalogger equip
+    # Open a serial connection, use Ctrl-] to quit
+    qtpy-datalogger connect
 
-# Open a serial connection, use Ctrl-] to quit
-qtpy-datalogger connect
+    qtpycmd get_apps
 
-qtpycmd get_apps
+    qtpycmd stats
 
-qtpycmd stats
+    qtpycmd read A0 A1 A2 A3
 
-qtpycmd read A0 A1 A2 A3
-```
+    # Ctrl-] to quit
+    ```
+1. Plot data in the [**Analog Plotter**] demo GUI app
+![Screenshot of the Analog Plotter demo](https://raw.githubusercontent.com/wireddown/qtpy-datalogger/refs/heads/main/docs/gallery/ex-analog-plotter-with-dialog.png)
+1. Optionally, delete the folder `qtpy-preview` when you are done
 
-This preview does not demonstrate MQTT communication over WiFi
+**_Note:_** This preview does not demonstrate MQTT communication over WiFi
 
 In order to communicate on the WiFi network, the QT Py sensor node must also have
 
 - an MQTT broker
 - WiFi credentials
 
-Visit the [MQTT setup] page for more details
+Visit the [MQTT setup] page for more details if you want to try [the demo apps] over the network.
 
 ## Gallery
+
+In addition to the command line tools, the `qtpy-datalogger` package includes these GUI apps.
 
 ### Scanner
 
@@ -141,13 +124,38 @@ Time,Sensor 1,Sensor 2
 ...
 ```
 
+## Supported systems
+
+**Supported Python versions**
+
+- Host
+    - Python 3.11
+    - Python 3.12
+    - Python 3.13
+- Node
+    - CircuitPython 9.x
+
+**Supported host platforms**
+
+- Windows
+
+**Supported connection types**
+
+- Serial / UART
+- Network / MQTT
+
+**Entry points**
+
+- Host program: [`qtpy_datalogger/console.py`](https://github.com/wireddown/qtpy-datalogger/blob/main/src/qtpy_datalogger/console.py)
+- QT Py program: [`qtpy_datalogger/sensor_node/code.py`](https://github.com/wireddown/qtpy-datalogger/blob/main/src/qtpy_datalogger/sensor_node/code.py)
+
 ## Questions and help
 
 Please go to the [Welcome] page for questions and help.
 
 ## Contributing
 
-This project manages its Python programs with `uv`.
+This project manages its Python package with `uv`.
 
 The environment setup instructions are on the [Develop] page.
 
@@ -164,10 +172,13 @@ See the [summary and source code] in the `docs/legacy` folder for details.
 
 [Adafruit QT Py S3]: https://learn.adafruit.com/adafruit-qt-py-esp32-s3
 [CircuitPython]: https://circuitpython.org/
+[downtothewire.io/**qtpy-datalogger/welcome**]: https://downtothewire.io/qtpy-datalogger/welcome/
 
+[**Analog Plotter**]: https://wireddown.github.io/qtpy-datalogger/customize/#analog-plotter
 [MQTT setup]: https://wireddown.github.io/qtpy-datalogger/eng/intro/mqtt/
+[the demo apps]: https://wireddown.github.io/qtpy-datalogger/customize/
 
-[Welcome]: https://downtothewire.io/qtpy-datalogger/welcome/
+[Welcome]: https://wireddown.github.io/qtpy-datalogger/welcome/
 [Develop]: https://wireddown.github.io/qtpy-datalogger/develop/
 [Design Doc]: https://github.com/wireddown/qtpy-datalogger/wiki/Design-Doc-1-Overview
 [summary and source code]: https://github.com/wireddown/qtpy-datalogger/blob/main/docs/legacy/README.md
