@@ -81,7 +81,7 @@ jobs:
         echo '' >> $env:GITHUB_STEP_SUMMARY
         echo '### Format errors' >> $env:GITHUB_STEP_SUMMARY
         echo '```diff' >> $env:GITHUB_STEP_SUMMARY
-        uv run ruff format --diff >> $env:GITHUB_STEP_SUMMARY
+        uv run ruff format --diff 2>&1 >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
         echo 'If there are errors:' >> $env:GITHUB_STEP_SUMMARY
         echo ' - :green_circle: Use `uv run ruff format` to fix errors' >> $env:GITHUB_STEP_SUMMARY
