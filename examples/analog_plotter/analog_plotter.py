@@ -8,6 +8,7 @@ import tkinter as tk
 from tkinter import font
 
 import matplotlib.backend_bases as mpl_backend_bases
+
 import numpy as np
 import serial
 import ttkbootstrap as ttk
