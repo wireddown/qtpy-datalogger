@@ -295,7 +295,7 @@ class AnalogPlotter(guikit.AsyncWindow):
         self.canvas.draw()
 
     async def close_io(self) -> None:
-        """Close all communciation channels and release system resources."""
+        """Close all communication channels and release system resources."""
         if self.uart:
             if self.uart_task:
                 logger.info("Clearing active UART message")
