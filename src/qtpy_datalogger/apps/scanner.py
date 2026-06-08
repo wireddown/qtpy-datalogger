@@ -130,21 +130,30 @@ class ScannerApp(guikit.AsyncWindow):
         # Scan group
         scan_frame = ttk.Frame(main, name="scan_frame", borderwidth=0, relief=tk.SOLID)
         scan_frame.grid(column=0, row=1, sticky=(tk.N, tk.E, tk.W), pady=(8, 0))
+        scan_frame.columnconfigure(0, weight=0)  # 'Group name' label
+        scan_frame.columnconfigure(1, weight=1)  # Text entry gox
+        scan_frame.columnconfigure(2, weight=0)  # 'Scan group' button
+        scan_frame.columnconfigure(3, weight=0)  # 'Clear results' button
+        scan_frame.rowconfigure(0, weight=1)
+
         group_input_label = ttk.Label(scan_frame, text="Group name")
-        group_input_label.pack(side=tk.LEFT)
+        group_input_label.grid(column=0, row=0)
         self.group_input = ttk.Entry(scan_frame)
         self.group_input.insert(0, Default.MqttGroup)
         self.group_input.bind("<KeyPress>", self.run_command_on_enter)
-        self.group_input.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(8, 0))
-        scan_button = ttk.Button(scan_frame, text="Scan group", command=self.start_scan)
-        scan_button.pack(side=tk.LEFT, padx=(8, 0))
+        self.group_input.grid(column=1, row=0, sticky=tk.EW, padx=(8, 0))
+        self.scan_button = ttk.Button(scan_frame, text="Scan group", command=self.start_scan)
+        self.scan_button.grid(column=2, row=0, padx=(8, 0))
+        self.scan_feedback = ttk.Floodgauge(
+            scan_frame, bootstyle=bootstyle.INFO, text="Scanning...", font="TkDefaultFont"
+        )
         clear_button = ttk.Button(
             scan_frame,
             text="Clear results",
             command=self.clear_results,
             style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
         )
-        clear_button.pack(side=tk.LEFT, padx=(8, 0))
+        clear_button.grid(column=3, row=0, padx=(8, 0))
 
         # Results group
         results_frame = ttk.Frame(main, name="result_frame", borderwidth=0, relief=tk.SOLID)
@@ -379,12 +388,19 @@ class ScannerApp(guikit.AsyncWindow):
             return
 
         self.update_status_message_and_style("Scanning....", bootstyle.INFO)
+        length = self.scan_button.winfo_width()
+        height = self.scan_button.winfo_height()
+        self.scan_feedback.configure(length=length, thickness=height, value=0, maximum=90)
+        self.scan_feedback.grid(column=2, row=0, padx=(8, 0))
+        self.scan_feedback.start()
 
         async def new_group_scan() -> dict[str, discovery.QTPyDevice]:
             qtpy_devices_in_group = await discovery.discover_qtpy_devices_async(group_id)
             return qtpy_devices_in_group
 
         def finalize_scan(scan_group_task: asyncio.Task) -> None:
+            self.scan_feedback.stop()
+            self.scan_feedback.grid_forget()
             self.background_tasks.discard(scan_group_task)
             qtpy_devices_in_group = scan_group_task.result()
             self.process_new_scan(group_id, qtpy_devices_in_group)
