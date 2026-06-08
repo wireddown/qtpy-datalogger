@@ -19,18 +19,18 @@ A custom host-side app that plots analog data using the built-in sensor node app
 
 ![Screenshot of Analog Plotter demo app](gallery/ex-analog-plotter.png)
 
-1. Copy the app's source file `analog_plotter.py` to your `qtpy-preview` folder
+1. **Copy** the app's source file `analog_plotter.py` to your `qtpy-preview` folder
     - [View] it in your browser
     - [Save-As] to download it directly
-1. Run it with
+1. **Run** it with
     ```pwsh title="PowerShell"
     python analog_plotter.py
     ```
-1. Edit the [variables at the top] of `get_and_plot_data()` to exercise the features
+1. **Edit** the [variables at the top] of `get_and_plot_data()` to exercise the features
     ```python title="get_and_plot_data()"
       # Customize
       use_uart = True
-      use_mqtt = True
+      use_mqtt = False
       minimum_mqtt_node_count = 1
       channel_cmd_string = "A0 A3"
       mqtt_group = datatypes.Default.MqttGroup
