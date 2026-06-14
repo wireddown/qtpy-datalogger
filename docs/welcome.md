@@ -43,10 +43,10 @@ Please see [Project Workflows] for next steps.
 
 If you're new to GitHub or want a crash course, we recommend this reading order
 
-1. [Tools](eng/intro/tools)
-1. [Python](eng/intro/python)
-1. [MQTT](eng/intro/mqtt)
-1. [Develop](develop)
+1. [Tools](eng/intro/tools/)
+1. [Python](eng/intro/python/)
+1. [MQTT](eng/intro/mqtt/)
+1. [Environment](eng/intro/environment/)
 1. [How-to Guide]
 
 
