@@ -13,7 +13,7 @@ tags:
 
 If you're having problems running the program or setting up the tools, please [create a help request].
 
-Go to the [Troubleshoot](troubleshoot) page to see how to gather information from your workstation.
+Go to the [Troubleshoot](troubleshoot/) page to see how to gather information from your workstation.
 
 ## Feedback and improvements
 
@@ -29,9 +29,9 @@ Continue reading below.
 
 ## Developing
 
-If you want to contribute or tinker with code, go to the [Develop](develop) page to setup your workstation.
+If you want to contribute or tinker with code, go to the [Develop](develop/) page to setup your workstation.
 
-- To learn how this project **tests and analyzes** its code, go to the [Python](eng/intro/python) page.
+- To learn how this project **tests and analyzes** its code, go to the [Python](eng/intro/python/#testing-code) page.
 - To learn how to **debug the code or maintain** the project, go to the [How-to Guide] page.
 - To learn about the **code design and structure**, go to the [Design Doc] pages.
 
