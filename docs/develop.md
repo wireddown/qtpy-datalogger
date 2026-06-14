@@ -15,7 +15,7 @@ tags:
 
     Add `qtpy_datalogger` to your project.
 
-    Use the CLI and API to deploy QT Py sensor nodes.
+    Use the [CLI and API](eng/usage/guide.md) to deploy QT Py sensor nodes.
 
 -   :lucide-message-square-diff:{ .lg .middle .qtpy }&nbsp; __Contribute__
 
