@@ -60,7 +60,12 @@ nav = [
   ] },
   { "Develop" = [
     { "Develop" = "develop.md" },
-    { "Guides" = [
+    { "Contribute" = [
+      { "Environment" = "eng/intro/environment.md" },
+      { "Workflows" = "eng/intro/workflows.md" },
+      { "References" = "eng/intro/references.md" },
+    ]},
+    { "Onboarding guides" = [
       { "Tools" = "eng/intro/tools.md" },
       { "Python" = "eng/intro/python.md" },
       { "MQTT" = "eng/intro/mqtt.md" },
