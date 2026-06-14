@@ -86,6 +86,24 @@ uv python find --show-version
 
 # Show all installed and selectable versions
 uv python list --only-installed
+
+# Confirm installed Python version
+uv run python -V
+```
+
+### 4. Install the project
+
+With **git**, **Python**, and **`uv`** installed, you can get the project's source code and install its dependencies.
+
+From steps 1 and 2 on the [Environment](environment/#1-get-the-source) page:
+
+```pwsh title="PowerShell"
+# Clone from GitHub
+git clone https://github.com/wireddown/qtpy-datalogger.git
+cd qtpy-datalogger
+
+# Install the package's dependencies
+uv sync
 ```
 
 ## Testing code
