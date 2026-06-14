@@ -60,12 +60,27 @@ nav = [
   ] },
   { "Develop" = [
     { "Develop" = "develop.md" },
-    { "Guides" = [
+    { "Contribute" = [
+      { "Environment" = "eng/intro/environment.md" },
+      { "Workflows" = "eng/intro/workflows.md" },
+      { "References" = "eng/intro/references.md" },
+    ]},
+    { "Onboarding guides" = [
       { "Tools" = "eng/intro/tools.md" },
       { "Python" = "eng/intro/python.md" },
       { "MQTT" = "eng/intro/mqtt.md" },
       { "Recap" = "eng/intro/recap.md" },
       ] },
+  ] },
+  { "User guide" = [
+    { "User guide" = "eng/usage/guide.md" },
+    { "CLI" = [
+      { "qtpy-datalogger" = "eng/usage/cli.md" },
+      { "connect" = "eng/usage/connect.md" },
+      { "equip" = "eng/usage/equip.md" },
+      { "run" = "eng/usage/run.md" },
+      { "server" = "eng/usage/server.md" },
+    ] },
   ] },
   { "Legacy system" = "legacy/README.md" },
   { "Governance" = [

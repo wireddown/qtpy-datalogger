@@ -8,9 +8,9 @@ tags:
 
 # Python
 
-This project uses `uv` to manage its Python environments and dependencies.
+This project uses **`uv`** to manage its Python environments and dependencies.
 
-## Install
+## Install Python
 
 ### Outline
 
@@ -25,27 +25,27 @@ This project uses `uv` to manage its Python environments and dependencies.
 ??? abstract "Further reading on this Python tooling, its uses, and how it works"
 
     - [**uv**: A Complete Guide]
-        - Explains the efficiencies and convenient workflows in `uv`
+        - Explains the efficiencies and convenient workflows in **`uv`**
     - [Python Virtual Environments: A Primer]
         - Explains what Python virtual environments are, why they are useful, and how they work
 
-!!! info "Why we use `uv run ...`"
-    - `uv` manages the virtual environment and its commands for the project **automatically**
-    - `uv run ...` activates the environment for the command that follows
-    - `uv` invokes these managed commands and won't use a system-wide tool of the same name by accident
+!!! info "Why we use **`uv run ...`**"
+    - **`uv`** manages the virtual environment and its commands for the project **automatically**
+    - **`uv run ...`** activates the environment for the command that follows
+    - **`uv`** invokes these managed commands and won't use a system-wide tool of the same name by accident
 
 ### 1. Disable Python aliases
 
-1. Open the **Windows Settings** app and navigate to:
+- Open the **Windows Settings** app and navigate to:
 
     - **:fontawesome-solid-gear:&nbsp; Settings :lucide-arrow-right: Apps :lucide-arrow-right: Advanced app settings :lucide-arrow-right: App execution aliases**
 
-1. Scroll down the list and **disable** these two entries:
+- Scroll down the list and **disable** these two entries:
 
-    | Name              | Detail        |
-    |-------------------|---------------|
-    | **App Installer** | `python.exe`  |
-    | **App Installer** | `python3.exe` |
+    | Name              | Detail            |
+    |-------------------|-------------------|
+    | **App Installer** | **`python.exe`**  |
+    | **App Installer** | **`python3.exe`** |
 
 ??? quote "Disable from PowerShell"
     ```pwsh title="PowerShell"
@@ -68,7 +68,7 @@ uv self version
 
 ### 3. Install Python
 
-Open PowerShell and [use **uv**] to install Python.
+Open PowerShell and [use **uv** to install Python].
 We recommend **Python 3.11** because it is the lowest version supported by the package.
 
 ```pwsh title="PowerShell"
@@ -86,11 +86,31 @@ uv python find --show-version
 
 # Show all installed and selectable versions
 uv python list --only-installed
+
+# Confirm installed Python version
+uv run python -V
+```
+
+### 4. Install the project
+
+With **git**, **Python**, and **`uv`** installed, you can get the project's source code and install its dependencies.
+
+From steps 1 and 2 on the [Environment](environment/#1-get-the-source) page:
+
+```pwsh title="PowerShell"
+# Clone from GitHub
+git clone https://github.com/wireddown/qtpy-datalogger.git
+cd qtpy-datalogger
+
+# Install the package's dependencies
+uv sync
 ```
 
 ## Testing code
 
-This project focuses on writing and running tests that exercise either entire features or single functions.
+This project includes tests for its behavior and analyzers for its source code.
+
+We focus on writing and running tests that exercise either entire features or single functions.
 As bugs are fixed, we add tests that confirm the bug remains fixed.
 
 ### Acceptance testing
@@ -200,7 +220,7 @@ uv run poe fix
 [Python Virtual Environments: A Primer]: https://realpython.com/python-virtual-environments-a-primer/
 
 [install **uv**]: https://docs.astral.sh/uv/getting-started/installation/#winget
-[use **uv**]: https://docs.astral.sh/uv/guides/install-python/#installing-a-specific-version
+[use **uv** to install Python]: https://docs.astral.sh/uv/guides/install-python/#installing-a-specific-version
 
 [tool **pytest**]: https://docs.pytest.org/en/stable/
 [discovers the tests]: https://code.visualstudio.com/docs/python/testing#_test-discovery

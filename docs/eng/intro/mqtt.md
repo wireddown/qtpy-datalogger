@@ -11,7 +11,7 @@ tags:
 Network communication with QT Py sensor nodes requires an MQTT broker service available on the network.
 If your facility does not have a service, you can install and host one on your workstation.
 
-## Mosquitto
+## 1. Install Mosquitto
 
 We recommend the [Mosquitto MQTT server] from the Eclipse Foundation.
 
@@ -19,11 +19,11 @@ We recommend the [Mosquitto MQTT server] from the Eclipse Foundation.
 1. Run the installer and keep the default options
 
 ??? quote "Install with `winget`"
-    ```pwsh title="PowerShell"
+    ```pwsh title="Administrator PowerShell"
     winget install --exact --id=EclipseFoundation.Mosquitto
     ```
 
-## Configure
+## 2. Configure the broker
 
 ### MQTT server
 
@@ -52,7 +52,7 @@ We optimize the firewall by constraining the new rule to match against the **loc
 
 !!! warning "Run this command in an **Administrator** terminal to configure the firewall for the Mosquitto program"
 
-   ```pwsh title="PowerShell"
+   ```pwsh title="Administrator PowerShell"
    netsh advfirewall firewall add rule `
       name='Mosquitto MQTT: allow inbound on port 1883 from local subnet' `
       program='C:\Program Files\mosquitto\mosquitto.exe' dir=in action=allow service=any `
@@ -62,7 +62,7 @@ We optimize the firewall by constraining the new rule to match against the **loc
    ```
 
 ??? note "Option-by-option explanation for [**netsh advfirewall**]"
-    ```pwsh title="PowerShell"
+    ```pwsh title="Administrator PowerShell"
     # Add a new firewall rule
     netsh advfirewall firewall add rule
 
@@ -106,7 +106,7 @@ We optimize the firewall by constraining the new rule to match against the **loc
         interfacetype=any
     ```
 
-## Ready check
+## 3. Ready check
 
 ### Server online
 
@@ -154,7 +154,7 @@ Use ++ctrl+c++ to disconnect and exit.
 
 If there is a problem connecting, the command exits with a description of what it can detect.
 
-## QT Py Control
+## 4. QT Py Control
 
 In order to communicate on the WiFi network, the QT Py sensor node must have:
 

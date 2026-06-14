@@ -47,6 +47,9 @@ This table lists useful [VS Code extensions] for this project.
 
 ### Recommended settings
 
+Use the menu entry under **File :lucide-arrow-right: Preferences :lucide-arrow-right: Settings** or press ++ctrl+++**`,`** to open the settings dialog.
+Filter for these settings to see and change them.
+
 - Enable `editor.smoothScrolling`
 - Enable `diffEditor.experimental.showMoves`
 - Enable `diffEditor.experimental.useTrueInlineView`
