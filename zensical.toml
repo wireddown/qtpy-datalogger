@@ -74,6 +74,13 @@ nav = [
   ] },
   { "User guide" = [
     { "User guide" = "eng/usage/guide.md" },
+    { "CLI" = [
+      { "qtpy-datalogger" = "eng/usage/cli.md" },
+      { "connect" = "eng/usage/connect.md" },
+      { "equip" = "eng/usage/equip.md" },
+      { "run" = "eng/usage/run.md" },
+      { "server" = "eng/usage/server.md" },
+    ] },
   ] },
   { "Legacy system" = "legacy/README.md" },
   { "Governance" = [
