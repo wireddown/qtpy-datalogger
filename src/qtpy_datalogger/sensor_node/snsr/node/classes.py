@@ -281,6 +281,27 @@ class ActionInformation:
         """Return a new ActionInformation from the specified dictionary."""
         return ActionInformation(**dictionary)
 
+    @staticmethod
+    def create_custom_command(custom_input: str, custom_id: str | None = None) -> "ActionInformation":
+        """Return a new ActionInformation that represents a custom command."""
+        custom_id = custom_id or "custom-action"
+        return ActionInformation("custom", {"input": custom_input}, custom_id)
+
+    @staticmethod
+    def create_custom_response(
+        custom_action: "ActionInformation", custom_output: str, complete: bool = True
+    ) -> "ActionInformation":
+        """Return a new ActionInformation that represents a response to a custom command."""
+        response_action = ActionInformation(
+            command=custom_action.command,
+            parameters={
+                "output": custom_output,
+                "complete": complete,
+            },
+            message_id=custom_action.message_id,
+        )
+        return response_action
+
     def as_dict(self) -> dict:
         """Return a dictionary representation."""
         return self.information
