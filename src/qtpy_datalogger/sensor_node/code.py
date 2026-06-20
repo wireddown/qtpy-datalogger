@@ -7,7 +7,7 @@ from traceback import print_exception
 
 from snsr.core import get_app, read_one_uart_line
 from snsr.handlers import can_handle_message, get_sender_information
-from snsr.node.classes import ActionPayload, create_custom_with_input
+from snsr.node.classes import ActionPayload
 from snsr.node.mqtt import get_broadcast_topic, get_command_topic, get_descriptor_topic
 from snsr.rxtx import connect_and_subscribe, create_mqtt_client, unsubscribe_and_disconnect
 from snsr.settings import settings
@@ -40,7 +40,7 @@ def main_loop() -> str:
             action_payload = can_handle_message(uart_input)
             made_custom = False
             if not action_payload:
-                action_payload = create_custom_with_input(uart_input.strip())
+                action_payload = ActionPayload.create_custom_with_input(uart_input.strip())
                 made_custom = True
 
             app = get_app(action_payload.action)
