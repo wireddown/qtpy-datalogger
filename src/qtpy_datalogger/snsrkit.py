@@ -51,7 +51,8 @@ class SingleUartProtocol(IOProtocol):
 
     async def setup_io(self) -> None:
         """Open the UART port on the sensor_node."""
-        self.serial_io = uart.open_uart(self.port_name)
+        if not self.serial_io:
+            self.serial_io = uart.open_uart(self.port_name)
 
     async def send_message(
         self, sensor_node_id: str, command_name: str, command_parameters: dict
