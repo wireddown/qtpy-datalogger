@@ -20,7 +20,7 @@ import toml
 
 from qtpy_datalogger import discovery
 
-from .datatypes import ConnectionTransport, Default, ExitCode, Links, SnsrNotice, SnsrPath
+from .datatypes import ConnectionTransport, ExitCode, Links, SnsrNotice, SnsrPath
 
 logger = logging.getLogger(__name__)
 
@@ -111,8 +111,8 @@ def handle_equip(behavior: Behavior, root: pathlib.Path | None, secrets: str) ->
 
     if not root:
         qtpy_device, communication_transport = discovery.discover_and_select_qtpy(
-            Default.MqttGroup,
-            ConnectionTransport.UART_Serial,
+            group_id="",
+            transport=ConnectionTransport.UART_Serial,
         )
         if not qtpy_device:
             logger.error("No QT Py devices found!")
