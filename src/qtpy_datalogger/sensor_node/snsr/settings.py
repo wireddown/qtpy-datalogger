@@ -55,7 +55,7 @@ class Settings:
         """Initialize the readonly settings from the environment variables."""
         from os import getenv
 
-        self._wifi_ssid = getenv("CIRCUITPY_WIFI_SSID", "")
+        self._wifi_ssid = getenv("CIRCUITPY_WIFI_SSID", "qtpy-no-wifi-ssid")
         self._wifi_password = getenv("CIRCUITPY_WIFI_PASSWORD", "")
         self._mqtt_broker = getenv("QTPY_BROKER_IP_ADDRESS", "")
         self._node_group = getenv("QTPY_NODE_GROUP", "zone1")
