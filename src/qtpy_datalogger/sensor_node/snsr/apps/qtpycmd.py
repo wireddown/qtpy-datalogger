@@ -45,7 +45,7 @@ def build_response(received_action: ActionInformation, message: str) -> ActionIn
 def handle_get_apps(received_action: ActionInformation, command_args: list[str]) -> ActionInformation:
     """Handle the 'qtpycmd get_apps' action."""
     apps = settings.app_catalog
-    return build_response(received_action, ",".join(sorted(apps)))
+    return build_response(received_action, f"[{', '.join(sorted(apps))}]")
 
 
 def handle_get_stats(received_action: ActionInformation, command_args: list[str]) -> ActionInformation:
