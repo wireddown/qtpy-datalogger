@@ -160,7 +160,7 @@ class AnalogPlotter(guikit.AsyncWindow):
 
         # Customize
         use_uart = True
-        use_mqtt = True
+        use_mqtt = False
         minimum_mqtt_node_count = 1
         channel_cmd_string = "A0 A3"
         mqtt_group = datatypes.Default.MqttGroup
