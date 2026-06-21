@@ -239,7 +239,7 @@ class AnalogPlotter(guikit.AsyncWindow):
             self.mqtt_task = asyncio.create_task(do_mqtt_collect(self.mqtt_controller))
 
         # Many loops later...
-        if self.mqtt_task and self.mqtt_task.done():
+        if self.mqtt_controller and self.mqtt_task and self.mqtt_task.done():
             mqtt_node_voltages = self.mqtt_task.result()
             for node_name, voltages in mqtt_node_voltages.items():
                 logger.info(f"{time_coordinate:.5f}  ::MQTT::  received  {node_name}")
