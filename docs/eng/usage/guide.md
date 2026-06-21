@@ -31,10 +31,5 @@ If you want to add this package to your own project and use it in your code, add
 Then import the package like any other in your source code.
 
 ```py title="my_program.py"
-from qtpy_datalogger.network import QTPyController
+from qtpy_datalogger import discovery, snsrkit
 ```
-
-See the summary workflows below for recommended steps when working on
-
-- [Host](../intro/workflows/#pc-dev-loop) code
-- [Node](../intro/workflows/#qt-py-dev-loop) code
