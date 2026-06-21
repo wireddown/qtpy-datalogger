@@ -17,8 +17,9 @@ from tkfontawesome import svg_to_image
 from ttkbootstrap import constants as bootstyle
 
 import qtpy_datalogger
-from qtpy_datalogger import discovery, guikit, network
+from qtpy_datalogger import discovery, guikit, snsrkit
 from qtpy_datalogger.datatypes import Default, Links
+from qtpy_datalogger.sensor_node.snsr.node import classes as node_classes
 
 logger = logging.getLogger(pathlib.Path(__file__).stem)
 
@@ -130,21 +131,30 @@ class ScannerApp(guikit.AsyncWindow):
         # Scan group
         scan_frame = ttk.Frame(main, name="scan_frame", borderwidth=0, relief=tk.SOLID)
         scan_frame.grid(column=0, row=1, sticky=(tk.N, tk.E, tk.W), pady=(8, 0))
+        scan_frame.columnconfigure(0, weight=0)  # 'Group name' label
+        scan_frame.columnconfigure(1, weight=1)  # Text entry gox
+        scan_frame.columnconfigure(2, weight=0)  # 'Scan group' button
+        scan_frame.columnconfigure(3, weight=0)  # 'Clear results' button
+        scan_frame.rowconfigure(0, weight=1)
+
         group_input_label = ttk.Label(scan_frame, text="Group name")
-        group_input_label.pack(side=tk.LEFT)
+        group_input_label.grid(column=0, row=0)
         self.group_input = ttk.Entry(scan_frame)
         self.group_input.insert(0, Default.MqttGroup)
         self.group_input.bind("<KeyPress>", self.run_command_on_enter)
-        self.group_input.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(8, 0))
-        scan_button = ttk.Button(scan_frame, text="Scan group", command=self.start_scan)
-        scan_button.pack(side=tk.LEFT, padx=(8, 0))
+        self.group_input.grid(column=1, row=0, sticky=tk.EW, padx=(8, 0))
+        self.scan_button = ttk.Button(scan_frame, text="Scan group", command=self.start_scan)
+        self.scan_button.grid(column=2, row=0, padx=(8, 0))
+        self.scan_feedback = ttk.Floodgauge(
+            scan_frame, bootstyle=bootstyle.INFO, text="Scanning...", font="TkDefaultFont"
+        )
         clear_button = ttk.Button(
             scan_frame,
             text="Clear results",
             command=self.clear_results,
             style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
         )
-        clear_button.pack(side=tk.LEFT, padx=(8, 0))
+        clear_button.grid(column=3, row=0, padx=(8, 0))
 
         # Results group
         results_frame = ttk.Frame(main, name="result_frame", borderwidth=0, relief=tk.SOLID)
@@ -379,12 +389,19 @@ class ScannerApp(guikit.AsyncWindow):
             return
 
         self.update_status_message_and_style("Scanning....", bootstyle.INFO)
+        length = self.scan_button.winfo_width()
+        height = self.scan_button.winfo_height()
+        self.scan_feedback.configure(length=length, thickness=height, value=0, maximum=90)
+        self.scan_feedback.grid(column=2, row=0, padx=(8, 0))
+        self.scan_feedback.start()
 
         async def new_group_scan() -> dict[str, discovery.QTPyDevice]:
             qtpy_devices_in_group = await discovery.discover_qtpy_devices_async(group_id)
             return qtpy_devices_in_group
 
         def finalize_scan(scan_group_task: asyncio.Task) -> None:
+            self.scan_feedback.stop()
+            self.scan_feedback.grid_forget()
             self.background_tasks.discard(scan_group_task)
             qtpy_devices_in_group = scan_group_task.result()
             self.process_new_scan(group_id, qtpy_devices_in_group)
@@ -431,30 +448,29 @@ class ScannerApp(guikit.AsyncWindow):
             return
         qtpy_resource = self.selected_node_combobox.get()
         if qtpy_resource == qtpy_device.com_port:
-            self.update_status_message_and_style("Serial communication is not implemented.", bootstyle.WARNING)
-            return
+            io_protocol = snsrkit.uart_protocol_for_node(qtpy_device)
+        else:
+            io_protocol = snsrkit.mqtt_group_protocol_for_node(qtpy_device)
 
         self.update_status_message_and_style("Sending....", bootstyle.INFO)
         self.message_input.delete(0, "end")
 
         async def send_message_and_get_response() -> tuple[str, str]:
-            controller = network.QTPyController.for_localhost_server(qtpy_device.mqtt_group_id)
-            await controller.connect_and_subscribe()
-            command_name = "custom"
-            custom_parameters = {
-                "input": message,
-            }
+            await io_protocol.setup_io()
+            custom_command = node_classes.ActionInformation.create_custom_command(message)
             sent_emoji = ttk_icons.Emoji.get("black large square")
             received_emoji = ttk_icons.Emoji.get("leftwards black arrow")
             status_emoji = ttk_icons.Emoji.get("white large square")
             self.append_text_to_log(f"{sent_emoji} {message}\n")
-            sent_action = controller.send_action(qtpy_device.node_id, command_name, custom_parameters)
+            sent_action = await io_protocol.send_message(
+                qtpy_device.node_id, custom_command.command, custom_command.parameters
+            )
             response_complete = False
             new_status_message = "Communication successful."
             new_status_style = bootstyle.SUCCESS
             while not response_complete:
                 try:
-                    response_parameters, sender_information = await controller.get_matching_result(
+                    response_parameters, sender_information = await io_protocol.get_response(
                         qtpy_device.node_id, sent_action
                     )
                     response_complete = response_parameters["complete"]
@@ -472,7 +488,7 @@ class ScannerApp(guikit.AsyncWindow):
                     )
                     new_status_style = bootstyle.DANGER
                     break
-            await controller.disconnect()
+            await io_protocol.close_io()
             return new_status_message, new_status_style
 
         def finalize_message(send_message_task: asyncio.Task) -> None:
