@@ -234,9 +234,9 @@ class AsyncWindow:
 
     async def show(self) -> None:
         """Show the window and cooperatively run with asyncio."""
-        await self.on_showing()
         self.root_window.deiconify()
         self.root_window.wait_visibility()
+        await self.on_showing()
         self.root_window.update()
 
         while self.should_run_loop:

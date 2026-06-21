@@ -227,7 +227,7 @@ class ScannerApp(guikit.AsyncWindow):
 
         self.clear_results()
 
-    def on_show(self) -> None:
+    async def on_showing(self) -> None:
         """Initialize window before entering main loop."""
         self.group_input.focus()
 
