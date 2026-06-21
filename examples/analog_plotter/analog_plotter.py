@@ -160,7 +160,7 @@ class AnalogPlotter(guikit.AsyncWindow):
 
         # Customize
         use_uart = True
-        use_mqtt = True
+        use_mqtt = False
         minimum_mqtt_node_count = 1
         channel_cmd_string = "A0 A3"
         mqtt_group = datatypes.Default.MqttGroup
@@ -239,7 +239,7 @@ class AnalogPlotter(guikit.AsyncWindow):
             self.mqtt_task = asyncio.create_task(do_mqtt_collect(self.mqtt_controller))
 
         # Many loops later...
-        if self.mqtt_task and self.mqtt_task.done():
+        if self.mqtt_controller and self.mqtt_task and self.mqtt_task.done():
             mqtt_node_voltages = self.mqtt_task.result()
             for node_name, voltages in mqtt_node_voltages.items():
                 logger.info(f"{time_coordinate:.5f}  ::MQTT::  received  {node_name}")
@@ -309,8 +309,13 @@ class AnalogPlotter(guikit.AsyncWindow):
             if self.mqtt_task:
                 logger.info("Clearing retained MQTT message")
                 self.mqtt_controller.clear_retained_group_action()
-                _ = await self.mqtt_task
-                self.mqtt_task = None
+                try:
+                    async with asyncio.timeout(5.0):
+                        _ = await self.mqtt_task
+                except TimeoutError:
+                    pass
+                finally:
+                    self.mqtt_task = None
             logger.info("Closing MQTT connection")
             _ = self.mqtt_controller.clear_messages()
             await self.mqtt_controller.disconnect()
