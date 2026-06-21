@@ -281,6 +281,27 @@ class ActionInformation:
         """Return a new ActionInformation from the specified dictionary."""
         return ActionInformation(**dictionary)
 
+    @staticmethod
+    def create_custom_command(custom_input: str, custom_id: str | None = None) -> "ActionInformation":
+        """Return a new ActionInformation that represents a custom command."""
+        custom_id = custom_id or "custom-action"
+        return ActionInformation("custom", {"input": custom_input}, custom_id)
+
+    @staticmethod
+    def create_custom_response(
+        custom_action: "ActionInformation", custom_output: str, complete: bool = True
+    ) -> "ActionInformation":
+        """Return a new ActionInformation that represents a response to a custom command."""
+        response_action = ActionInformation(
+            command=custom_action.command,
+            parameters={
+                "output": custom_output,
+                "complete": complete,
+            },
+            message_id=custom_action.message_id,
+        )
+        return response_action
+
     def as_dict(self) -> dict:
         """Return a dictionary representation."""
         return self.information
@@ -322,6 +343,18 @@ class ActionPayload:
         sender_information = SenderInformation.from_dict(dictionary["sender"])
         return ActionPayload(action_information, sender_information)
 
+    @staticmethod
+    def create_custom_with_input(input_string: str) -> "ActionPayload":
+        """Return an ActionPayload for a custom command with the specified input."""
+        payload = ActionPayload(
+            action=ActionInformation.create_custom_command(
+                custom_input=input_string,
+                custom_id="create_custom_with_input",
+            ),
+            sender=SenderInformation.create_empty(),
+        )
+        return payload
+
     def as_dict(self) -> dict:
         """Return a dictionary representation."""
         return self.information
@@ -335,26 +368,3 @@ class ActionPayload:
     def sender(self) -> SenderInformation:
         """The sender of the payload."""
         return SenderInformation.from_dict(self.information["sender"])
-
-
-def create_custom_with_input(input_string: str) -> ActionPayload:
-    """Return an ActionPayload for a custom command with the specified input."""
-    payload = ActionPayload(
-        action=ActionInformation(
-            command="custom",
-            parameters={
-                "input": input_string,
-            },
-            message_id="create_custom_with_input",
-        ),
-        sender=SenderInformation(
-            descriptor_topic="unused",
-            sent_at="unused",
-            status=StatusInformation(
-                used_memory="unused",
-                free_memory="unused",
-                cpu_temperature="unused",
-            ),
-        ),
-    )
-    return payload

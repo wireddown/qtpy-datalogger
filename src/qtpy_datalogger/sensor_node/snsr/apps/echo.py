@@ -10,14 +10,7 @@ class EchoApp(SnsrApp):
     def handle_message(self) -> ActionInformation:
         """Handle a received action from the controlling host."""
         echo = self.action.parameters.get("input", self.action.command)
-        response_action = ActionInformation(
-            command=self.action.command,
-            parameters={
-                "output": f"received: {echo}",
-                "complete": True,
-            },
-            message_id=self.action.message_id,
-        )
+        response_action = ActionInformation.create_custom_response(self.action, f"received: {echo}")
         return response_action
 
     def did_handle_message(self) -> None:

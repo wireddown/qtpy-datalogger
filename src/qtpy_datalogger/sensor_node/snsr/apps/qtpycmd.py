@@ -36,23 +36,16 @@ def create_app(received_action: ActionInformation) -> SnsrApp:
     return QtpyCmdApp(received_action)
 
 
-def build_response(received_action: ActionInformation, message: object) -> ActionInformation:
+def build_response(received_action: ActionInformation, message: str) -> ActionInformation:
     """Create an action response with the specified message."""
-    response_action = ActionInformation(
-        command=received_action.parameters["input"],
-        parameters={
-            "output": message,
-            "complete": True,
-        },
-        message_id=received_action.message_id,
-    )
+    response_action = ActionInformation.create_custom_response(received_action, message)
     return response_action
 
 
 def handle_get_apps(received_action: ActionInformation, command_args: list[str]) -> ActionInformation:
     """Handle the 'qtpycmd get_apps' action."""
     apps = settings.app_catalog
-    return build_response(received_action, sorted(apps))
+    return build_response(received_action, ",".join(sorted(apps)))
 
 
 def handle_get_stats(received_action: ActionInformation, command_args: list[str]) -> ActionInformation:
