@@ -5,6 +5,7 @@ from json import dumps
 from time import monotonic, sleep
 from traceback import print_exception
 
+from adafruit_minimqtt.adafruit_minimqtt import MMQTTException
 from snsr.core import get_app, read_one_uart_line
 from snsr.handlers import can_handle_message, get_sender_information
 from snsr.node.classes import ActionPayload
@@ -19,18 +20,21 @@ mqtt_topics = [
 ]
 
 
-def main_loop() -> str:
+def main_loop(skip_mqtt: bool) -> str:
     """Run the main node loop."""
-    settings.connect_to_wifi()
-    mqtt_client = create_mqtt_client(settings.node_group, settings.mqtt_client_id)
-    connect_and_subscribe(mqtt_client, mqtt_topics)
+    mqtt_client = None
+    if not skip_mqtt:
+        settings.connect_to_wifi()
+        mqtt_client = create_mqtt_client(settings.node_group, settings.mqtt_client_id)
+        connect_and_subscribe(mqtt_client, mqtt_topics)
 
     uart_input = ""
     while uart_input.lower() not in ["exit", "quit"]:
         uart_connected = settings.uart_connected
-        did_receive = mqtt_client.loop(timeout=1.0)  # Smallest supported timeout
-        if not (did_receive or uart_connected):
-            sleep(4)  # Conserve battery by not constantly polling the network
+        if mqtt_client:
+            did_receive = mqtt_client.loop(timeout=1.0)  # Smallest supported timeout
+            if not (did_receive or uart_connected):
+                sleep(4)  # Conserve battery by not constantly polling the network
 
         if uart_connected:
             sleep(0.2)
@@ -46,7 +50,6 @@ def main_loop() -> str:
             app = get_app(action_payload.action)
             result = app.handle_message()
 
-            response = ""
             if made_custom:
                 response = result.parameters["output"]
             else:
@@ -58,7 +61,8 @@ def main_loop() -> str:
 
             app.did_handle_message()
 
-    unsubscribe_and_disconnect(mqtt_client, mqtt_topics)
+    if mqtt_client:
+        unsubscribe_and_disconnect(mqtt_client, mqtt_topics)
     return uart_input
 
 
@@ -67,9 +71,13 @@ error_count = 0
 error_limit = 3
 while True:
     try:
-        result = main_loop()
+        mqtt_failed = most_recent_error is MMQTTException
+        skip_mqtt = settings.uart_connected and mqtt_failed
+        if skip_mqtt:
+            print("[SNSR]  Disabling MQTT: broker is unreachable")
+        result = main_loop(skip_mqtt)
         if result.lower() in ["exit", "quit"]:
-            print("Exiting to REPL...")
+            print("[SNSR]  Exiting to REPL...")
             break
     except Exception as e:
         try:
@@ -77,7 +85,7 @@ while True:
         except AttributeError:
             pass
         print()
-        print(f"Encountered {type(e)} {e.args}")
+        print(f"[SNSR]  Encountered {type(e).__name__}")
         print_exception(e)
         collect()
         if type(e) is most_recent_error:
@@ -87,5 +95,5 @@ while True:
         else:
             most_recent_error = type(e)
             error_count = 0
-        print("Trying again...")
+        print("[SNSR]  Trying again...")
         continue
