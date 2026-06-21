@@ -435,6 +435,7 @@ def _equip_snsr_node(behavior: Behavior, comparison_information: dict[str, SnsrN
         return_code = result.returncode
 
     if return_code == ExitCode.Success:
+        device_main_folder.joinpath("code.py").touch()  # Restart the node
         logger.info("Installation complete")
     else:
         logger.error(f"circup exited with code '{return_code}'")
