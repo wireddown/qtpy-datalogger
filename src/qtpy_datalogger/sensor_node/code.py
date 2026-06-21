@@ -71,10 +71,12 @@ error_count = 0
 error_limit = 3
 while True:
     try:
+        wifi_failed = most_recent_error is ConnectionError
         mqtt_failed = most_recent_error is MMQTTException
-        skip_mqtt = settings.uart_connected and mqtt_failed
+        skip_mqtt = settings.uart_connected and (wifi_failed or mqtt_failed)
         if skip_mqtt:
-            print("[SNSR]  Disabling MQTT: broker is unreachable")
+            reason = "incorrect WiFi credentials" if wifi_failed else "broker is unreachable"
+            print(f"[SNSR]  Disabling MQTT: {reason}")
         result = main_loop(skip_mqtt)
         if result.lower() in ["exit", "quit"]:
             print("[SNSR]  Exiting to REPL...")
