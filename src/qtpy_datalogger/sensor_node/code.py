@@ -73,7 +73,7 @@ while True:
     try:
         wifi_failed = most_recent_error is ConnectionError
         mqtt_failed = most_recent_error is MMQTTException
-        skip_mqtt = settings.uart_connected and (wifi_failed or mqtt_failed)
+        skip_mqtt = settings.usb_connected and (wifi_failed or mqtt_failed)
         if skip_mqtt:
             reason = "incorrect WiFi credentials" if wifi_failed else "broker is unreachable"
             print(f"[SNSR]  Disabling MQTT: {reason}")
