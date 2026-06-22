@@ -27,6 +27,8 @@ A custom host-side app that plots analog data using the built-in sensor node app
     python analog_plotter.py
     ```
 1. **Edit** the [variables at the top] of `get_and_plot_data()` to exercise the features
+    - Note that this example only enables UART communication to start
+    - If you setup [MQTT](eng/intro/mqtt/) to use WiFi, change **`use_mqtt`** to **`True`**
     ```python title="get_and_plot_data()"
       # Customize
       use_uart = True
