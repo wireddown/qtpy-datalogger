@@ -132,6 +132,11 @@ class Settings:
         return monotonic() - settings.boot_time
 
     @property
+    def usb_connected(self) -> bool:
+        """Return true if the sensor_node has a USB connection."""
+        return runtime.usb_connected
+
+    @property
     def uart_connected(self) -> bool:
         """Return true if the sensor_node has an open UART connection."""
         return runtime.usb_connected and runtime.serial_connected
