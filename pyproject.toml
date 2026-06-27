@@ -43,6 +43,7 @@ dependencies = [
     "pyserial>=3.5",
     "tkfontawesome>=0.3.2",
     "ttkbootstrap>=1.20.2",
+    "ttkbootstrap-icons>=4.0.0",
     "wmi>=1.5.1",
 
     # sensor_node

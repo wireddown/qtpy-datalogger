@@ -1486,6 +1486,7 @@ dependencies = [
     { name = "pyserial" },
     { name = "tkfontawesome" },
     { name = "ttkbootstrap" },
+    { name = "ttkbootstrap-icons" },
     { name = "wmi" },
 ]
 
@@ -1518,6 +1519,7 @@ requires-dist = [
     { name = "pyserial", specifier = ">=3.5" },
     { name = "tkfontawesome", specifier = ">=0.3.2" },
     { name = "ttkbootstrap", specifier = ">=1.20.2" },
+    { name = "ttkbootstrap-icons", specifier = ">=4.0.0" },
     { name = "wmi", specifier = ">=1.5.1" },
 ]
 
@@ -1723,6 +1725,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/bd/88/bb1535edbd12e7b60223bee86241368b5d27043c001ef81d620ae8a56faf/ttkbootstrap-1.20.3.tar.gz", hash = "sha256:3350b80f79b0454c12558a7174c4bc4bd47905758843c3e8b0fbb19a0286fb69", size = 176262, upload-time = "2026-05-07T03:09:26.443Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/13/48/a5fd0d5d360e363f9bb289bef29b66103fd4ae1be1e3b6896a01b6e0f993/ttkbootstrap-1.20.3-py3-none-any.whl", hash = "sha256:95a05a4a663e3047be54edc220aa59c494a54f5c617a72a2c59a4bf634b97a5a", size = 191453, upload-time = "2026-05-07T03:09:24.935Z" },
+]
+
+[[package]]
+name = "ttkbootstrap-icons"
+version = "4.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pillow" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a6/ac/19312258e408ba8c708256fd948bc78ab7d1d944991adfaf4044d56b7c78/ttkbootstrap_icons-4.0.0.tar.gz", hash = "sha256:4d3045e053fa57ce1cc6524d8cd721715595114803cc362616d7cdc8a2a9c416", size = 90441, upload-time = "2025-12-05T04:34:15.909Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b0/7e/f610e3d08fc64c419ff6a0c6d0b168e0fe15ad181f45f51ef37ea3f434b7/ttkbootstrap_icons-4.0.0-py3-none-any.whl", hash = "sha256:75ac2a2205be559a348bc6df037976f02e9a0cf4058e3ed037ddf2520dfa8cfd", size = 33743, upload-time = "2025-12-05T04:34:14.708Z" },
 ]
 
 [[package]]
