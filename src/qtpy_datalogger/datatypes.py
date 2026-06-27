@@ -24,6 +24,7 @@ class Links(enum.StrEnum):
     New_Bug = "https://github.com/wireddown/qtpy-datalogger/issues/new?template=bug-report.md"
     Board_Support_Matrix = "https://docs.circuitpython.org/en/stable/shared-bindings/support_matrix.html"
     MQTT_Walkthrough = "https://wireddown.github.io/qtpy-datalogger/eng/intro/mqtt/"
+    Help = "https://downtothewire.io/qtpy-datalogger/welcome/"
 
 
 class ExitCode(enum.IntEnum):
