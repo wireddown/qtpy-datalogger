@@ -1115,7 +1115,7 @@ def get_first_in_range(upper_bound: float, selection: dict) -> Any:  # noqa ANN4
     return first_value_in_range
 
 
-def image_from_icon(name: str, fill: str | None = None, scale_to_width: int | None = None, scale_to_height: int | None = None, scale: float = 1) -> tk.PhotoImage:
+def image_from_icon(name: str, fill: str | None = None, scale_to_width: int | None = None, scale_to_height: int | None = None) -> tk.PhotoImage:
     """Look up a FontAwesome icon by name and return it as an PhotoImage object."""
     return icon_to_image(name, fill, scale_to_width, scale_to_height, scale)
 
