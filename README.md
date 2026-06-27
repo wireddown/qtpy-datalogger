@@ -134,6 +134,7 @@ Time,Sensor 1,Sensor 2
     - Python 3.13
 - Node
     - CircuitPython 9.x
+    - CircuitPython 10.x
 
 **Supported host platforms**
 
