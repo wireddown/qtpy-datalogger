@@ -427,7 +427,7 @@ class AboutDialog(AsyncDialog):
         self.app_icons = all_icons[:3]
         self.icon_labels = []
         self.app_icon_images = []
-        self.help_url = help_url or datatypes.Links.Homepage
+        self.help_url = help_url or datatypes.Links.Help
         self.source_url = source_url or datatypes.Links.Source
         self.copy_version_text = "Copy version"
         super().__init__(parent, f"About {app_name}".strip())
