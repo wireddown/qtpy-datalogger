@@ -363,7 +363,7 @@ class ActionDialog(AsyncDialog):
             image_name = "o"
         if not image_fill:
             image_fill = StyleKey.Fg
-        self.message_image = icon_to_image(name=image_name, fill=hex_string_for_style(image_fill), scale_to_height=40)
+        self.message_image = image_from_icon(name=image_name, fill=hex_string_for_style(image_fill), scale_to_height=40)
         if not message_paragraphs:
             message_paragraphs = ["Click OK to close."]
         self.message = "\n\n".join([click.wrap_text(message, width=64) for message in message_paragraphs])
@@ -482,7 +482,7 @@ class AboutDialog(AsyncDialog):
         separator.grid(column=1, row=3, columnspan=5, sticky=tk.EW, pady=4)
         button_text_color = hex_string_for_style(StyleKey.SelectFg)
         spacer = "   "
-        self.help_icon = icon_to_image("parachute-box", fill=button_text_color, scale_to_width=16)
+        self.help_icon = image_from_icon("parachute-box", fill=button_text_color, scale_to_width=16)
         help_button = ttk.Button(
             message_frame,
             compound=tk.LEFT,
@@ -493,7 +493,7 @@ class AboutDialog(AsyncDialog):
             command=functools.partial(webbrowser.open_new_tab, self.help_url),
         )
         help_button.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
-        self.source_icon = icon_to_image("github-alt", fill=button_text_color, scale_to_width=16)
+        self.source_icon = image_from_icon("github-alt", fill=button_text_color, scale_to_width=16)
         source_button = ttk.Button(
             message_frame,
             compound=tk.LEFT,
@@ -530,7 +530,7 @@ class AboutDialog(AsyncDialog):
         icon_color = hex_string_for_style(StyleKey.Fg)
         self.app_icon_images.clear()
         for icon_name, icon_label in zip(self.app_icons, self.icon_labels, strict=True):
-            icon_image = icon_to_image(icon_name, fill=icon_color, scale_to_height=icon_height)
+            icon_image = image_from_icon(icon_name, fill=icon_color, scale_to_height=icon_height)
             self.app_icon_images.append(icon_image)
             icon_label.configure(image=icon_image)
 
