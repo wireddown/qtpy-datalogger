@@ -36,7 +36,8 @@ tags:
 :fontawesome-solid-worm:{ .lg .middle .qtpy }&nbsp; __CircuitPython 9.x__
 { .card }
 
-> :fontawesome-solid-worm:{ .lg .middle }&nbsp; __CircuitPython 10.x__ &nbsp;_untested_
+:fontawesome-solid-worm:{ .lg .middle .qtpy }&nbsp; __CircuitPython 10.x__
+{ .card }
 
 :fontawesome-brands-windows:{ .lg .middle .qtpy }&nbsp; __Windows 11 / 10__
 { .card }
