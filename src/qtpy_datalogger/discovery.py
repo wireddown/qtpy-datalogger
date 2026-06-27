@@ -177,8 +177,8 @@ def _process_query_results(
                 continue
             short_port_serial_number = port_serial_number[:-1]
 
-            # We compare with one character trimmed because CircuitPython 10.2.1 (and likely earlier)
-            # adds a second disk w/o any partitions which causes the serial numbers to differ at the end
+            # We compare with one character trimmed because CircuitPython 10 adds an SD disk
+            # drive mount, which causes Windows to mutate the serial number for each mount
             # See https://github.com/adafruit/circuitpython/issues/11076 for details
             if short_port_serial_number == short_drive_serial_number:
                 serial_number = port_serial_number.lower()
