@@ -31,6 +31,7 @@ def query_ports_from_serial() -> dict[str, dict[DetailKey, str]]:
             DetailKey.serial_number: comport.serial_number,
         }
         for comport in sorted(comports())
+        if comport.device != "COM1"
     }
     logger.debug(discovered_comports)
     return discovered_comports

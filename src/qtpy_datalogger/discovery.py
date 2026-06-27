@@ -169,11 +169,18 @@ def _process_query_results(
     qtpy_devices: dict[str, QTPyDevice] = {}
     for drive_info in discovered_disk_volumes.values():
         drive_serial_number = drive_info[DetailKey.serial_number]
+        short_drive_serial_number = drive_serial_number[:-1]
 
         for port_info in discovered_serial_ports.values():
             port_serial_number = port_info[DetailKey.serial_number]
+            if not port_serial_number:
+                continue
+            short_port_serial_number = port_serial_number[:-1]
 
-            if port_serial_number and port_serial_number == drive_serial_number:
+            # We compare with one character trimmed because CircuitPython 10.2.1 (and likely earlier)
+            # adds a second disk w/o any partitions which causes the serial numbers to differ at the end
+            # See https://github.com/adafruit/circuitpython/issues/11076 for details
+            if short_port_serial_number == short_drive_serial_number:
                 serial_number = port_serial_number.lower()
                 python_implementation, snsr_version, mqtt_group = _query_node_info_from_drive(
                     drive_info[DetailKey.drive_root]
