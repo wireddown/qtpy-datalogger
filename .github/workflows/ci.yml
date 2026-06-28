@@ -23,7 +23,7 @@ jobs:
           '3.11',
           '3.12',
           '3.13',
-          # '3.14',   In some way, tkfontawesome brings lxml 5.4 which is not available for Python 3.14
+          '3.14',
         ]
 
     steps:
