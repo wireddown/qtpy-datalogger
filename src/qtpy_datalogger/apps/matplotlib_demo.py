@@ -105,7 +105,7 @@ class PlottingApp(guikit.AsyncWindow):
         self.axis_tool_window = None
         self.background_tasks: set[asyncio.Task] = set()
         self.canvas = ttkbootstrap_matplotlib.create_styled_plot_canvas(mpl_figure, canvas_frame)
-        self.canvas.mpl_connect("key_press_event", mpl_backend_bases.key_press_handler)  # ty: ignore[invalid-argument-type] -- matplotlib's handler uses more specific type than its mpl_connect()
+        self.canvas.mpl_connect("key_press_event", mpl_backend_bases.key_press_handler)
         self.canvas.mpl_connect("button_press_event", self.on_graph_mouse_down)
         self.canvas.mpl_connect("pick_event", self.on_graph_pick)
 
