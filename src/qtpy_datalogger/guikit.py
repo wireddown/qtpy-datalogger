@@ -23,8 +23,9 @@ import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.style as ttk_style
 import ttkbootstrap.themes.standard as ttk_themes
 import ttkbootstrap.tooltip as ttk_tooltip
-from tkfontawesome import icon_to_image
 from ttkbootstrap import constants as bootstyle
+from ttkbootstrap_icons import Icon
+from ttkbootstrap_icons.providers import BaseFontProvider
 
 from qtpy_datalogger import datatypes
 
@@ -493,7 +494,7 @@ class AboutDialog(AsyncDialog):
             command=functools.partial(webbrowser.open_new_tab, self.help_url),
         )
         help_button.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
-        self.source_icon = image_from_icon("github-alt", fill=button_text_color, scale_to_width=16)
+        self.source_icon = image_from_icon("github-alt-brands", fill=button_text_color, scale_to_width=16)
         source_button = ttk.Button(
             message_frame,
             compound=tk.LEFT,
@@ -854,6 +855,43 @@ class ThemeChanger:
         owner.winfo_toplevel().event_generate(ThemeChanger.Event.BootstrapThemeChanged)
 
 
+class CustomFontAwesomeIcon(Icon):
+    """A custom image renderer for FontAwesome icons."""
+
+    def __init__(self, name: str, size: int = 24, color: str = "black") -> None:
+        """
+        Create an image from a FontAwesome icon using the specified name, size, and fill color.
+
+        'name' is taken from the solid subset unless it ends with -regular or -brands.
+        """
+        y_adjust = 0.125  # MOVES the rendered font text DOWN by this fraction of the size
+        pad_factor = 0.0  # SHRINKS the render area by this fraction of the size on each side
+        padded_size = round(1 * size)
+        custom_provider = BaseFontProvider(
+            name="fontawesome",
+            display_name="Font Awesome 6 (Free)",
+            package="ttkbootstrap_icons_fa",
+            homepage="https://fontawesome.com/v6/icons",
+            license_url="https://fontawesome.com/license",
+            icon_version="6.7.2",
+            default_style="solid",
+            styles={
+                "solid": {"filename": "fonts/fa-solid-900.ttf"},
+                "regular": {"filename": "fonts/fa-regular-400.ttf"},
+                "brands": {"filename": "fonts/fa-brands-400.ttf"},
+            },
+            pad_factor=pad_factor,
+            y_bias=y_adjust,
+            scale_to_fit=True,
+        )
+        auto_style = None
+        resolved_style = custom_provider.resolve_icon_style(name, auto_style)
+        # The package caches the provider by its name and style
+        Icon.initialize_with_provider(custom_provider, resolved_style)
+        resolved = custom_provider.resolve_icon_name(name, auto_style)
+        super().__init__(resolved, padded_size, color)
+
+
 class DemoWithAnimation(AsyncWindow):
     """Compare synchronous vs asynchronous calls in Tk."""
 
@@ -1115,9 +1153,17 @@ def get_first_in_range(upper_bound: float, selection: dict) -> Any:  # noqa ANN4
     return first_value_in_range
 
 
-def image_from_icon(name: str, fill: str = "#000000", scale_to_width: int = 16, scale_to_height: int = 16) -> tk.PhotoImage:
-    """Look up a FontAwesome icon by name and return it as an PhotoImage object."""
-    return icon_to_image(name, fill, scale_to_width, scale_to_height, scale)
+def image_from_icon(
+    name: str, fill: str = "#000000", scale_to_width: int = 16, scale_to_height: int = 16
+) -> tk.PhotoImage:
+    """
+    Render a FontAwesome icon by name and return it as a tk.PhotoImage object.
+
+    'name' is taken from the solid subset unless it ends with -regular or -brands.
+    """
+    size = max(scale_to_height, scale_to_width)
+    font_awesome_icon = CustomFontAwesomeIcon(name, size=size, color=fill)
+    return font_awesome_icon.image
 
 
 def hex_string_for_style(style_name: str, theme_name: str = "") -> str:
