@@ -59,6 +59,7 @@ tags:
 :fontawesome-brands-python:{ .lg .middle .qtpy }&nbsp; __Python 3.13__
 { .card }
 
-> :fontawesome-brands-python:{ .lg .middle }&nbsp; __Python 3.14__ &nbsp;_in work_
+:fontawesome-brands-python:{ .lg .middle .qtpy }&nbsp; __Python 3.14__
+{ .card }
 
 </div>
