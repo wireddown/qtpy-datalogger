@@ -3,6 +3,7 @@
 import asyncio
 import enum
 import functools
+import io
 import json
 import logging
 import pathlib
@@ -10,6 +11,7 @@ import subprocess
 import sys
 import tkinter as tk
 import webbrowser
+import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass
 from tkinter import font
@@ -18,6 +20,7 @@ from typing import Any, ClassVar, NamedTuple
 import click
 import matplotlib.axes as mpl_axes
 import matplotlib.backend_bases as mpl_backend_bases
+import tksvg
 import ttkbootstrap as ttk
 import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.style as ttk_style
@@ -1164,6 +1167,41 @@ def image_from_icon(
     size = max(scale_to_height, scale_to_width)
     font_awesome_icon = CustomFontAwesomeIcon(name, size=size, color=fill)
     return font_awesome_icon.image
+
+
+def image_from_svg(
+    svg_text: str, fill: str = "#000000", scale_to_width: int = 16, scale_to_height: int = 16
+) -> tk.PhotoImage:
+    """Render the SVG text into a tk.PhotoImage object using the fill and size information."""
+    # Reworked without lxml from
+    # https://github.com/israel-dryer/TkFontAwesome/blob/503c71e00dadd44abf3f9b74db49101c990f0f96/tkfontawesome/__init__.py#L42
+    ET.register_namespace("", "http://www.w3.org/2000/svg")
+    root = ET.fromstring(svg_text)  # noqa S314: this package does not parse user-files
+    tree = ET.ElementTree(root)
+
+    # Apply fill color
+    for elem in root.iter():
+        tag = str(elem.tag)
+        if "fill" in elem.attrib or tag.endswith("path"):
+            elem.attrib["fill"] = fill
+
+    # Calculate scale
+    desired_pixel_size = max(scale_to_width, scale_to_height)
+    x0, y0, x1, y1 = root.attrib["viewBox"].split(" ")
+    width = float(x1) - float(x0)
+    height = float(y1) - float(y0)
+    x_ratio = desired_pixel_size / width
+    y_ratio = desired_pixel_size / height
+    scale = x_ratio if desired_pixel_size == scale_to_width else y_ratio
+
+    img_data = io.BytesIO()
+    tree.write(img_data)
+    img_text_bytes = img_data.getvalue()
+    params = {
+        "data": img_text_bytes,
+        "scale": scale,
+    }
+    return tksvg.SvgImage(**params)
 
 
 def hex_string_for_style(style_name: str, theme_name: str = "") -> str:
