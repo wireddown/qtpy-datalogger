@@ -319,7 +319,7 @@ wheels = [
 
 [[package]]
 name = "circup"
-version = "3.0.1"
+version = "3.0.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "appdirs" },
@@ -329,9 +329,9 @@ dependencies = [
     { name = "toml" },
     { name = "update-checker" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8a/c8/1f1f012953d27ab0ca8280e60e2f42917f3a76c64a0aff03e3ae98cda753/circup-3.0.1.tar.gz", hash = "sha256:be1d40d4aa6c8fdb4672b807bf99fa58955a8ebcb91c566637e98989c39aec94", size = 124586, upload-time = "2026-02-04T23:21:50.696Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/2f/92/8acd7dded8b33a9363d756b7b30efddd8917521fef0168da78d9a24ea25b/circup-3.0.4.tar.gz", hash = "sha256:bd1ae484e8e42c73aa47bca938912e475bd535f436de44295adee5d592185f7d", size = 124779, upload-time = "2026-06-01T17:17:38.28Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0c/cd/1354266314038db5f60c5e718e565dd300451f6af81d54cee245423a90be/circup-3.0.1-py3-none-any.whl", hash = "sha256:59145a80f1db18fee0b04fb93e53eff3a75ecf36303f722aca733ef39740c2bd", size = 50658, upload-time = "2026-02-04T23:21:49.631Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/7b/51082156ff7f0eeafd2ebe5c67cb5ae4c92fe5050bcf5dc95a8f208419f4/circup-3.0.4-py3-none-any.whl", hash = "sha256:813da5393a4ec842ef314f4399820ece83a4b3e1f5ddc9c7179c454c2bd8de40", size = 50670, upload-time = "2026-06-01T17:17:37.112Z" },
 ]
 
 [[package]]
