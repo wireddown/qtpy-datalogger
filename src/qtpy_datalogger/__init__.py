@@ -3,4 +3,4 @@
 import warnings
 
 # Suppress tjguk/wmi #32
-warnings.filterwarnings("ignore", category=SyntaxWarning, message="invalid escape sequence.*")
+warnings.filterwarnings("ignore", category=SyntaxWarning, message=".*invalid escape sequence.*")
