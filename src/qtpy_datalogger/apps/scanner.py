@@ -13,7 +13,6 @@ import ttkbootstrap as ttk
 import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.widgets.scrolled as ttk_scrolled
 import ttkbootstrap.widgets.tableview as ttk_tableview
-from tkfontawesome import svg_to_image
 from ttkbootstrap import constants as bootstyle
 
 import qtpy_datalogger
@@ -91,7 +90,7 @@ class ScannerApp(guikit.AsyncWindow):
         package = importlib.resources.files(qtpy_datalogger)
         assets = package.joinpath("assets")
         telescope_data = assets.joinpath("telescope.svg").read_text()
-        icon = svg_to_image(telescope_data, fill="#07a000", scale_to_height=256)
+        icon = guikit.image_from_svg(telescope_data, fill="#07a000", scale_to_height=64)
         self.root_window.minsize(width=560, height=572)
         self.root_window.title(Constants.AppName)
         self.root_window.iconphoto(True, icon)
@@ -113,7 +112,9 @@ class ScannerApp(guikit.AsyncWindow):
         main.rowconfigure(5, weight=0)
 
         # Title
-        telescope_image = svg_to_image(telescope_data, fill=guikit.hex_string_for_style("fg"), scale_to_height=25)
+        telescope_image = guikit.image_from_svg(
+            telescope_data, fill=guikit.hex_string_for_style("fg"), scale_to_height=25
+        )
         self.svg_images["telescope"] = telescope_image
         title_font = font.Font(weight="bold", size=24)
         title_label = ttk.Label(

@@ -1,4 +1,5 @@
 # Custom ignores
+.python-version
 .ruff_cache/
 ignored/
 

@@ -3,6 +3,7 @@
 import asyncio
 import enum
 import functools
+import io
 import json
 import logging
 import pathlib
@@ -10,6 +11,7 @@ import subprocess
 import sys
 import tkinter as tk
 import webbrowser
+import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass
 from tkinter import font
@@ -18,13 +20,15 @@ from typing import Any, ClassVar, NamedTuple
 import click
 import matplotlib.axes as mpl_axes
 import matplotlib.backend_bases as mpl_backend_bases
+import tksvg
 import ttkbootstrap as ttk
 import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.style as ttk_style
 import ttkbootstrap.themes.standard as ttk_themes
 import ttkbootstrap.tooltip as ttk_tooltip
-from tkfontawesome import icon_to_image
 from ttkbootstrap import constants as bootstyle
+from ttkbootstrap_icons import Icon
+from ttkbootstrap_icons.providers import BaseFontProvider
 
 from qtpy_datalogger import datatypes
 
@@ -363,7 +367,7 @@ class ActionDialog(AsyncDialog):
             image_name = "o"
         if not image_fill:
             image_fill = StyleKey.Fg
-        self.message_image = icon_to_image(name=image_name, fill=hex_string_for_style(image_fill), scale_to_height=40)
+        self.message_image = image_from_icon(name=image_name, fill=hex_string_for_style(image_fill), scale_to_height=40)
         if not message_paragraphs:
             message_paragraphs = ["Click OK to close."]
         self.message = "\n\n".join([click.wrap_text(message, width=64) for message in message_paragraphs])
@@ -427,7 +431,7 @@ class AboutDialog(AsyncDialog):
         self.app_icons = all_icons[:3]
         self.icon_labels = []
         self.app_icon_images = []
-        self.help_url = help_url or datatypes.Links.Homepage
+        self.help_url = help_url or datatypes.Links.Help
         self.source_url = source_url or datatypes.Links.Source
         self.copy_version_text = "Copy version"
         super().__init__(parent, f"About {app_name}".strip())
@@ -482,7 +486,7 @@ class AboutDialog(AsyncDialog):
         separator.grid(column=1, row=3, columnspan=5, sticky=tk.EW, pady=4)
         button_text_color = hex_string_for_style(StyleKey.SelectFg)
         spacer = "   "
-        self.help_icon = icon_to_image("parachute-box", fill=button_text_color, scale_to_width=16)
+        self.help_icon = image_from_icon("parachute-box", fill=button_text_color, scale_to_width=16)
         help_button = ttk.Button(
             message_frame,
             compound=tk.LEFT,
@@ -493,7 +497,7 @@ class AboutDialog(AsyncDialog):
             command=functools.partial(webbrowser.open_new_tab, self.help_url),
         )
         help_button.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
-        self.source_icon = icon_to_image("github-alt", fill=button_text_color, scale_to_width=16)
+        self.source_icon = image_from_icon("github-alt-brands", fill=button_text_color, scale_to_width=16)
         source_button = ttk.Button(
             message_frame,
             compound=tk.LEFT,
@@ -530,7 +534,7 @@ class AboutDialog(AsyncDialog):
         icon_color = hex_string_for_style(StyleKey.Fg)
         self.app_icon_images.clear()
         for icon_name, icon_label in zip(self.app_icons, self.icon_labels, strict=True):
-            icon_image = icon_to_image(icon_name, fill=icon_color, scale_to_height=icon_height)
+            icon_image = image_from_icon(icon_name, fill=icon_color, scale_to_height=icon_height)
             self.app_icon_images.append(icon_image)
             icon_label.configure(image=icon_image)
 
@@ -854,6 +858,43 @@ class ThemeChanger:
         owner.winfo_toplevel().event_generate(ThemeChanger.Event.BootstrapThemeChanged)
 
 
+class CustomFontAwesomeIcon(Icon):
+    """A custom image renderer for FontAwesome icons."""
+
+    def __init__(self, name: str, size: int = 24, color: str = "black") -> None:
+        """
+        Create an image from a FontAwesome icon using the specified name, size, and fill color.
+
+        'name' is taken from the solid subset unless it ends with -regular or -brands.
+        """
+        y_adjust = 0.125  # MOVES the rendered font text DOWN by this fraction of the size
+        pad_factor = 0.0  # SHRINKS the render area by this fraction of the size on each side
+        padded_size = round(1 * size)
+        custom_provider = BaseFontProvider(
+            name="fontawesome",
+            display_name="Font Awesome 6 (Free)",
+            package="ttkbootstrap_icons_fa",
+            homepage="https://fontawesome.com/v6/icons",
+            license_url="https://fontawesome.com/license",
+            icon_version="6.7.2",
+            default_style="solid",
+            styles={
+                "solid": {"filename": "fonts/fa-solid-900.ttf"},
+                "regular": {"filename": "fonts/fa-regular-400.ttf"},
+                "brands": {"filename": "fonts/fa-brands-400.ttf"},
+            },
+            pad_factor=pad_factor,
+            y_bias=y_adjust,
+            scale_to_fit=True,
+        )
+        auto_style = None
+        resolved_style = custom_provider.resolve_icon_style(name, auto_style)
+        # The package caches the provider by its name and style
+        Icon.initialize_with_provider(custom_provider, resolved_style)
+        resolved = custom_provider.resolve_icon_name(name, auto_style)
+        super().__init__(resolved, padded_size, color)
+
+
 class DemoWithAnimation(AsyncWindow):
     """Compare synchronous vs asynchronous calls in Tk."""
 
@@ -1113,6 +1154,54 @@ def get_first_in_range(upper_bound: float, selection: dict) -> Any:  # noqa ANN4
     first_in_range_index = [upper_bound > entry for entry in descending].index(True)
     first_value_in_range = selection[descending[first_in_range_index]]
     return first_value_in_range
+
+
+def image_from_icon(
+    name: str, fill: str = "#000000", scale_to_width: int = 16, scale_to_height: int = 16
+) -> tk.PhotoImage:
+    """
+    Render a FontAwesome icon by name and return it as a tk.PhotoImage object.
+
+    'name' is taken from the solid subset unless it ends with -regular or -brands.
+    """
+    size = max(scale_to_height, scale_to_width)
+    font_awesome_icon = CustomFontAwesomeIcon(name, size=size, color=fill)
+    return font_awesome_icon.image
+
+
+def image_from_svg(
+    svg_text: str, fill: str = "#000000", scale_to_width: int = 16, scale_to_height: int = 16
+) -> tk.PhotoImage:
+    """Render the SVG text into a tk.PhotoImage object using the fill and size information."""
+    # Reworked without lxml from
+    # https://github.com/israel-dryer/TkFontAwesome/blob/503c71e00dadd44abf3f9b74db49101c990f0f96/tkfontawesome/__init__.py#L42
+    ET.register_namespace("", "http://www.w3.org/2000/svg")
+    root = ET.fromstring(svg_text)  # noqa S314: this package does not parse user-files
+    tree = ET.ElementTree(root)
+
+    # Apply fill color
+    for elem in root.iter():
+        tag = str(elem.tag)
+        if "fill" in elem.attrib or tag.endswith("path"):
+            elem.attrib["fill"] = fill
+
+    # Calculate scale
+    desired_pixel_size = max(scale_to_width, scale_to_height)
+    x0, y0, x1, y1 = root.attrib["viewBox"].split(" ")
+    width = float(x1) - float(x0)
+    height = float(y1) - float(y0)
+    x_ratio = desired_pixel_size / width
+    y_ratio = desired_pixel_size / height
+    scale = x_ratio if desired_pixel_size == scale_to_width else y_ratio
+
+    img_data = io.BytesIO()
+    tree.write(img_data)
+    img_text_bytes = img_data.getvalue()
+    params = {
+        "data": img_text_bytes,
+        "scale": scale,
+    }
+    return tksvg.SvgImage(**params)
 
 
 def hex_string_for_style(style_name: str, theme_name: str = "") -> str:

@@ -21,7 +21,6 @@ import numpy as np
 import pandas as pd
 import ttkbootstrap as ttk
 import ttkbootstrap.themes.standard as ttk_themes
-from tkfontawesome import icon_to_image
 from ttkbootstrap import constants as bootstyle
 
 from qtpy_datalogger import guikit, ttkbootstrap_matplotlib
@@ -156,7 +155,7 @@ class DataViewer(guikit.AsyncWindow):
         self.next_update_time = time.time()
         self.state = AppState(self.root_window)
 
-        app_icon = icon_to_image("chart-line", fill=app_icon_color, scale_to_height=256)
+        app_icon = guikit.image_from_icon("chart-line", fill=app_icon_color, scale_to_height=64)
         self.root_window.iconphoto(True, app_icon)
 
         figure_dpi = 112
@@ -409,7 +408,9 @@ class DataViewer(guikit.AsyncWindow):
     ) -> ttk.Button:
         """Create a ttk.Button using the specified text and FontAwesome icon_name."""
         text_spacing = 3 * " "
-        button_image = icon_to_image(icon_name, fill=guikit.hex_string_for_style(StyleKey.SelectFg), scale_to_height=24)
+        button_image = guikit.image_from_icon(
+            icon_name, fill=guikit.hex_string_for_style(StyleKey.SelectFg), scale_to_height=24
+        )
         self.svg_images[icon_name] = button_image
         button = ttk.Button(
             parent,

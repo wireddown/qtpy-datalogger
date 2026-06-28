@@ -41,8 +41,10 @@ dependencies = [
     "pandas>=3.0.2",
     "psutil>=7.2.2",
     "pyserial>=3.5",
-    "tkfontawesome>=0.3.2",
+    "tksvg>=0.7.4",
     "ttkbootstrap>=1.20.2",
+    "ttkbootstrap-icons>=4.0.0",
+    "ttkbootstrap-icons-fa>=1.0.2",
     "wmi>=1.5.1",
 
     # sensor_node
