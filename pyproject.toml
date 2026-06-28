@@ -25,6 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Embedded Systems",
     "Topic :: Software Development :: User Interfaces",
@@ -209,7 +210,7 @@ ignore = [
 "examples/**.py" = [
     "C401",         # Allow unnecessary generators to support explicit initialization
     "INP001",       # Examples are not namespace packages and don't use __init__.py either
-    "PLR0912",      # Allow many if/else branches to support feature demonstations
+    "PLR0912",      # Allow many if/else branches to support feature demonstrations
     "PLR0915",      # Allow long functions for detailed unoptimized demonstrations
 ]
 # Templates
