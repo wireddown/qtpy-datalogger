@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass
 from tkinter import font
-from typing import Any, ClassVar, NamedTuple
+from typing import ClassVar, NamedTuple
 
 import click
 import matplotlib.axes as mpl_axes
@@ -117,14 +117,14 @@ class AsyncDialog:
     """
 
     _open_dialogs: ClassVar[set["AsyncDialog"]] = set()
-    _open_dialog_tasks: ClassVar[set[asyncio.Task]] = set()
+    _open_dialog_tasks: ClassVar[set[asyncio.Task[object]]] = set()
 
     @classmethod
     def show_no_wait(cls, dialog: "AsyncDialog", behavior: DialogBehavior) -> None:
         """Show the dialog without waiting for or returning a result."""
         if dialog not in cls._open_dialogs:
 
-            def finalize_safe_show(task: asyncio.Task) -> None:
+            def finalize_safe_show(task: asyncio.Task[object]) -> None:
                 cls._open_dialogs.discard(dialog)
                 cls._open_dialog_tasks.discard(task)
 
@@ -283,7 +283,7 @@ class ActionDialog(AsyncDialog):
         """A NamedTuple that holds information for a supported Action."""
 
         text: str
-        command: Callable
+        command: Callable[[], None]
         style: str
 
     def __init__(self, parent: ttk.Toplevel | ttk.Window) -> None:
@@ -1148,7 +1148,7 @@ def is_left_double_click(mouse_args: mpl_backend_bases.MouseEvent) -> bool:
     return mouse_args.dblclick
 
 
-def get_first_in_range(upper_bound: float, selection: dict) -> Any:  # noqa ANN401: allow callers to select from any collection
+def get_first_in_range(upper_bound: float, selection: dict) -> float:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
     """Get the first value in the selection that is lower than the upper_bound."""
     descending = sorted(selection.keys(), reverse=True)
     first_in_range_index = [upper_bound > entry for entry in descending].index(True)
@@ -1233,7 +1233,7 @@ def toggle_visual_debug(frame: tk.Widget) -> None:
     )
 
 
-def inspect_visual_style(frame: tk.Widget) -> dict:
+def inspect_visual_style(frame: tk.Widget) -> dict:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
     """Get visual configuration details for the specified frame and its children."""
     # >>> list(toolbar.children.keys())
     # <<< ['!button', '!button2', '!button3', '!frame', '!checkbutton-1', '!checkbutton-2', '!button4', '!frame2', '!button5', '!label', '!label2']
@@ -1272,7 +1272,7 @@ def inspect_visual_style(frame: tk.Widget) -> dict:
     return visual_configuration
 
 
-def show_palette(palette: dict) -> None:
+def show_palette(palette: dict[str, str]) -> None:
     """Show the hex color codes for the specified palette."""
     color_names = sorted(ttk_style.Colors.label_iter())
     _ = [logger.info(f"{color:>12} {palette.get(color)}") for color in color_names]
