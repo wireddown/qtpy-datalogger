@@ -67,7 +67,7 @@ class Settings:
         self._app_catalog = None  # Lazily loaded on first access
         self._wifi_radio = None
         self._board_io_pins: dict[str, digitalio.DigitalInOut | analogio.AnalogIn | neopixel.NeoPixel] = {}
-        self._settings_for_app_name: dict[str, dict] = {}
+        self._settings_for_app_name: dict[str, dict] = {}  # ty: ignore[missing-type-argument] -- allow flexible dict elements
         self._stemma_bus = None
 
     @property
@@ -243,11 +243,11 @@ class Settings:
             self._stemma_bus = board.STEMMA_I2C()  # ty: ignore[unresolved-attribute] -- this is a builtin CircuitPython extension
         return self._stemma_bus
 
-    def get_app_settings(self, app_name: str) -> dict:
+    def get_app_settings(self, app_name: str) -> dict:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
         """Get the settings for app_name. Use update_app_settings() to make changes."""
         return self._settings_for_app_name.get(app_name, {})
 
-    def update_app_settings(self, app_name: str, settings: dict) -> None:
+    def update_app_settings(self, app_name: str, settings: dict) -> None:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
         """Add or update the specified settings for app_name."""
         app_settings = self._settings_for_app_name.get(app_name, {})
         app_settings.update(settings)
