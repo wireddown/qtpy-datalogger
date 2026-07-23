@@ -128,12 +128,12 @@ def two_dual_mode_qtpy_devices(group_id: str) -> dict[str, discovery.QTPyDevice]
     }
 
 
-def select_first_from_prompt(text: str, type: click.Choice, default: str, show_default: bool) -> str:  # noqa: A002 -- we must hide 'type' to match the click API
+def select_first_from_prompt(text: str, type: click.Choice[str], default: str, show_default: bool) -> str:  # noqa: A002 -- we must hide 'type' to match the click API
     """Override click.prompt() to select the first item from the type parameter."""
     return type.choices[0]
 
 
-def select_last_from_prompt(text: str, type: click.Choice, default: str, show_default: bool) -> str:  # noqa: A002 -- we must hide 'type' to match the click API
+def select_last_from_prompt(text: str, type: click.Choice[str], default: str, show_default: bool) -> str:  # noqa: A002 -- we must hide 'type' to match the click API
     """Override click.prompt() to select the last item from the type parameter."""
     return type.choices[-1]
 
