@@ -102,12 +102,16 @@ class QTPyController:
         # Define these at runtime because
         #   we cannot change their parameters and make them instance methods (ie we cannot add 'self')
         #   we don't want to make make them static methods and share them across all instances
-        def on_mqtt_connect(client: MqttClientWithContext, flags: int, rc: int, properties: dict) -> None:
+        def on_mqtt_connect(client: MqttClientWithContext, flags: int, rc: int, properties: dict) -> None:  # ty: ignore[missing-type-argument] -- dict is untyped upstream
             """Handle connection to the MQTT broker."""
             logger.debug(f"Connected with flags='{flags}' rc='{rc}' properties='{properties}'")
 
         async def on_mqtt_message(
-            client: MqttClientWithContext, topic: str, payload: bytes, qos: int, properties: dict
+            client: MqttClientWithContext,
+            topic: str,
+            payload: bytes,
+            qos: int,
+            properties: dict,  # ty: ignore[missing-type-argument] -- dict is untyped upstream
         ) -> None:
             """Handle a message on topic with payload."""
             payload_string = payload.decode("UTF-8")
@@ -119,7 +123,7 @@ class QTPyController:
             """Handle disconnection from the MQTT broker."""
             logger.debug(f"Disconnected with packet='{packet}'")
 
-        def on_mqtt_subscribe(client: MqttClientWithContext, mid: int, qos: tuple, properties: dict) -> None:
+        def on_mqtt_subscribe(client: MqttClientWithContext, mid: int, qos: tuple, properties: dict) -> None:  # ty: ignore[missing-type-argument] -- tuple, dict are untyped upstream
             """Handle subscription from the MQTT broker."""
             logger.debug(f"Subscribed with mid='{mid}' qos='{qos}' properties='{properties}'")
 
@@ -177,7 +181,7 @@ class QTPyController:
         }
         return node_information
 
-    def send_action(self, node_id: str, command_name: str, parameters: dict) -> node_classes.ActionInformation:
+    def send_action(self, node_id: str, command_name: str, parameters: dict) -> node_classes.ActionInformation:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
         """
         Send a command with the specified parameters to the node in the group with node_id and return the sent ActionInformation.
 
@@ -197,7 +201,7 @@ class QTPyController:
         node_id: str,
         action: node_classes.ActionInformation,
         timeout: float = 5.0,  # noqa ASYNC109: Allow timeout parameter for library ease-of-use
-    ) -> tuple[dict, node_classes.SenderInformation]:
+    ) -> tuple[dict, node_classes.SenderInformation]:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
         """
         Monitor the MQTT messages for a matching result to the specified action.
 
@@ -236,7 +240,7 @@ class QTPyController:
 
     async def wait_until_matching_node_response(
         self, action: node_classes.ActionInformation
-    ) -> tuple[dict, node_classes.SenderInformation]:
+    ) -> tuple[dict, node_classes.SenderInformation]:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
         """Cooperatively wait until the first sensor_node responds to the specified action."""
         result = {}
         sender = node_classes.SenderInformation.create_empty()
