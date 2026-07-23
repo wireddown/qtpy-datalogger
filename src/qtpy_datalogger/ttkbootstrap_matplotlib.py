@@ -8,7 +8,6 @@ from tkinter import font
 
 import ttkbootstrap as ttk
 import ttkbootstrap.colorutils as ttk_colorutils
-import ttkbootstrap.themes.standard as ttk_themes
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg,
@@ -18,11 +17,9 @@ from matplotlib.figure import Figure
 from matplotlib.legend import Legend
 from ttkbootstrap import constants as bootstyle
 
-from qtpy_datalogger.guikit import ThemeChanger
+import qtpy_datalogger.guikit as gk
 
 logger = logging.getLogger(__name__)
-
-ColorPalette = dict[str, str]
 
 
 class ReservedName(StrEnum):
@@ -50,7 +47,7 @@ def create_styled_plot_canvas(
     canvas_widget = canvas.get_tk_widget()
     setattr(canvas_widget, ReservedName.EmbeddedFigure, canvas)
     canvas_widget.grid(column=0, row=0, sticky=tk.NSEW)
-    ThemeChanger.add_handler(canvas_frame, functools.partial(handle_theme_changed, canvas_widget))
+    gk.ThemeChanger.add_handler(canvas_frame, functools.partial(handle_theme_changed, canvas_widget))
     return canvas
 
 
@@ -72,7 +69,7 @@ def create_styled_plot_toolbar(
     toolbar_border.columnconfigure(0, weight=0, minsize=final_width)
     toolbar_border.rowconfigure(0, weight=0, minsize=final_height)
     toolbar_border.grid_propagate(False)  # Lock the height and width by ignoring child size requests
-    ThemeChanger.add_handler(toolbar_border, functools.partial(handle_theme_changed, toolbar_border))
+    gk.ThemeChanger.add_handler(toolbar_border, functools.partial(handle_theme_changed, toolbar_border))
 
     toolbar_frame = tk.Frame(toolbar_border, name="toolbar_frame")
     toolbar_frame.grid(column=0, row=0)
@@ -103,9 +100,9 @@ def handle_theme_changed(themed_widget: tk.Misc, event_args: tk.Event) -> None:
     if not (style and style.theme):
         raise ValueError()
 
-    default_theme = ttk_themes.STANDARD_THEMES[bootstyle.DEFAULT_THEME]
-    requested_theme = ttk_themes.STANDARD_THEMES.get(style.theme.name, default_theme)
-    color_palette = requested_theme["colors"]
+    color_palette = gk.palette_for_style(style.theme.name)
+    if not color_palette:
+        color_palette = gk.palette_for_style(bootstyle.DEFAULT_THEME)
     if isinstance(themed_widget, tk.Canvas):
         apply_figure_style(themed_widget, color_palette)
     elif isinstance(themed_widget, tk.Frame):
@@ -114,7 +111,7 @@ def handle_theme_changed(themed_widget: tk.Misc, event_args: tk.Event) -> None:
         raise TypeError()
 
 
-def apply_figure_style(canvas: tk.Canvas, color_palette: ColorPalette) -> None:
+def apply_figure_style(canvas: tk.Canvas, color_palette: gk.ColorPalette) -> None:
     """Apply the specified theme to the specified matplotlib figure canvas."""
     mpl_figure_canvas = getattr(canvas, ReservedName.EmbeddedFigure, None)
     if not mpl_figure_canvas:
@@ -158,7 +155,7 @@ def apply_figure_style(canvas: tk.Canvas, color_palette: ColorPalette) -> None:
     mpl_figure_canvas.draw()
 
 
-def apply_legend_style(mpl_legend: Legend, color_palette: ColorPalette) -> None:
+def apply_legend_style(mpl_legend: Legend, color_palette: gk.ColorPalette) -> None:
     """Apply the specified theme to the matplotlib Legend."""
     fill_color = color_palette[palette_color_key["xtra_window_bg"]]
     text_color = color_palette[palette_color_key["xtra_window_fg"]]
@@ -183,12 +180,12 @@ def apply_legend_style(mpl_legend: Legend, color_palette: ColorPalette) -> None:
         plot_line.set_color(owning_plot.get_color())
 
 
-def apply_toolbar_style(tk_widget: tk.Widget, color_palette: ColorPalette) -> None:
+def apply_toolbar_style(tk_widget: tk.Widget, color_palette: gk.ColorPalette) -> None:
     """Apply the specified theme to the specified tk.Frame."""
     style_tree(tk_widget, color_palette)
 
 
-def style_tree(widget: tk.Widget, color_palette: ColorPalette) -> None:
+def style_tree(widget: tk.Widget, color_palette: gk.ColorPalette) -> None:
     """Style the specified tk.Widget and its children."""
     if isinstance(widget, tk.Frame):
         style_frame(widget, color_palette)
@@ -206,7 +203,7 @@ def style_tree(widget: tk.Widget, color_palette: ColorPalette) -> None:
             style_tree(child, color_palette)
 
 
-def style_frame(frame: tk.Frame, color_palette: ColorPalette) -> None:
+def style_frame(frame: tk.Frame, color_palette: gk.ColorPalette) -> None:
     """Style a tk.Frame using the specified colors."""
     frame_color = color_palette[palette_color_key["background"]]
     if frame.winfo_name() == ReservedName.ToolbarBorder:
@@ -218,7 +215,7 @@ def style_frame(frame: tk.Frame, color_palette: ColorPalette) -> None:
     )
 
 
-def style_label(label: tk.Label, color_palette: ColorPalette) -> None:
+def style_label(label: tk.Label, color_palette: gk.ColorPalette) -> None:
     """Style a tk.Label using the specified colors."""
     label.configure(
         {
@@ -229,7 +226,7 @@ def style_label(label: tk.Label, color_palette: ColorPalette) -> None:
     )
 
 
-def style_button(button: tk.Button, color_palette: ColorPalette) -> None:
+def style_button(button: tk.Button, color_palette: gk.ColorPalette) -> None:
     """Style a tk.Button using the specified colors."""
     press_color = change_color_luminance(color_palette[palette_color_key["background"]], -20)
     button.configure(
@@ -240,7 +237,7 @@ def style_button(button: tk.Button, color_palette: ColorPalette) -> None:
     )
 
 
-def style_checkbutton(checkbutton: tk.Checkbutton, color_palette: ColorPalette) -> None:
+def style_checkbutton(checkbutton: tk.Checkbutton, color_palette: gk.ColorPalette) -> None:
     """Style a tk.Checkbutton using the specified colors."""
     press_color = change_color_luminance(color_palette[palette_color_key["background"]], -20)
     checkbutton.configure(
