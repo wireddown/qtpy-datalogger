@@ -134,7 +134,7 @@ async def wait_until_line_received(com_port: serial.Serial) -> str:
     return response
 
 
-def _get_default_uart_options(port: str) -> dict:
+def _get_default_uart_options(port: str) -> dict[str, str | int | bool]:
     """Get the default serial port options for QT Py devices."""
     return {
         "url": port,
