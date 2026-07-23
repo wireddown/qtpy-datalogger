@@ -400,7 +400,7 @@ class ScannerApp(guikit.AsyncWindow):
             qtpy_devices_in_group = await discovery.discover_qtpy_devices_async(group_id)
             return qtpy_devices_in_group
 
-        def finalize_scan(scan_group_task: asyncio.Task) -> None:
+        def finalize_scan(scan_group_task: asyncio.Task[dict[str, discovery.QTPyDevice]]) -> None:
             self.scan_feedback.stop()
             self.scan_feedback.grid_forget()
             self.background_tasks.discard(scan_group_task)
@@ -492,7 +492,7 @@ class ScannerApp(guikit.AsyncWindow):
             await io_protocol.close_io()
             return new_status_message, new_status_style
 
-        def finalize_message(send_message_task: asyncio.Task) -> None:
+        def finalize_message(send_message_task: asyncio.Task[tuple[str, str]]) -> None:
             self.background_tasks.discard(send_message_task)
             new_status, new_style = send_message_task.result()
             self.update_status_message_and_style(new_status, new_style)

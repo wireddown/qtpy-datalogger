@@ -194,7 +194,7 @@ class DataViewer(guikit.AsyncWindow):
 
         self.plot_axes = plot_figure.add_subplot()
         self.axis_tool_window = None
-        self.background_tasks: set[asyncio.Task] = set()
+        self.background_tasks = set()
 
         toolbar_row = ttk.Frame(main, name="toolbar_row")
         toolbar_row.grid(column=0, row=1, sticky=tk.NSEW, padx=40, pady=(8, 0))
@@ -708,8 +708,9 @@ class DataViewer(guikit.AsyncWindow):
             loc="upper left",
             draggable=True,
         )
-        requested_theme = ttk_themes.STANDARD_THEMES[self.state.active_theme]
-        ttkbootstrap_matplotlib.apply_legend_style(legend, requested_theme)
+        color_palette = guikit.palette_for_style(self.state.active_theme)
+        if color_palette:
+            ttkbootstrap_matplotlib.apply_legend_style(legend, color_palette)
         self.canvas_figure.draw()
         self.update_file_message(f"Duration: {time_coordinates[-1]:.3f}")
         return data_series.keys().to_list()
@@ -758,9 +759,10 @@ class DataViewer(guikit.AsyncWindow):
         limits = guikit.Range.create_infinite()
         self.axis_tool_window.attach_to_axis(event_args.canvas.draw_idle, self.plot_axes, axis, limits)
 
-    def finalize_tool_window(self, task: asyncio.Task) -> None:
+    def finalize_tool_window(self, task: asyncio.Task[object]) -> None:
         """Finalize the AxisToolDialog after the user closes it."""
         self.axis_tool_window = None
+        self.background_tasks.discard(task)
 
     def get_data(self) -> tuple[list[float], pd.DataFrame]:
         """Get the time coordinates and measurement series from the data file."""

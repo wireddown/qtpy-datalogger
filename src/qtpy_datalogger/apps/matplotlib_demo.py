@@ -103,7 +103,7 @@ class PlottingApp(guikit.AsyncWindow):
         )
 
         self.axis_tool_window = None
-        self.background_tasks: set[asyncio.Task] = set()
+        self.background_tasks: set[asyncio.Task[object]] = set()
         self.canvas = ttkbootstrap_matplotlib.create_styled_plot_canvas(mpl_figure, canvas_frame)
         self.canvas.mpl_connect("key_press_event", mpl_backend_bases.key_press_handler)
         self.canvas.mpl_connect("button_press_event", self.on_graph_mouse_down)
@@ -185,9 +185,10 @@ class PlottingApp(guikit.AsyncWindow):
         limits = guikit.Range.create_infinite()
         self.axis_tool_window.attach_to_axis(event_args.canvas.draw_idle, self.axes, axis, limits)
 
-    def finalize_tool_window(self, task: asyncio.Task) -> None:
+    def finalize_tool_window(self, task: asyncio.Task[object]) -> None:
         """Finalize the AxisToolDialog after the user closes it."""
         self.axis_tool_window = None
+        self.background_tasks.discard(task)
 
 
 if __name__ == "__main__":

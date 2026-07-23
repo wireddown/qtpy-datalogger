@@ -15,14 +15,17 @@ class IOProtocol(Protocol):
         ...
 
     async def send_message(
-        self, sensor_node_id: str, command_name: str, command_parameters: dict
+        self,
+        sensor_node_id: str,
+        command_name: str,
+        command_parameters: dict,  # ty: ignore[missing-type-argument] -- allow flexible dict elements
     ) -> node_classes.ActionInformation:
         """Send the command and parameters to the specified sensor_node_id."""
         ...
 
     async def get_response(
         self, sensor_node_id: str, sent_action: node_classes.ActionInformation
-    ) -> tuple[dict, node_classes.SenderInformation]:
+    ) -> tuple[dict, node_classes.SenderInformation]:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
         """Wait for the sensor_node_id to respond to the specified action and return the result and the node's SenderInformation."""
         ...
 
@@ -55,7 +58,10 @@ class SingleUartProtocol(IOProtocol):
             self.serial_io = uart.open_uart(self.port_name)
 
     async def send_message(
-        self, sensor_node_id: str, command_name: str, command_parameters: dict
+        self,
+        sensor_node_id: str,
+        command_name: str,
+        command_parameters: dict,  # ty: ignore[missing-type-argument] -- allow flexible dict elements
     ) -> node_classes.ActionInformation:
         """Send the specified command and parameters to the sensor_node over UART."""
         if not self.serial_io:
@@ -75,7 +81,7 @@ class SingleUartProtocol(IOProtocol):
 
     async def get_response(
         self, sensor_node_id: str, sent_action: node_classes.ActionInformation
-    ) -> tuple[dict, node_classes.SenderInformation]:
+    ) -> tuple[dict, node_classes.SenderInformation]:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
         """Read bytes from the UART on the sensor_node until it completes its response."""
         if not self.serial_io:
             message = "UART port is not open. Did you call setup_io()?"
@@ -106,7 +112,10 @@ class MqttGroupProtocol(IOProtocol):
             await self.qtpy_controller.connect_and_subscribe()
 
     async def send_message(
-        self, sensor_node_id: str, command_name: str, command_parameters: dict
+        self,
+        sensor_node_id: str,
+        command_name: str,
+        command_parameters: dict,  # ty: ignore[missing-type-argument] -- allow flexible dict elements
     ) -> node_classes.ActionInformation:
         """Send the specified command and parameters to the sensor_node over MQTT."""
         if not self.qtpy_controller:
@@ -117,7 +126,7 @@ class MqttGroupProtocol(IOProtocol):
 
     async def get_response(
         self, sensor_node_id: str, sent_action: node_classes.ActionInformation
-    ) -> tuple[dict, node_classes.SenderInformation]:
+    ) -> tuple[dict, node_classes.SenderInformation]:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
         """Monitor MQTT messages until the sensor_node completes its response."""
         if not self.qtpy_controller:
             message = "MQTT connection is not open. Did you call setup_io()?"

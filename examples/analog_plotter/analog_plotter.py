@@ -64,7 +64,7 @@ class AnalogPlotter(guikit.AsyncWindow):
         )
 
         self.axis_tool_window = None
-        self.background_tasks: set[asyncio.Task] = set()
+        self.background_tasks = set()
         self.canvas = ttkbootstrap_matplotlib.create_styled_plot_canvas(mpl_figure, canvas_frame)
         self.canvas.mpl_connect("key_press_event", mpl_backend_bases.key_press_handler)
         self.canvas.mpl_connect("button_press_event", self.on_graph_mouse_down)
@@ -146,7 +146,7 @@ class AnalogPlotter(guikit.AsyncWindow):
             open_tool_window_task.add_done_callback(self.finalize_tool_window)
         return self.axis_tool_window
 
-    def finalize_tool_window(self, task: asyncio.Task) -> None:
+    def finalize_tool_window(self, task: asyncio.Task[object]) -> None:
         """Finalize the AxisToolDialog after the user closes it."""
         self.axis_tool_window = None
         self.background_tasks.discard(task)

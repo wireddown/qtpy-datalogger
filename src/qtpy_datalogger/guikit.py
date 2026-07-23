@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass
 from tkinter import font
-from typing import Any, ClassVar, NamedTuple
+from typing import ClassVar, NamedTuple
 
 import click
 import matplotlib.axes as mpl_axes
@@ -25,12 +25,14 @@ import ttkbootstrap as ttk
 import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.style as ttk_style
 import ttkbootstrap.themes.standard as ttk_themes
-import ttkbootstrap.tooltip as ttk_tooltip
 from ttkbootstrap import constants as bootstyle
+from ttkbootstrap.widgets import tooltip as ttk_tooltip
 from ttkbootstrap_icons import Icon
 from ttkbootstrap_icons.providers import BaseFontProvider
 
 from qtpy_datalogger import datatypes
+
+ColorPalette = dict[str, str]
 
 logger = logging.getLogger(__name__)
 
@@ -117,14 +119,14 @@ class AsyncDialog:
     """
 
     _open_dialogs: ClassVar[set["AsyncDialog"]] = set()
-    _open_dialog_tasks: ClassVar[set[asyncio.Task]] = set()
+    _open_dialog_tasks: ClassVar[set[asyncio.Task[object]]] = set()
 
     @classmethod
     def show_no_wait(cls, dialog: "AsyncDialog", behavior: DialogBehavior) -> None:
         """Show the dialog without waiting for or returning a result."""
         if dialog not in cls._open_dialogs:
 
-            def finalize_safe_show(task: asyncio.Task) -> None:
+            def finalize_safe_show(task: asyncio.Task[object]) -> None:
                 cls._open_dialogs.discard(dialog)
                 cls._open_dialog_tasks.discard(task)
 
@@ -283,7 +285,7 @@ class ActionDialog(AsyncDialog):
         """A NamedTuple that holds information for a supported Action."""
 
         text: str
-        command: Callable
+        command: Callable[[], None]
         style: str
 
     def __init__(self, parent: ttk.Toplevel | ttk.Window) -> None:
@@ -1148,7 +1150,7 @@ def is_left_double_click(mouse_args: mpl_backend_bases.MouseEvent) -> bool:
     return mouse_args.dblclick
 
 
-def get_first_in_range(upper_bound: float, selection: dict) -> Any:  # noqa ANN401: allow callers to select from any collection
+def get_first_in_range(upper_bound: float, selection: dict) -> float:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
     """Get the first value in the selection that is lower than the upper_bound."""
     descending = sorted(selection.keys(), reverse=True)
     first_in_range_index = [upper_bound > entry for entry in descending].index(True)
@@ -1204,6 +1206,19 @@ def image_from_svg(
     return tksvg.SvgImage(**params)
 
 
+def palette_for_style(style_name: str) -> ColorPalette:
+    """Return the color palette for the specified theme name."""
+    requested_theme = ttk_themes.STANDARD_THEMES[style_name]
+    color_palette = requested_theme["colors"]
+    if not (
+        isinstance(color_palette, dict)
+        and all(isinstance(k, str) and isinstance(v, str) for k, v in color_palette.items())
+    ):
+        # No colors in palette
+        return {}
+    return color_palette
+
+
 def hex_string_for_style(style_name: str, theme_name: str = "") -> str:
     """Return the '#RRGGBB' string for the specified style name for the active or specified theme."""
     if not theme_name:
@@ -1233,7 +1248,7 @@ def toggle_visual_debug(frame: tk.Widget) -> None:
     )
 
 
-def inspect_visual_style(frame: tk.Widget) -> dict:
+def inspect_visual_style(frame: tk.Widget) -> dict:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
     """Get visual configuration details for the specified frame and its children."""
     # >>> list(toolbar.children.keys())
     # <<< ['!button', '!button2', '!button3', '!frame', '!checkbutton-1', '!checkbutton-2', '!button4', '!frame2', '!button5', '!label', '!label2']
@@ -1272,7 +1287,7 @@ def inspect_visual_style(frame: tk.Widget) -> dict:
     return visual_configuration
 
 
-def show_palette(palette: dict) -> None:
+def show_palette(palette: dict[str, str]) -> None:
     """Show the hex color codes for the specified palette."""
     color_names = sorted(ttk_style.Colors.label_iter())
     _ = [logger.info(f"{color:>12} {palette.get(color)}") for color in color_names]
