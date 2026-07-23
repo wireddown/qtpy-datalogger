@@ -164,7 +164,7 @@ universal_usb_test_cases = [
 ]
 
 
-def assert_universal_test_cases(excinfo: pytest.ExceptionInfo, expected_exit_code: int, expected_com_port: str) -> None:
+def assert_universal_test_cases(excinfo: pytest.ExceptionInfo, expected_exit_code: int, expected_com_port: str) -> None:  # ty: ignore[missing-type-argument] -- this function inspects several exception types
     """Validate the output results from the universal_discovery_test_cases."""
     assert excinfo
     exception = excinfo.value
