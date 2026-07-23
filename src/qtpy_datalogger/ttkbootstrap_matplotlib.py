@@ -22,6 +22,8 @@ from qtpy_datalogger.guikit import ThemeChanger
 
 logger = logging.getLogger(__name__)
 
+ColorPalette = dict[str, str]
+
 
 class ReservedName(StrEnum):
     """Reserved names used to implement matplotlib styling."""
@@ -103,25 +105,25 @@ def handle_theme_changed(themed_widget: tk.Misc, event_args: tk.Event) -> None:
 
     default_theme = ttk_themes.STANDARD_THEMES[bootstyle.DEFAULT_THEME]
     requested_theme = ttk_themes.STANDARD_THEMES.get(style.theme.name, default_theme)
+    color_palette = requested_theme["colors"]
     if isinstance(themed_widget, tk.Canvas):
-        apply_figure_style(themed_widget, requested_theme)
+        apply_figure_style(themed_widget, color_palette)
     elif isinstance(themed_widget, tk.Frame):
-        apply_toolbar_style(themed_widget, requested_theme)
+        apply_toolbar_style(themed_widget, color_palette)
     else:
         raise TypeError()
 
 
-def apply_figure_style(canvas: tk.Canvas, requested_theme: dict) -> None:
+def apply_figure_style(canvas: tk.Canvas, color_palette: ColorPalette) -> None:
     """Apply the specified theme to the specified matplotlib figure canvas."""
     mpl_figure_canvas = getattr(canvas, ReservedName.EmbeddedFigure, None)
     if not mpl_figure_canvas:
         # Nothing to style
         return
 
-    theme_palette = requested_theme["colors"]
-    fill_color = theme_palette[palette_color_key["xtra_window_bg"]]
-    plot_area_color = theme_palette[palette_color_key["background"]]
-    text_color = theme_palette[palette_color_key["xtra_window_fg"]]
+    fill_color = color_palette[palette_color_key["xtra_window_bg"]]
+    plot_area_color = color_palette[palette_color_key["background"]]
+    text_color = color_palette[palette_color_key["xtra_window_fg"]]
 
     figure: Figure = mpl_figure_canvas.figure
     figure.set_facecolor(fill_color)
@@ -152,15 +154,14 @@ def apply_figure_style(canvas: tk.Canvas, requested_theme: dict) -> None:
         legend = ax.get_legend()
         if not legend:
             continue
-        apply_legend_style(legend, requested_theme)
+        apply_legend_style(legend, color_palette)
     mpl_figure_canvas.draw()
 
 
-def apply_legend_style(mpl_legend: Legend, requested_theme: dict) -> None:
+def apply_legend_style(mpl_legend: Legend, color_palette: ColorPalette) -> None:
     """Apply the specified theme to the matplotlib Legend."""
-    theme_palette = requested_theme["colors"]
-    fill_color = theme_palette[palette_color_key["xtra_window_bg"]]
-    text_color = theme_palette[palette_color_key["xtra_window_fg"]]
+    fill_color = color_palette[palette_color_key["xtra_window_bg"]]
+    text_color = color_palette[palette_color_key["xtra_window_fg"]]
 
     legend_frame = mpl_legend.get_frame()
     legend_frame.set_alpha(0.9)
@@ -182,35 +183,34 @@ def apply_legend_style(mpl_legend: Legend, requested_theme: dict) -> None:
         plot_line.set_color(owning_plot.get_color())
 
 
-def apply_toolbar_style(tk_widget: tk.Widget, requested_theme: dict) -> None:
+def apply_toolbar_style(tk_widget: tk.Widget, color_palette: ColorPalette) -> None:
     """Apply the specified theme to the specified tk.Frame."""
-    theme_palette = requested_theme["colors"]
-    style_tree(tk_widget, theme_palette)
+    style_tree(tk_widget, color_palette)
 
 
-def style_tree(widget: tk.Widget, theme_palette: dict[str, str]) -> None:
+def style_tree(widget: tk.Widget, color_palette: ColorPalette) -> None:
     """Style the specified tk.Widget and its children."""
     if isinstance(widget, tk.Frame):
-        style_frame(widget, theme_palette)
+        style_frame(widget, color_palette)
     elif isinstance(widget, tk.Label):
-        style_label(widget, theme_palette)
+        style_label(widget, color_palette)
     elif isinstance(widget, tk.Button):
-        style_button(widget, theme_palette)
+        style_button(widget, color_palette)
     elif isinstance(widget, tk.Checkbutton):
-        style_checkbutton(widget, theme_palette)
+        style_checkbutton(widget, color_palette)
     else:
         raise TypeError()
 
     if widget.children:
         for child in widget.children.values():
-            style_tree(child, theme_palette)
+            style_tree(child, color_palette)
 
 
-def style_frame(frame: tk.Frame, style_palette: dict) -> None:
+def style_frame(frame: tk.Frame, color_palette: ColorPalette) -> None:
     """Style a tk.Frame using the specified colors."""
-    frame_color = style_palette[palette_color_key["background"]]
+    frame_color = color_palette[palette_color_key["background"]]
     if frame.winfo_name() == ReservedName.ToolbarBorder:
-        frame_color = style_palette[palette_color_key["xtra_window_fg"]]
+        frame_color = color_palette[palette_color_key["xtra_window_fg"]]
     frame.configure(
         {
             "background": frame_color,
@@ -218,36 +218,36 @@ def style_frame(frame: tk.Frame, style_palette: dict) -> None:
     )
 
 
-def style_label(label: tk.Label, style_palette: dict) -> None:
+def style_label(label: tk.Label, color_palette: ColorPalette) -> None:
     """Style a tk.Label using the specified colors."""
     label.configure(
         {
-            "background": style_palette[palette_color_key["background"]],
-            "foreground": style_palette[palette_color_key["foreground"]],
+            "background": color_palette[palette_color_key["background"]],
+            "foreground": color_palette[palette_color_key["foreground"]],
             "font": font.Font(weight="bold"),
         }
     )
 
 
-def style_button(button: tk.Button, style_palette: dict) -> None:
+def style_button(button: tk.Button, color_palette: ColorPalette) -> None:
     """Style a tk.Button using the specified colors."""
-    press_color = change_color_luminance(style_palette[palette_color_key["background"]], -20)
+    press_color = change_color_luminance(color_palette[palette_color_key["background"]], -20)
     button.configure(
         {
-            "background": style_palette[palette_color_key["background"]],
+            "background": color_palette[palette_color_key["background"]],
             "activebackground": press_color,  # Mouse down
         }
     )
 
 
-def style_checkbutton(checkbutton: tk.Checkbutton, style_palette: dict) -> None:
+def style_checkbutton(checkbutton: tk.Checkbutton, color_palette: ColorPalette) -> None:
     """Style a tk.Checkbutton using the specified colors."""
-    press_color = change_color_luminance(style_palette[palette_color_key["background"]], -20)
+    press_color = change_color_luminance(color_palette[palette_color_key["background"]], -20)
     checkbutton.configure(
         {
-            "background": style_palette[palette_color_key["background"]],
+            "background": color_palette[palette_color_key["background"]],
             "activebackground": press_color,  # Mouse down
-            "selectcolor": style_palette[palette_color_key["selectcolor"]],  # Active selection
+            "selectcolor": color_palette[palette_color_key["selectcolor"]],  # Active selection
         }
     )
 
