@@ -25,12 +25,14 @@ import ttkbootstrap as ttk
 import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.style as ttk_style
 import ttkbootstrap.themes.standard as ttk_themes
-import ttkbootstrap.tooltip as ttk_tooltip
 from ttkbootstrap import constants as bootstyle
+from ttkbootstrap.widgets import tooltip as ttk_tooltip
 from ttkbootstrap_icons import Icon
 from ttkbootstrap_icons.providers import BaseFontProvider
 
 from qtpy_datalogger import datatypes
+
+ColorPalette = dict[str, str]
 
 logger = logging.getLogger(__name__)
 
@@ -1202,6 +1204,19 @@ def image_from_svg(
         "scale": scale,
     }
     return tksvg.SvgImage(**params)
+
+
+def palette_for_style(style_name: str) -> ColorPalette:
+    """Return the color palette for the specified theme name."""
+    requested_theme = ttk_themes.STANDARD_THEMES[style_name]
+    color_palette = requested_theme["colors"]
+    if not (
+        isinstance(color_palette, dict)
+        and all(isinstance(k, str) and isinstance(v, str) for k, v in color_palette.items())
+    ):
+        # No colors in palette
+        return {}
+    return color_palette
 
 
 def hex_string_for_style(style_name: str, theme_name: str = "") -> str:
