@@ -269,7 +269,7 @@ def test_detect_missing_secrets(tmp_path: pathlib.Path, caplog: pytest.LogCaptur
 
 def test_prompt_for_secrets(
     tmp_path: pathlib.Path,
-    capsys: pytest.CaptureFixture,
+    capsys: pytest.CaptureFixture[str],
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -288,7 +288,7 @@ def test_prompt_for_secrets(
 
 def test_merge_secrets(
     tmp_path: pathlib.Path,
-    capsys: pytest.CaptureFixture,
+    capsys: pytest.CaptureFixture[str],
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
