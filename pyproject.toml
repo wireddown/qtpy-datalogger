@@ -79,7 +79,7 @@ dev = [
 [tool.poe.tasks]
 _ruff_check = "uv run ruff check"
 _ruff_diff = "uv run ruff format --diff"
-_ty_check = "uv run ty check"
+_ty_check = "uv run ty check --output-format concise"
 _ruff_check_fix = "uv run ruff check --fix"
 _ruff_format = "uv run ruff format"
 _ty_check_fix = "uv run ty check --fix"
