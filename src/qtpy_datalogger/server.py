@@ -252,7 +252,7 @@ def _restart_mqtt_broker_with_wmi(broker_information: MqttBrokerInformation) -> 
         return did_anything
 
     def _call_service_control_function(
-        service_control_function: Callable,
+        service_control_function: Callable[[], tuple[int]],
         active_runmode: str,
         desired_runmode: str,
     ) -> str:
