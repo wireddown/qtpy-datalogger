@@ -112,6 +112,7 @@ respect-type-ignore-comments = false  # Disable support for `type: ignore` comme
 
 [tool.ty.rules]
 all = "error"
+"missing-override-decorator" = "ignore"  # Available in Python 3.12
 
 # Submodule snsr.pysh uses PC-only imports to help with development and testing
 [[tool.ty.overrides]]
