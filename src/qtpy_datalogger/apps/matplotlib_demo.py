@@ -188,6 +188,7 @@ class PlottingApp(guikit.AsyncWindow):
     def finalize_tool_window(self, task: asyncio.Task[object]) -> None:
         """Finalize the AxisToolDialog after the user closes it."""
         self.axis_tool_window = None
+        self.background_tasks.discard(task)
 
 
 if __name__ == "__main__":
