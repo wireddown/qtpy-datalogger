@@ -708,8 +708,9 @@ class DataViewer(guikit.AsyncWindow):
             loc="upper left",
             draggable=True,
         )
-        requested_theme = ttk_themes.STANDARD_THEMES[self.state.active_theme]
-        ttkbootstrap_matplotlib.apply_legend_style(legend, requested_theme)
+        color_palette = guikit.palette_for_style(self.state.active_theme)
+        if color_palette:
+            ttkbootstrap_matplotlib.apply_legend_style(legend, color_palette)
         self.canvas_figure.draw()
         self.update_file_message(f"Duration: {time_coordinates[-1]:.3f}")
         return data_series.keys().to_list()
