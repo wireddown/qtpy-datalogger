@@ -761,6 +761,7 @@ class DataViewer(guikit.AsyncWindow):
     def finalize_tool_window(self, task: asyncio.Task[object]) -> None:
         """Finalize the AxisToolDialog after the user closes it."""
         self.axis_tool_window = None
+        self.background_tasks.discard(task)
 
     def get_data(self) -> tuple[list[float], pd.DataFrame]:
         """Get the time coordinates and measurement series from the data file."""
