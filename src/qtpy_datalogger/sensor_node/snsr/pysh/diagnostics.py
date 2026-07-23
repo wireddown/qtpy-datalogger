@@ -16,7 +16,6 @@ from .py_shell import (
 )
 
 try:
-    from collections.abc import Callable
     from typing import BinaryIO
 except ImportError:
     pass
@@ -193,15 +192,3 @@ def builtin_input(message: str = "") -> str:
     """Use the built-in 'input' function to prompt the user with message and return the response."""
     from_remote = input(message)
     return from_remote
-
-
-# Can we set a new wrapped function on the serial object?
-# - AttributeError: can't set attribute 'write'
-def traced(traced_function: Callable, trace_list: list[str]) -> Callable:
-    """When traced_function is called, add a message containing the parameters to trace_list."""
-
-    def with_tracing(*args, **kwargs) -> Callable:  # noqa: ANN002 ANN003 -- wrapping an unknown function signature
-        trace_list.append(f"{args} {kwargs}")
-        return traced_function(*args, **kwargs)
-
-    return with_tracing
