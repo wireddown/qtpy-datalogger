@@ -128,6 +128,7 @@ include = ["src/qtpy_datalogger/sensor_node/snsr/node/classes.py"]
 [tool.ty.overrides.rules]
 invalid-argument-type = "ignore"
 invalid-return-type = "ignore"
+missing-type-argument = "ignore"
 
 # Do not leave suppressions in example code which might be used in projects that use other type checkers
 [[tool.ty.overrides]]
