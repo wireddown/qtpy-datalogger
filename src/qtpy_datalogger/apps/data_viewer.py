@@ -194,7 +194,7 @@ class DataViewer(guikit.AsyncWindow):
 
         self.plot_axes = plot_figure.add_subplot()
         self.axis_tool_window = None
-        self.background_tasks: set[asyncio.Task] = set()
+        self.background_tasks = set()
 
         toolbar_row = ttk.Frame(main, name="toolbar_row")
         toolbar_row.grid(column=0, row=1, sticky=tk.NSEW, padx=40, pady=(8, 0))
@@ -758,7 +758,7 @@ class DataViewer(guikit.AsyncWindow):
         limits = guikit.Range.create_infinite()
         self.axis_tool_window.attach_to_axis(event_args.canvas.draw_idle, self.plot_axes, axis, limits)
 
-    def finalize_tool_window(self, task: asyncio.Task) -> None:
+    def finalize_tool_window(self, task: asyncio.Task[object]) -> None:
         """Finalize the AxisToolDialog after the user closes it."""
         self.axis_tool_window = None
 
