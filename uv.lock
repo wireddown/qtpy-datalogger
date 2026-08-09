@@ -1645,14 +1645,14 @@ wheels = [
 
 [[package]]
 name = "ttkbootstrap"
-version = "1.20.3"
+version = "2.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pillow" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bd/88/bb1535edbd12e7b60223bee86241368b5d27043c001ef81d620ae8a56faf/ttkbootstrap-1.20.3.tar.gz", hash = "sha256:3350b80f79b0454c12558a7174c4bc4bd47905758843c3e8b0fbb19a0286fb69", size = 176262, upload-time = "2026-05-07T03:09:26.443Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ec/e8/1686fb0ba11750b99cb18f994464f99970656a96d9778b622069ae2731c2/ttkbootstrap-2.1.0.tar.gz", hash = "sha256:3e39916f01340f169cea55370cd5d36e8f9556399c06b78f11e759f09f24c258", size = 576678, upload-time = "2026-07-30T13:26:46.729Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/48/a5fd0d5d360e363f9bb289bef29b66103fd4ae1be1e3b6896a01b6e0f993/ttkbootstrap-1.20.3-py3-none-any.whl", hash = "sha256:95a05a4a663e3047be54edc220aa59c494a54f5c617a72a2c59a4bf634b97a5a", size = 191453, upload-time = "2026-05-07T03:09:24.935Z" },
+    { url = "https://files.pythonhosted.org/packages/da/bc/258e547b6c25552958511be1f75b8e82c9ba25d7afb6db0a919e313b0d3b/ttkbootstrap-2.1.0-py3-none-any.whl", hash = "sha256:f37fd4541aea11f185aa28c39badbb19f4f1b83f3ec442b42919a5cabd53c20f", size = 535901, upload-time = "2026-07-30T13:26:45.266Z" },
 ]
 
 [[package]]
