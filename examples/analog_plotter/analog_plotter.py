@@ -81,11 +81,8 @@ class AnalogPlotter(guikit.AsyncWindow):
         toolbar_frame = ttkbootstrap_matplotlib.create_styled_plot_toolbar(toolbar_row, self.canvas)
         toolbar_frame.grid(column=1, row=0, sticky=tk.EW)
 
-        theme_name = "darkly"
-        style = ttk.Style.get_instance()
-        if not style:
-            raise ValueError()
-        guikit.ThemeChanger.use_bootstrap_theme(theme_name, self.root_window)
+        theme_key = "cosmo-dark"
+        guikit.ThemeChanger.use_bootstrap_theme(theme_key, self.root_window)
 
         # Bookkeeping
         self.time_0 = time.monotonic()
