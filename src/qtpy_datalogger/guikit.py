@@ -948,9 +948,9 @@ class ThemeChanger:
         return owner.winfo_toplevel().bind_all(ThemeChanger.Event.BootstrapThemeChanged, command, add="+")
 
     @staticmethod
-    def use_bootstrap_theme(new_theme: str, owner: tk.Misc) -> None:
+    def use_bootstrap_theme(new_theme_key: str, owner: tk.Misc) -> None:
         """Change the ttkbootstrap theme and notify BootstrapThemeChanged subscribers."""
-        ttk.Style().theme_use(new_theme)
+        ttk.Style.get_instance().theme_use(new_theme_key)
         owner.winfo_toplevel().event_generate(ThemeChanger.Event.BootstrapThemeChanged)
 
 
