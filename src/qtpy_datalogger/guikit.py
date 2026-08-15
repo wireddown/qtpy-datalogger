@@ -1288,30 +1288,6 @@ def image_from_svg(
     return tksvg.SvgImage(**params)
 
 
-def palette_for_style(style_name: str) -> ColorPalette:
-    """Return the color palette for the specified theme name."""
-    requested_theme = ttk_themes.STANDARD_THEMES[style_name]
-    color_palette = requested_theme["colors"]
-    if not (
-        isinstance(color_palette, dict)
-        and all(isinstance(k, str) and isinstance(v, str) for k, v in color_palette.items())
-    ):
-        # No colors in palette
-        return {}
-    return color_palette
-
-
-def hex_string_for_style(style_name: str, theme_name: str = "") -> str:
-    """Return the '#RRGGBB' string for the specified style name for the active or specified theme."""
-    if not theme_name:
-        style = ttk.Style.get_instance()
-        if not (style and style.theme):
-            raise ValueError()
-        theme_name = style.theme.name
-    palette = ttk_themes.STANDARD_THEMES[theme_name]["colors"]
-    return palette[style_name]  # ty: ignore[invalid-argument-type] -- the "colors" entry is a dict[str, str]
-
-
 def open_folder(path: pathlib.Path) -> None:
     """Open Windows Explorer to the specified folder."""
     target = path if path.is_dir() else path.parent
