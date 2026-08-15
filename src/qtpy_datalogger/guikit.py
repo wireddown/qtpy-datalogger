@@ -715,7 +715,7 @@ class AxisToolDialog(AsyncDialog):
             parent=tool_frame,
             values=[AxisToolDialog.AxisScale.Linear, AxisToolDialog.AxisScale.Log],
             width=5,
-            justify=bootstyle.RIGHT,
+            justify=bootstyle.LEFT,
             completion=handle_scale_selection,
         )
         scale_input.grid(column=1, row=3, sticky=(tk.EW, tk.N))
