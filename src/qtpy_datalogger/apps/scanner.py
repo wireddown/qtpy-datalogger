@@ -196,7 +196,7 @@ class ScannerApp(guikit.AsyncWindow):
             selection_status_frame,
             values=[Constants.NoneChoice],
             width=20,
-            justify=bootstyle.RIGHT,
+            justify=bootstyle.LEFT,
             completion=self.on_combobox_selected,
         )
         self.selected_node_combobox.pack(side=tk.LEFT, padx=(8, 0))
