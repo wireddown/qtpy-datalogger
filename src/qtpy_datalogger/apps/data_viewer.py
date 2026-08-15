@@ -52,7 +52,7 @@ class AppState:
     def __init__(self, tk_root: tk.Tk) -> None:
         """Initialize a new AppState instance."""
         self._tk_notifier: tk.Tk = tk_root
-        self._theme_name: str = ""
+        self._theme_key: str = ""
         self._data_file: pathlib.Path = AppState.no_file
         self._replay_active: bool = False
         self._demo_folder: pathlib.Path = pathlib.Path(tempfile.mkdtemp())
@@ -61,14 +61,14 @@ class AppState:
     @property
     def active_theme(self) -> str:
         """Return the name of the active ttkbootstrap theme."""
-        return self._theme_name
+        return self._theme_key
 
     @active_theme.setter
     def active_theme(self, new_value: str) -> None:
         """Set a new value for active_theme and change themes to match."""
-        if new_value == self._theme_name:
+        if new_value == self._theme_key:
             return
-        self._theme_name = new_value
+        self._theme_key = new_value
         guikit.ThemeChanger.use_bootstrap_theme(new_value, self._tk_notifier)
 
     @property
