@@ -20,7 +20,6 @@ import matplotlib.figure as mpl_figure
 import numpy as np
 import pandas as pd
 import ttkbootstrap as ttk
-import ttkbootstrap.themes.standard as ttk_themes
 from ttkbootstrap import constants as bootstyle
 
 from qtpy_datalogger import guikit, ttkbootstrap_matplotlib
@@ -274,7 +273,7 @@ class DataViewer(guikit.AsyncWindow):
         self.reload_file(sender=main)
 
         # matplotlib elements must be created before setting the theme or the button icons initialize with poor color contrast
-        self.state.active_theme = "flatly"
+        self.state.active_theme = "cosmo-light"
 
     def build_window_menu(self) -> None:
         """Create the entries for the window menu bar."""
@@ -342,16 +341,9 @@ class DataViewer(guikit.AsyncWindow):
             underline=0,
         )
         # Themes submenu
-        light_themes = []
-        dark_themes = []
-        for theme_name, definition in ttk_themes.STANDARD_THEMES.items():
-            theme_kind = definition["type"]
-            if theme_kind == "light":
-                light_themes.append(theme_name)
-            elif theme_kind == "dark":
-                dark_themes.append(theme_name)
-            else:
-                raise ValueError()
+        theme_names = self.theme_catalog.theme_names
+        light_themes = sorted(key for key in theme_names if "Light" in key)
+        dark_themes = sorted(key for key in theme_names if "Dark" in key)
         self.themes_menu = tk.Menu(self.view_menu, name="themes_menu")
         self.view_menu.add_cascade(
             label=DataViewer.CommandName.Theme,
@@ -373,13 +365,13 @@ class DataViewer(guikit.AsyncWindow):
         for theme_name in sorted(light_themes):
             self.light_menu.add_radiobutton(
                 command=functools.partial(self.change_theme, theme_name),
-                label=theme_name.capitalize(),
+                label=theme_name,
                 variable=self.theme_variable,
             )
         for theme_name in sorted(dark_themes):
             self.dark_menu.add_radiobutton(
                 command=functools.partial(self.change_theme, theme_name),
-                label=theme_name.capitalize(),
+                label=theme_name,
                 variable=self.theme_variable,
             )
 
@@ -409,7 +401,7 @@ class DataViewer(guikit.AsyncWindow):
         """Create a ttk.Button using the specified text and FontAwesome icon_name."""
         text_spacing = 3 * " "
         button_image = guikit.image_from_icon(
-            icon_name, fill=guikit.hex_string_for_style(StyleKey.SelectFg), scale_to_height=24
+            icon_name, fill=self.theme_catalog.hex_color_for_style_key(StyleKey.SelectFg), scale_to_height=24
         )
         self.svg_images[icon_name] = button_image
         button = ttk.Button(
@@ -547,7 +539,7 @@ class DataViewer(guikit.AsyncWindow):
 
     def change_theme(self, theme_name: str) -> None:
         """Handle the View::Theme selection command."""
-        self.state.active_theme = theme_name
+        self.state.active_theme = self.theme_catalog.key_for_name(theme_name)
 
     def show_about(self) -> None:
         """Handle the Help::About menu command."""
@@ -624,8 +616,8 @@ class DataViewer(guikit.AsyncWindow):
     def on_theme_changed(self, event_args: tk.Event) -> None:
         """Handle the ThemeChanger.Event.BootstrapThemeChanged event."""
         theme_name = self.state.active_theme
-        self.theme_variable.set(theme_name.capitalize())
-        self.startup_label.configure(background=guikit.hex_string_for_style(bootstyle.LIGHT))
+        self.theme_variable.set(self.theme_catalog.name_for_key(theme_name))
+        self.startup_label.configure(background=self.theme_catalog.hex_color_for_style_key(bootstyle.LIGHT))
         all_menus = [
             self.file_menu,
             self.view_menu,
@@ -708,9 +700,7 @@ class DataViewer(guikit.AsyncWindow):
             loc="upper left",
             draggable=True,
         )
-        color_palette = guikit.palette_for_style(self.state.active_theme)
-        if color_palette:
-            ttkbootstrap_matplotlib.apply_legend_style(legend, color_palette)
+        ttkbootstrap_matplotlib.apply_legend_style(legend, self.theme_catalog.active_palette)
         self.canvas_figure.draw()
         self.update_file_message(f"Duration: {time_coordinates[-1]:.3f}")
         return data_series.keys().to_list()
