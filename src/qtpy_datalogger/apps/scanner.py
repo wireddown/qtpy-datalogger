@@ -143,7 +143,7 @@ class ScannerApp(guikit.AsyncWindow):
         self.group_input.insert(0, Default.MqttGroup)
         self.group_input.bind("<KeyPress>", self.run_command_on_enter)
         self.group_input.grid(column=1, row=0, sticky=tk.EW, padx=(8, 0))
-        self.scan_button = ttk.Button(scan_frame, text="Scan group", command=self.start_scan)
+        self.scan_button = ttk.Button(scan_frame, text="Scan group", command=self.start_scan, style=bootstyle.PRIMARY)
         self.scan_button.grid(column=2, row=0, padx=(8, 0))
         self.scan_feedback = ttk.Floodgauge(
             scan_frame, bootstyle=bootstyle.INFO, text="Scanning...", font="TkDefaultFont"
@@ -206,7 +206,7 @@ class ScannerApp(guikit.AsyncWindow):
         self.message_input = ttk.Entry(message_frame)
         self.message_input.bind("<KeyPress>", self.run_command_on_enter)
         self.message_input.pack(side=tk.LEFT, expand=True, fill=tk.X)
-        self.send_message_button = ttk.Button(message_frame, text="Send message", command=self.send_message)
+        self.send_message_button = ttk.Button(message_frame, text="Send message", command=self.send_message, style=bootstyle.PRIMARY)
         self.send_message_button.pack(side=tk.LEFT, padx=(8, 0))
 
         self.message_log = ttk_scrolled.ScrolledText(comms_frame, state=tk.DISABLED, wrap="word")
