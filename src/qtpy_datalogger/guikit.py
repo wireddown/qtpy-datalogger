@@ -371,7 +371,9 @@ class ActionDialog(AsyncDialog):
             image_name = "o"
         if not image_fill:
             image_fill = StyleKey.Fg
-        self.message_image = image_from_icon(name=image_name, fill=self.theme_catalog.hex_color_for_style_key(image_fill), scale_to_height=40)
+        self.message_image = image_from_icon(
+            name=image_name, fill=self.theme_catalog.hex_color_for_style_key(image_fill), scale_to_height=40
+        )
         if not message_paragraphs:
             message_paragraphs = ["Click OK to close."]
         self.message = "\n\n".join([click.wrap_text(message, width=64) for message in message_paragraphs])
@@ -864,8 +866,13 @@ class ThemeCatalog:
         custom_theme_objects = [
             ttk.Theme(
                 name="cosmo",
-                primary="#2780e3", success="#3fb618", info="#9954bb", warning="#ff7518", danger="#ff0039",
-                secondary="#373a3c", neutral="#adb5bd",
+                primary="#2780e3",
+                success="#3fb618",
+                info="#9954bb",
+                warning="#ff7518",
+                danger="#ff0039",
+                secondary="#373a3c",
+                neutral="#adb5bd",
                 light={"background": "#fdfdfd", "foreground": "#212529"},
                 dark={"background": "#212529", "foreground": "#fdfdfd"},
             ),
@@ -911,10 +918,7 @@ class ThemeCatalog:
     def active_palette(self) -> ColorPalette:
         """Get the ColorPalette for the active theme."""
         style = ttk.Style.get_instance()
-        palette = {
-            label: getattr(style.colors, label)
-            for label in ttk_Colors.label_iter()
-        }
+        palette = {label: getattr(style.colors, label) for label in ttk_Colors.label_iter()}
         return palette
 
     def hex_color_for_style_key(self, style_key: str) -> str:
