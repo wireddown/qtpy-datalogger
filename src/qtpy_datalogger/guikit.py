@@ -311,7 +311,7 @@ class ActionDialog(AsyncDialog):
             ActionDialog.Action.Cancel: ActionDialog.Information(
                 text="Cancel",
                 command=self.exit,
-                style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+                style=f"{bootstyle.OUTLINE} {bootstyle.WARNING}",
             ),
         }
 
@@ -1086,7 +1086,7 @@ def create_demo_ui(
     progressbar = ttk.Progressbar(
         root,
         length=280,
-        style=(bootstyle.STRIPED, bootstyle.SUCCESS),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+        style=f"{bootstyle.STRIPED} {bootstyle.SUCCESS}",
     )
     progressbar.grid(
         row=1,
@@ -1190,7 +1190,7 @@ def show_button_feedback(
     """Attach feedback to a ttk.Button command that indicates the command's outcome."""
     normal_text: str = button.cget("text")
     full_style: str = button.cget("style")
-    normal_style = tuple(trait.lower() for trait in full_style.split(".")[:-1])
+    normal_style = " ".join(trait.lower() for trait in full_style.split(".")[:-1])
 
     feedback_text = success_text if command_result else failure_text
     feedback_style = bootstyle.SUCCESS if command_result else bootstyle.DANGER
