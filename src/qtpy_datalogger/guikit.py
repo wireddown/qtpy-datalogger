@@ -821,7 +821,7 @@ class NumericInput:
         # - Validate all user actions: key input, focus-in, focus-out
         # - %P: incoming new value to be validated
         input_validator = parent.register(functools.partial(check_float_in_range, self._input_control, limits))
-        self._input_control.configure(validate=tk.ALL, validatecommand=(input_validator, "%P"))
+        self._input_control.configure(validate=tk.ALL, validatecommand=(input_validator, "%P"))  # ty: ignore[invalid-argument-type] -- we're using a registered Tcl function to help
         # Once valid, run a follow-up trace command to accept the new float
         self._input_variable.trace_add("write", functools.partial(handle_new_value, self._input_control))
         # Once a user action commits the new value, emit the value changed event
