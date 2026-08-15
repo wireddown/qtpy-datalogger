@@ -211,19 +211,31 @@ class DataViewer(guikit.AsyncWindow):
         action_panel.rowconfigure(1, weight=0)  # Message
 
         self.reload_button = self.create_icon_button(
-            action_panel, text=DataViewer.CommandName.Reload, icon_name="rotate-left", char_width=12, bootstyle=bootstyle.PRIMARY
+            action_panel,
+            text=DataViewer.CommandName.Reload,
+            icon_name="rotate-left",
+            char_width=12,
+            bootstyle=bootstyle.PRIMARY,
         )
         self.reload_button.configure(command=functools.partial(self.reload_file, self.reload_button))
         self.reload_button.grid(column=0, row=0, padx=(0, 8))
 
         self.replay_button = self.create_icon_button(
-            action_panel, text=DataViewer.CommandName.Replay, icon_name="clock-rotate-left", char_width=12, bootstyle=bootstyle.PRIMARY
+            action_panel,
+            text=DataViewer.CommandName.Replay,
+            icon_name="clock-rotate-left",
+            char_width=12,
+            bootstyle=bootstyle.PRIMARY,
         )
         self.replay_button.configure(command=functools.partial(self.replay_data, self.replay_button))
         self.replay_button.grid(column=1, row=0, padx=8)
 
         self.export_csv_button = self.create_icon_button(
-            action_panel, text=DataViewer.CommandName.Export, icon_name="table", char_width=12, bootstyle=bootstyle.PRIMARY
+            action_panel,
+            text=DataViewer.CommandName.Export,
+            icon_name="table",
+            char_width=12,
+            bootstyle=bootstyle.PRIMARY,
         )
         self.export_csv_button.grid(column=4, row=0, padx=(8, 0))
         self.export_csv_button.configure(command=functools.partial(self.export_canvas, self.export_csv_button))
