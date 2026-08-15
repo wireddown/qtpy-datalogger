@@ -7,7 +7,7 @@ from enum import StrEnum
 from tkinter import font
 
 import ttkbootstrap as ttk
-import ttkbootstrap.colorutils as ttk_colorutils
+import ttkbootstrap.utils as ttk_utils
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg,
@@ -251,9 +251,9 @@ def style_checkbutton(checkbutton: tk.Checkbutton, color_palette: gk.ColorPalett
 
 def change_color_luminance(original_color: str, delta: int) -> str:
     """Return a new hex color code that represents the same color with a changed brightness."""
-    as_hsl = ttk_colorutils.color_to_hsl(original_color, model="hex")
+    as_hsl = ttk_utils.color_to_hsl(original_color, model="hex")
     new_luminance = as_hsl[-1] + delta
-    new_color = ttk_colorutils.update_hsl_value(
+    new_color = ttk_utils.update_hsl_value(
         original_color,
         lum=new_luminance,
         inmodel="hex",
