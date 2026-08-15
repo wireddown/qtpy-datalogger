@@ -519,12 +519,12 @@ class AboutDialog(AsyncDialog):
         self.copy_version_button = ttk.Button(
             button_frame,
             text=self.copy_version_text,
-            style=bootstyle.OUTLINE,
+            style=f"{bootstyle.OUTLINE} {bootstyle.PRIMARY}",
             command=self.copy_version,
             width=12,
         )
         self.copy_version_button.grid(column=0, row=0, sticky=tk.E, padx=(0, 16))
-        ok_button = ttk.Button(button_frame, text="OK", command=self.exit)
+        ok_button = ttk.Button(button_frame, text="OK", command=self.exit, style=bootstyle.PRIMARY)
         ok_button.grid(column=1, row=0, sticky=tk.E)
         self.initial_focus = ok_button
 
@@ -917,7 +917,7 @@ class DemoWithAnimation(AsyncWindow):
             main_frame,
             text="Modal",
             command=functools.partial(self.open_dialog, DialogBehavior.Modal),
-            style=(bootstyle.SECONDARY, bootstyle.INFO),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+            style=bootstyle.SECONDARY,
         )
         modal_button.grid(column=0, row=3, sticky=tk.EW, padx=8)
 
@@ -925,7 +925,7 @@ class DemoWithAnimation(AsyncWindow):
             main_frame,
             text="Modeless",
             command=functools.partial(self.open_dialog, DialogBehavior.Modeless),
-            style=(bootstyle.SECONDARY, bootstyle.INFO),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+            style=bootstyle.SECONDARY,
         )
         modeless_button.grid(column=1, row=3, sticky=tk.EW, pady=8)
 
