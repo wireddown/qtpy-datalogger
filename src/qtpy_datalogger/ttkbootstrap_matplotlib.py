@@ -96,13 +96,7 @@ def create_styled_plot_toolbar(
 
 def handle_theme_changed(themed_widget: tk.Misc, event_args: tk.Event) -> None:
     """Handle the virtual event ThemeChanger.Event.BootstrapThemeChanged."""
-    style = ttk.Style.get_instance()
-    if not (style and style.theme):
-        raise ValueError()
-
-    color_palette = gk.palette_for_style(style.theme.name)
-    if not color_palette:
-        color_palette = gk.palette_for_style(bootstyle.DEFAULT_THEME)
+    color_palette = gk.ThemeCatalog.get_instance().active_palette
     if isinstance(themed_widget, tk.Canvas):
         apply_figure_style(themed_widget, color_palette)
     elif isinstance(themed_widget, tk.Frame):
