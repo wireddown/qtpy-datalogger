@@ -152,7 +152,7 @@ class ScannerApp(guikit.AsyncWindow):
             scan_frame,
             text="Clear results",
             command=self.clear_results,
-            style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+            style=f"{bootstyle.OUTLINE} {bootstyle.WARNING}",
         )
         clear_button.grid(column=3, row=0, padx=(8, 0))
 
@@ -224,14 +224,14 @@ class ScannerApp(guikit.AsyncWindow):
             action_frame,
             text="Copy all",
             command=self.copy_log,
-            style=(bootstyle.OUTLINE, bootstyle.PRIMARY),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+            style=f"{bootstyle.OUTLINE} {bootstyle.PRIMARY}",
         )
         copy_log_button.pack(side=tk.LEFT)
         clear_log_button = ttk.Button(
             action_frame,
             text="Clear all",
             command=self.clear_log,
-            style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+            style=f"{bootstyle.OUTLINE} {bootstyle.WARNING}",
         )
         clear_log_button.pack(side=tk.LEFT, padx=(8, 0))
         help_button = ttk.Button(action_frame, text="Online help", command=self.launch_help, style=bootstyle.OUTLINE)
