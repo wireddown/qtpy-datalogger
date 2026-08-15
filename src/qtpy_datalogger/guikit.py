@@ -22,7 +22,6 @@ import matplotlib.axes as mpl_axes
 import matplotlib.backend_bases as mpl_backend_bases
 import tksvg
 import ttkbootstrap as ttk
-import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.style as ttk_style
 import ttkbootstrap.themes.standard as ttk_themes
 from ttkbootstrap import constants as bootstyle
@@ -324,7 +323,7 @@ class ActionDialog(AsyncDialog):
         unwrapped_message = "\n\n".join(unwrapped_paragraphs)
         self.parent.clipboard_clear()
         self.parent.clipboard_append(unwrapped_message)
-        success_text = f"{ttk_icons.Emoji.get('white heavy check mark')}   Copied!"
+        success_text = "✅   Copied!"
         show_button_feedback(self.copy_button, command_result=True, success_text=success_text)
 
     def create_user_interface(self) -> None:
@@ -478,7 +477,7 @@ class AboutDialog(AsyncDialog):
         name_label = ttk.Label(message_frame, font=font.Font(weight="bold", size=28), text=self.app_name)
         name_label.grid(column=5, row=1, sticky=tk.W)
         self.notice_information = datatypes.SnsrNotice.get_package_notice_info(allow_dev_version=True)
-        bullet = ttk_icons.Emoji.get("black medium small square")
+        bullet = "◾"
         version_label = ttk.Label(
             message_frame,
             text=f"{self.notice_information.version} {bullet} {self.notice_information.timestamp:%Y-%m-%d} {bullet} {self.notice_information.commit}",
@@ -549,7 +548,7 @@ class AboutDialog(AsyncDialog):
         }
         self.parent.clipboard_clear()
         self.parent.clipboard_append(json.dumps(formatted_version))
-        success_text = f"{ttk_icons.Emoji.get('white heavy check mark')}   Copied!"
+        success_text = "✅   Copied!"
         show_button_feedback(self.copy_version_button, command_result=True, success_text=success_text)
 
     async def on_loop(self) -> None:
@@ -907,7 +906,7 @@ class DemoWithAnimation(AsyncWindow):
     def create_user_interface(self) -> None:
         """Create text label to animate and define buttons to demonstrate blocking vs async calls."""
         self.root_window.title("Async Demo")
-        icon = tk.PhotoImage(master=self.root_window, data=ttk_icons.Icon.info)
+        icon = ttk.Icon("info-circle-fill", size=20, color="#444444")
         self.root_window.iconphoto(True, icon)
 
         self.animation = "🤍🤍🤍🤍🤍🤍🤍🤍🤍🤍🩶🖤"
