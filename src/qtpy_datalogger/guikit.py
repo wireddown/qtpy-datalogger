@@ -23,8 +23,9 @@ import matplotlib.backend_bases as mpl_backend_bases
 import tksvg
 import ttkbootstrap as ttk
 import ttkbootstrap.style as ttk_style
-import ttkbootstrap.themes.standard as ttk_themes
+import ttkbootstrap.themes.builtin as ttk_themes
 from ttkbootstrap import constants as bootstyle
+from ttkbootstrap.style.theme import Colors as ttk_Colors
 from ttkbootstrap.widgets import tooltip as ttk_tooltip
 from ttkbootstrap_icons import Icon
 from ttkbootstrap_icons.providers import BaseFontProvider
@@ -835,6 +836,100 @@ class NumericInput:
     def value(self) -> float:
         """Return the value of the NumericInput as a float."""
         return self._value
+
+
+class ThemeCatalog:
+    """A class that describes the available themes."""
+
+    _instance = None
+
+    def __init__(self) -> "ThemeCatalog":
+        """Use ThemeCatalog.get_instance() instead of direct instantiation."""
+        message = "Use ThemeCatalog.get_instance() instead of direct instantiation"
+        raise TypeError(message)
+
+    @classmethod
+    def get_instance(cls) -> "ThemeCatalog":
+        """Get or create the singleton ThemeCatalog instance."""
+        if cls._instance is None:
+            # Bypass the __init__ guard
+            instance = object.__new__(cls)
+            instance._build_catalog()
+            cls._instance = instance
+        return cls._instance
+
+    def _build_catalog(self) -> None:
+        custom_theme_objects = [
+            ttk.Theme(
+                name="cosmo",
+                primary="#2780e3", success="#3fb618", info="#9954bb", warning="#ff7518", danger="#ff0039",
+                secondary="#373a3c", neutral="#adb5bd",
+                light={"background": "#fdfdfd", "foreground": "#212529"},
+                dark={"background": "#212529", "foreground": "#fdfdfd"},
+            ),
+        ]
+        custom_theme_names = set()
+        for custom_theme in custom_theme_objects:
+            custom_theme.register()
+            custom_theme_names.add(custom_theme.name.replace("-", "_").upper())
+
+        self._catalog = {}
+        style = ttk.Style.get_instance() or ttk.Style()
+        for theme_key in style.theme_names():
+            as_lower_name = theme_key.rsplit("-", 1)[0]
+            as_upper_name = as_lower_name.replace("-", "_").upper()
+            name = as_lower_name
+            if not (as_upper_name in custom_theme_names or hasattr(ttk_themes, as_upper_name)):
+                logger.warning(f"Theme '{theme_key}' is unknown, using '{name}' as the base name key.")
+            light_key = f"{name}-light"
+            dark_key = f"{name}-dark"
+            light_name = light_key.replace("-", " ").title()
+            dark_name = dark_key.replace("-", " ").title()
+            self._catalog[light_name] = {
+                "key": light_key,
+            }
+            self._catalog[dark_name] = {
+                "key": dark_key,
+            }
+
+    @property
+    def theme_names(self) -> list[str]:
+        """Get the catalog of available themes by name."""
+        light_themes = sorted(name for name in self._catalog if "Light" in name)
+        dark_themes = sorted(name for name in self._catalog if "Dark" in name)
+        return [*light_themes, *dark_themes]
+
+    @property
+    def active_theme_key(self) -> str:
+        """Get the theme key for the active theme."""
+        style = ttk.Style.get_instance()
+        return style.theme.name
+
+    @property
+    def active_palette(self) -> ColorPalette:
+        """Get the ColorPalette for the active theme."""
+        style = ttk.Style.get_instance()
+        palette = {
+            label: getattr(style.colors, label)
+            for label in ttk_Colors.label_iter()
+        }
+        return palette
+
+    def hex_color_for_style_key(self, style_key: str) -> str:
+        """Return the '#RRGGBB' string for the specified style name for the active theme."""
+        return self.active_palette[style_key]
+
+    def key_for_name(self, name: str) -> str:
+        """Get the theme key for the specified theme name."""
+        entry = self._catalog[name]
+        return entry["key"]
+
+    def name_for_key(self, key: str) -> str:
+        """Get the theme name for the specified theme key."""
+        for name, entry in self._catalog.items():
+            if entry["key"] == key:
+                return name
+        raise ValueError(key)
 
 
 class ThemeChanger:
