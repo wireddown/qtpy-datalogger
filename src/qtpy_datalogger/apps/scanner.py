@@ -83,7 +83,7 @@ class ScannerApp(guikit.AsyncWindow):
         self.svg_images = {}
 
         # Theme
-        guikit.ThemeChanger.use_bootstrap_theme("cosmo", self.root_window)
+        guikit.ThemeChanger.use_bootstrap_theme("cosmo-light", self.root_window)
 
         # Window title bar
         package = importlib.resources.files(qtpy_datalogger)
@@ -112,7 +112,7 @@ class ScannerApp(guikit.AsyncWindow):
 
         # Title
         telescope_image = guikit.image_from_svg(
-            telescope_data, fill=guikit.hex_string_for_style("fg"), scale_to_height=25
+            telescope_data, fill=self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.Fg), scale_to_height=25
         )
         self.svg_images["telescope"] = telescope_image
         title_font = font.Font(weight="bold", size=24)
@@ -171,7 +171,7 @@ class ScannerApp(guikit.AsyncWindow):
             results_frame,
             coldata=result_columns,
             height=9,  # Unit is lines of text
-            stripecolor=(guikit.hex_string_for_style(bootstyle.LIGHT), None),
+            stripecolor=(self.theme_catalog.hex_color_for_style_key(bootstyle.LIGHT), None),
         )
         self.scan_results_table.view.configure(selectmode=tk.BROWSE)
         self.scan_results_table.view.bind("<<TreeviewSelect>>", self.on_row_selected)
