@@ -140,6 +140,7 @@ class AsyncDialog:
         self.parent = parent
         self.root_window = ttk.Toplevel(master=self.parent, title=title)
         self.root_window.withdraw()
+        self.theme_catalog = ThemeCatalog.get_instance()
 
         self.io_loop = asyncio.get_running_loop()
         self.should_run_loop = True
@@ -229,6 +230,7 @@ class AsyncWindow:
         # Let subclasses set the window icon
         self.root_window = ttk.Window(iconphoto=None)
         self.root_window.withdraw()
+        self.theme_catalog = ThemeCatalog.get_instance()
 
         self.io_loop = asyncio.get_running_loop()
         self.should_run_loop = True
@@ -369,7 +371,7 @@ class ActionDialog(AsyncDialog):
             image_name = "o"
         if not image_fill:
             image_fill = StyleKey.Fg
-        self.message_image = image_from_icon(name=image_name, fill=hex_string_for_style(image_fill), scale_to_height=40)
+        self.message_image = image_from_icon(name=image_name, fill=self.theme_catalog.hex_color_for_style_key(image_fill), scale_to_height=40)
         if not message_paragraphs:
             message_paragraphs = ["Click OK to close."]
         self.message = "\n\n".join([click.wrap_text(message, width=64) for message in message_paragraphs])
@@ -486,7 +488,7 @@ class AboutDialog(AsyncDialog):
         version_label.grid(column=5, row=2, sticky=tk.W, padx=(2, 0))
         separator = ttk.Separator(message_frame)
         separator.grid(column=1, row=3, columnspan=5, sticky=tk.EW, pady=4)
-        button_text_color = hex_string_for_style(StyleKey.SelectFg)
+        button_text_color = self.theme_catalog.hex_color_for_style_key(StyleKey.SelectFg)
         spacer = "   "
         self.help_icon = image_from_icon("parachute-box", fill=button_text_color, scale_to_width=16)
         help_button = ttk.Button(
@@ -533,7 +535,7 @@ class AboutDialog(AsyncDialog):
     def refresh_icons(self) -> None:
         """Refresh the icons in the dialog using the active style."""
         icon_height = 48
-        icon_color = hex_string_for_style(StyleKey.Fg)
+        icon_color = self.theme_catalog.hex_color_for_style_key(StyleKey.Fg)
         self.app_icon_images.clear()
         for icon_name, icon_label in zip(self.app_icons, self.icon_labels, strict=True):
             icon_image = image_from_icon(icon_name, fill=icon_color, scale_to_height=icon_height)
@@ -1147,44 +1149,30 @@ async def calculate_async(progressbar: ttk.Progressbar) -> None:
 
 def create_theme_combobox(parent: tk.BaseWidget) -> ttk.Combobox:
     """Create and return a Combobox that lists the available themes and handles the selection event."""
-    style = ttk.Style.get_instance()
-    if not (style and style.theme):
-        raise ValueError()
-    active_theme = style.theme
-    light_themes = []
-    dark_themes = []
-    for theme_name, definition in ttk_themes.STANDARD_THEMES.items():
-        theme_kind = definition["type"]
-        if theme_kind == "light":
-            light_themes.append(theme_name.capitalize())
-        elif theme_kind == "dark":
-            dark_themes.append(theme_name.capitalize())
-        else:
-            raise ValueError()
-    sorted_by_kind = [*sorted(light_themes), *sorted(dark_themes)]
+    theme_catalog = ThemeCatalog.get_instance()
 
     def handle_change_theme(new_selection: str) -> None:
         """Handle the selection event for the theme Combobox."""
-        ThemeChanger.use_bootstrap_theme(new_selection.lower(), parent)
+        new_theme_key = theme_catalog.key_for_name(new_selection)
+        ThemeChanger.use_bootstrap_theme(new_theme_key, parent)
 
     def on_theme_changed(themed_widget: tk.Misc, event_args: tk.Event) -> None:
         """Handle the ThemeChanger.Event.BootstrapThemeChanged event."""
         sending_combobox = themed_widget
         if not isinstance(sending_combobox, ttk.Combobox):
             raise TypeError()
-        style = ttk.Style.get_instance()
-        if not (style and style.theme):
-            raise ValueError()
-        sending_combobox.set(style.theme.name.capitalize())
+        theme_name = theme_catalog.name_for_key(theme_catalog.active_theme_key)
+        sending_combobox.set(theme_name)
 
     theme_combobox = create_dropdown_combobox(
         parent,
-        values=sorted_by_kind,
-        width=12,
+        values=theme_catalog.theme_names,
+        width=17,
         justify=bootstyle.LEFT,
         completion=handle_change_theme,
     )
-    theme_combobox.set(active_theme.name.capitalize())
+    active_theme_name = theme_catalog.name_for_key(theme_catalog.active_theme_key)
+    theme_combobox.set(active_theme_name)
     ThemeChanger.add_handler(theme_combobox, functools.partial(on_theme_changed, theme_combobox))
     return theme_combobox
 
