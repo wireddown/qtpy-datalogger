@@ -10,7 +10,6 @@ from enum import StrEnum
 from tkinter import font
 
 import ttkbootstrap as ttk
-import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.widgets.scrolled as ttk_scrolled
 import ttkbootstrap.widgets.tableview as ttk_tableview
 from ttkbootstrap import constants as bootstyle
@@ -310,9 +309,9 @@ class ScannerApp(guikit.AsyncWindow):
 
     def update_status_message_and_style(self, new_message: str, new_style: str) -> None:
         """Set the status message to a new string and style."""
-        status_emoji = ttk_icons.Emoji.get("white heavy check mark")
+        status_emoji = "✅"
         if new_style in [bootstyle.WARNING, bootstyle.DANGER]:
-            status_emoji = ttk_icons.Emoji.get("cross mark")
+            status_emoji = "❌"
         self.status_icon_label.configure(text=status_emoji, bootstyle=new_style)
         self.status_message.configure(text=new_message, bootstyle=new_style)
 
@@ -459,9 +458,9 @@ class ScannerApp(guikit.AsyncWindow):
         async def send_message_and_get_response() -> tuple[str, str]:
             await io_protocol.setup_io()
             custom_command = node_classes.ActionInformation.create_custom_command(message)
-            sent_emoji = ttk_icons.Emoji.get("black large square")
-            received_emoji = ttk_icons.Emoji.get("leftwards black arrow")
-            status_emoji = ttk_icons.Emoji.get("white large square")
+            sent_emoji = "⬛"
+            received_emoji = "➡"
+            status_emoji = "⬜"
             self.append_text_to_log(f"{sent_emoji} {message}\n")
             sent_action = await io_protocol.send_message(
                 qtpy_device.node_id, custom_command.command, custom_command.parameters
