@@ -120,12 +120,8 @@ class PlottingApp(guikit.AsyncWindow):
         toolbar_frame = ttkbootstrap_matplotlib.create_styled_plot_toolbar(toolbar_row, self.canvas)
         toolbar_frame.grid(column=1, row=0, sticky=tk.EW)
 
-        theme_name = "cosmo"
-        style = ttk.Style.get_instance()
-        if not style:
-            raise ValueError()
-        self.theme_combobox.set(theme_name.capitalize())
-        guikit.ThemeChanger.use_bootstrap_theme(theme_name, self.root_window)
+        theme_key = "cosmo-light"
+        guikit.ThemeChanger.use_bootstrap_theme(theme_key, self.root_window)
 
     async def on_loop(self) -> None:
         """Update the window with new information."""
