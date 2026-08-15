@@ -206,7 +206,9 @@ class ScannerApp(guikit.AsyncWindow):
         self.message_input = ttk.Entry(message_frame)
         self.message_input.bind("<KeyPress>", self.run_command_on_enter)
         self.message_input.pack(side=tk.LEFT, expand=True, fill=tk.X)
-        self.send_message_button = ttk.Button(message_frame, text="Send message", command=self.send_message, style=bootstyle.PRIMARY)
+        self.send_message_button = ttk.Button(
+            message_frame, text="Send message", command=self.send_message, style=bootstyle.PRIMARY
+        )
         self.send_message_button.pack(side=tk.LEFT, padx=(8, 0))
 
         self.message_log = ttk_scrolled.ScrolledText(comms_frame, state=tk.DISABLED, wrap="word")
