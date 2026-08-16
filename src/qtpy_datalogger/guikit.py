@@ -41,6 +41,7 @@ class StyleKey(enum.StrEnum):
     """A class that extends the palette names of ttkbootstrap styles."""
 
     Fg = "fg"
+    Foreground = "foreground"
     SelectFg = "selectfg"
 
 
@@ -477,8 +478,6 @@ class AboutDialog(AsyncDialog):
             icon_label.grid(column=icon_column, row=1, rowspan=2)
             self.icon_labels.append(icon_label)
 
-        self.refresh_icons()
-
         name_label = ttk.Label(message_frame, font=font.Font(weight="bold", size=28), text=self.app_name)
         name_label.grid(column=5, row=1, sticky=tk.W)
         self.notice_information = datatypes.SnsrNotice.get_package_notice_info(allow_dev_version=True)
@@ -493,7 +492,7 @@ class AboutDialog(AsyncDialog):
         button_text_color = self.theme_catalog.hex_color_for_style_key(StyleKey.SelectFg)
         spacer = "   "
         self.help_icon = image_from_icon("parachute-box", fill=button_text_color, scale_to_width=16)
-        help_button = ttk.Button(
+        self.help_button = ttk.Button(
             message_frame,
             compound=tk.LEFT,
             image=self.help_icon,
@@ -502,9 +501,9 @@ class AboutDialog(AsyncDialog):
             width=18,
             command=functools.partial(webbrowser.open_new_tab, self.help_url),
         )
-        help_button.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
+        self.help_button.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
         self.source_icon = image_from_icon("github-alt-brands", fill=button_text_color, scale_to_width=16)
-        source_button = ttk.Button(
+        self.source_button = ttk.Button(
             message_frame,
             compound=tk.LEFT,
             image=self.source_icon,
@@ -513,7 +512,7 @@ class AboutDialog(AsyncDialog):
             width=18,
             command=functools.partial(webbrowser.open_new_tab, self.source_url),
         )
-        source_button.grid(column=5, row=5, sticky=tk.W, pady=(22, 0))
+        self.source_button.grid(column=5, row=5, sticky=tk.W, pady=(22, 0))
 
         button_frame = ttk.Frame(main_frame)
         button_frame.grid(column=0, row=1, sticky=tk.NSEW, padx=(0, 16), pady=(8, 0))
@@ -532,17 +531,28 @@ class AboutDialog(AsyncDialog):
         ok_button.grid(column=1, row=0, sticky=tk.E)
         self.initial_focus = ok_button
 
+        self.refresh_icons()
         ThemeChanger.add_handler(self.root_window, self.on_theme_changed)
 
     def refresh_icons(self) -> None:
         """Refresh the icons in the dialog using the active style."""
         icon_height = 48
-        icon_color = self.theme_catalog.hex_color_for_style_key(StyleKey.Fg)
         self.app_icon_images.clear()
         for icon_name, icon_label in zip(self.app_icons, self.icon_labels, strict=True):
+            icon_color = self.theme_catalog.hex_color_for_style_key(StyleKey.Foreground, icon_label)
             icon_image = image_from_icon(icon_name, fill=icon_color, scale_to_height=icon_height)
             self.app_icon_images.append(icon_image)
             icon_label.configure(image=icon_image)
+
+        button_icon_height = 16
+        help_icon_fill = self.theme_catalog.hex_color_for_style_key(StyleKey.Foreground, self.help_button)
+        self.help_icon = image_from_icon("parachute-box", fill=help_icon_fill, scale_to_width=button_icon_height)
+        self.help_button.configure(image=self.help_icon)
+        source_icon_fill = self.theme_catalog.hex_color_for_style_key(StyleKey.Foreground, self.source_button)
+        self.source_icon = image_from_icon(
+            "github-alt-brands", fill=source_icon_fill, scale_to_width=button_icon_height
+        )
+        self.source_button.configure(image=self.source_icon)
 
     def copy_version(self) -> None:
         """Copy the version information to the clipboard."""
