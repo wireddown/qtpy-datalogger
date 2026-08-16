@@ -624,8 +624,10 @@ class DataViewer(guikit.AsyncWindow):
         """Handle the ThemeChanger.Event.BootstrapThemeChanged event."""
         theme_name = self.state.active_theme
         self.theme_variable.set(self.theme_catalog.name_for_key(theme_name))
-        self.startup_label.configure(background=self.theme_catalog.hex_color_for_style_key(bootstyle.LIGHT))
-        self.startup_label.configure(foreground=self.theme_catalog.hex_color_for_style_key(bootstyle.DARK))
+        self.startup_label.configure(
+            background=self.theme_catalog.hex_color_for_style_key(bootstyle.LIGHT),
+            foreground=self.theme_catalog.hex_color_for_style_key(bootstyle.DARK),
+        )
 
         all_button_icon_names = sorted(self.svg_buttons.keys())
         for button_icon_name in all_button_icon_names:
