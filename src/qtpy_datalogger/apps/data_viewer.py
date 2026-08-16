@@ -29,13 +29,6 @@ logger = logging.getLogger(pathlib.Path(__file__).stem)
 app_icon_color = "#07a000"
 
 
-class StyleKey(StrEnum):
-    """A class that extends the palette names of ttkbootstrap styles."""
-
-    Fg = "fg"
-    SelectFg = "selectfg"
-
-
 class AppState:
     """A class that models and controls the app's settings and runtime state."""
 
@@ -148,6 +141,7 @@ class DataViewer(guikit.AsyncWindow):
         self.replay_variable = tk.BooleanVar()
         self.plots_variables: list[tk.BooleanVar] = []
         self.svg_images: dict[str, tk.Image] = {}
+        self.svg_buttons: dict[str, ttk.Button] = {}
 
         # Supports app state
         self.replay_index = 0
@@ -413,9 +407,8 @@ class DataViewer(guikit.AsyncWindow):
         """Create a ttk.Button using the specified text and FontAwesome icon_name."""
         text_spacing = 3 * " "
         button_image = guikit.image_from_icon(
-            icon_name, fill=self.theme_catalog.hex_color_for_style_key(StyleKey.SelectFg), scale_to_height=24
+            icon_name, fill=self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.SelectFg), scale_to_height=24
         )
-        self.svg_images[icon_name] = button_image
         button = ttk.Button(
             parent,
             text=text + spaces * text_spacing,
@@ -425,6 +418,8 @@ class DataViewer(guikit.AsyncWindow):
             padding=(4, 6, 4, 4),
             bootstyle=bootstyle,
         )
+        self.svg_images[icon_name] = button_image
+        self.svg_buttons[icon_name] = button
         return button
 
     async def on_loop(self) -> None:
@@ -630,6 +625,16 @@ class DataViewer(guikit.AsyncWindow):
         theme_name = self.state.active_theme
         self.theme_variable.set(self.theme_catalog.name_for_key(theme_name))
         self.startup_label.configure(background=self.theme_catalog.hex_color_for_style_key(bootstyle.LIGHT))
+        self.startup_label.configure(foreground=self.theme_catalog.hex_color_for_style_key(bootstyle.DARK))
+
+        all_button_icon_names = sorted(self.svg_buttons.keys())
+        for button_icon_name in all_button_icon_names:
+            button = self.svg_buttons[button_icon_name]
+            icon_fill = self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.Foreground, button)
+            button_image = guikit.image_from_icon(button_icon_name, fill=icon_fill, scale_to_height=24)
+            self.svg_images[button_icon_name] = button_image
+            button.configure(image=button_image)
+
         all_menus = [
             self.file_menu,
             self.view_menu,
@@ -713,6 +718,9 @@ class DataViewer(guikit.AsyncWindow):
             draggable=True,
         )
         ttkbootstrap_matplotlib.apply_legend_style(legend, self.theme_catalog.active_palette)
+        ttkbootstrap_matplotlib.apply_figure_style(
+            self.canvas_figure.get_tk_widget(), self.theme_catalog.active_palette
+        )
         self.canvas_figure.draw()
         self.update_file_message(f"Duration: {time_coordinates[-1]:.3f}")
         return data_series.keys().to_list()
