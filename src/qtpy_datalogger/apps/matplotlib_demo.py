@@ -11,6 +11,7 @@ import matplotlib.backend_bases as mpl_backend_bases
 import numpy as np
 import ttkbootstrap as ttk
 from matplotlib.figure import Figure
+from ttkbootstrap import constants as bootstyle
 
 from qtpy_datalogger import guikit, ttkbootstrap_matplotlib
 
@@ -62,7 +63,7 @@ class PlottingApp(guikit.AsyncWindow):
         )
         slider_update.grid(column=1, row=0, padx=(4, 0))
 
-        separator = ttk.Frame(slider_frame, style="primary", width=2, height=24)
+        separator = ttk.Frame(slider_frame, style=bootstyle.PRIMARY, width=2, height=24)
         separator.grid(column=2, row=0, padx=(40, 32))
 
         combobox_label = ttk.Label(slider_frame, text="Theme")
