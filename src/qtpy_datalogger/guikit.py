@@ -921,8 +921,12 @@ class ThemeCatalog:
         palette = {label: getattr(style.colors, label) for label in ttk_Colors.label_iter()}
         return palette
 
-    def hex_color_for_style_key(self, style_key: str) -> str:
-        """Return the '#RRGGBB' string for the specified style name for the active theme."""
+    def hex_color_for_style_key(self, style_key: str, widget: tk.Widget | None = None) -> str:
+        """Return the '#RRGGBB' string for the specified style name for the active theme and widget."""
+        if widget:
+            style_name = widget.cget("style")
+            color = ttk.Style().get_instance().lookup(style_name, style_key)
+            return color
         return self.active_palette[style_key]
 
     def key_for_name(self, name: str) -> str:
