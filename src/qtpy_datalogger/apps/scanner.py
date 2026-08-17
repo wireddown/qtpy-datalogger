@@ -88,8 +88,8 @@ class ScannerApp(guikit.AsyncWindow):
         # Window title bar
         package = importlib.resources.files(qtpy_datalogger)
         assets = package.joinpath("assets")
-        telescope_data = assets.joinpath("telescope.svg").read_text()
-        icon = guikit.image_from_svg(telescope_data, fill="#07a000", scale_to_height=64)
+        self.telescope_data = assets.joinpath("telescope.svg").read_text()
+        icon = guikit.image_from_svg(self.telescope_data, fill="#07a000", scale_to_height=64)
         self.root_window.minsize(width=560, height=572)
         self.root_window.title(Constants.AppName)
         self.root_window.iconphoto(True, icon)
@@ -112,11 +112,11 @@ class ScannerApp(guikit.AsyncWindow):
 
         # Title
         telescope_image = guikit.image_from_svg(
-            telescope_data, fill=self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.Fg), scale_to_height=25
+            self.telescope_data, fill=self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.Fg), scale_to_height=25
         )
         self.svg_images["telescope"] = telescope_image
         title_font = font.Font(weight="bold", size=24)
-        title_label = ttk.Label(
+        self.title_label = ttk.Label(
             main,
             text=f" {Constants.AppName}",
             image=telescope_image,
@@ -126,7 +126,7 @@ class ScannerApp(guikit.AsyncWindow):
             borderwidth=0,
             relief=tk.SOLID,
         )
-        title_label.grid(column=0, row=0)
+        self.title_label.grid(column=0, row=0)
 
         # Scan group
         scan_frame = ttk.Frame(main, name="scan_frame", borderwidth=0, relief=tk.SOLID)
@@ -236,6 +236,10 @@ class ScannerApp(guikit.AsyncWindow):
         clear_log_button.pack(side=tk.LEFT, padx=(8, 0))
         help_button = ttk.Button(action_frame, text="Online help", command=self.launch_help, style=bootstyle.OUTLINE)
         help_button.pack(side=tk.RIGHT, padx=(8, 0))
+        toggle_theme_mode_button = ttk.Button(
+            action_frame, icon="circle-half", command=self.toggle_theme_mode, style=bootstyle.OUTLINE
+        )
+        toggle_theme_mode_button.pack(side=tk.RIGHT, padx=(8, 0))
 
         self.clear_results()
 
@@ -501,6 +505,15 @@ class ScannerApp(guikit.AsyncWindow):
         communicate_task = asyncio.create_task(send_message_and_get_response())
         self.background_tasks.add(communicate_task)
         communicate_task.add_done_callback(finalize_message)
+
+    def toggle_theme_mode(self) -> None:
+        """Toggle the theme between its Light and Dark modes."""
+        guikit.ThemeChanger.toggle_light_dark()
+        telescope_image = guikit.image_from_svg(
+            self.telescope_data, fill=self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.Fg), scale_to_height=25
+        )
+        self.svg_images["telescope"] = telescope_image
+        self.title_label.configure(image=telescope_image)
 
     def launch_help(self) -> None:
         """Open online help for the app."""
