@@ -10,7 +10,6 @@ from enum import StrEnum
 from tkinter import font
 
 import ttkbootstrap as ttk
-import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.widgets.scrolled as ttk_scrolled
 import ttkbootstrap.widgets.tableview as ttk_tableview
 from ttkbootstrap import constants as bootstyle
@@ -84,13 +83,13 @@ class ScannerApp(guikit.AsyncWindow):
         self.svg_images = {}
 
         # Theme
-        guikit.ThemeChanger.use_bootstrap_theme("cosmo", self.root_window)
+        guikit.ThemeChanger.use_bootstrap_theme("cosmo-light", self.root_window)
 
         # Window title bar
         package = importlib.resources.files(qtpy_datalogger)
         assets = package.joinpath("assets")
-        telescope_data = assets.joinpath("telescope.svg").read_text()
-        icon = guikit.image_from_svg(telescope_data, fill="#07a000", scale_to_height=64)
+        self.telescope_data = assets.joinpath("telescope.svg").read_text()
+        icon = guikit.image_from_svg(self.telescope_data, fill="#07a000", scale_to_height=64)
         self.root_window.minsize(width=560, height=572)
         self.root_window.title(Constants.AppName)
         self.root_window.iconphoto(True, icon)
@@ -113,11 +112,11 @@ class ScannerApp(guikit.AsyncWindow):
 
         # Title
         telescope_image = guikit.image_from_svg(
-            telescope_data, fill=guikit.hex_string_for_style("fg"), scale_to_height=25
+            self.telescope_data, fill=self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.Fg), scale_to_height=25
         )
         self.svg_images["telescope"] = telescope_image
         title_font = font.Font(weight="bold", size=24)
-        title_label = ttk.Label(
+        self.title_label = ttk.Label(
             main,
             text=f" {Constants.AppName}",
             image=telescope_image,
@@ -127,7 +126,7 @@ class ScannerApp(guikit.AsyncWindow):
             borderwidth=0,
             relief=tk.SOLID,
         )
-        title_label.grid(column=0, row=0)
+        self.title_label.grid(column=0, row=0)
 
         # Scan group
         scan_frame = ttk.Frame(main, name="scan_frame", borderwidth=0, relief=tk.SOLID)
@@ -144,7 +143,7 @@ class ScannerApp(guikit.AsyncWindow):
         self.group_input.insert(0, Default.MqttGroup)
         self.group_input.bind("<KeyPress>", self.run_command_on_enter)
         self.group_input.grid(column=1, row=0, sticky=tk.EW, padx=(8, 0))
-        self.scan_button = ttk.Button(scan_frame, text="Scan group", command=self.start_scan)
+        self.scan_button = ttk.Button(scan_frame, text="Scan group", command=self.start_scan, style=bootstyle.PRIMARY)
         self.scan_button.grid(column=2, row=0, padx=(8, 0))
         self.scan_feedback = ttk.Floodgauge(
             scan_frame, bootstyle=bootstyle.INFO, text="Scanning...", font="TkDefaultFont"
@@ -153,7 +152,7 @@ class ScannerApp(guikit.AsyncWindow):
             scan_frame,
             text="Clear results",
             command=self.clear_results,
-            style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+            style=f"{bootstyle.OUTLINE} {bootstyle.WARNING}",
         )
         clear_button.grid(column=3, row=0, padx=(8, 0))
 
@@ -172,7 +171,7 @@ class ScannerApp(guikit.AsyncWindow):
             results_frame,
             coldata=result_columns,
             height=9,  # Unit is lines of text
-            stripecolor=(guikit.hex_string_for_style(bootstyle.LIGHT), None),
+            stripecolor=(self.theme_catalog.hex_color_for_style_key(bootstyle.LIGHT), None),
         )
         self.scan_results_table.view.configure(selectmode=tk.BROWSE)
         self.scan_results_table.view.bind("<<TreeviewSelect>>", self.on_row_selected)
@@ -197,7 +196,7 @@ class ScannerApp(guikit.AsyncWindow):
             selection_status_frame,
             values=[Constants.NoneChoice],
             width=20,
-            justify=bootstyle.RIGHT,
+            justify=bootstyle.LEFT,
             completion=self.on_combobox_selected,
         )
         self.selected_node_combobox.pack(side=tk.LEFT, padx=(8, 0))
@@ -207,7 +206,9 @@ class ScannerApp(guikit.AsyncWindow):
         self.message_input = ttk.Entry(message_frame)
         self.message_input.bind("<KeyPress>", self.run_command_on_enter)
         self.message_input.pack(side=tk.LEFT, expand=True, fill=tk.X)
-        self.send_message_button = ttk.Button(message_frame, text="Send message", command=self.send_message)
+        self.send_message_button = ttk.Button(
+            message_frame, text="Send message", command=self.send_message, style=bootstyle.PRIMARY
+        )
         self.send_message_button.pack(side=tk.LEFT, padx=(8, 0))
 
         self.message_log = ttk_scrolled.ScrolledText(comms_frame, state=tk.DISABLED, wrap="word")
@@ -223,18 +224,22 @@ class ScannerApp(guikit.AsyncWindow):
             action_frame,
             text="Copy all",
             command=self.copy_log,
-            style=(bootstyle.OUTLINE, bootstyle.PRIMARY),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+            style=f"{bootstyle.OUTLINE} {bootstyle.PRIMARY}",
         )
         copy_log_button.pack(side=tk.LEFT)
         clear_log_button = ttk.Button(
             action_frame,
             text="Clear all",
             command=self.clear_log,
-            style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+            style=f"{bootstyle.OUTLINE} {bootstyle.WARNING}",
         )
         clear_log_button.pack(side=tk.LEFT, padx=(8, 0))
         help_button = ttk.Button(action_frame, text="Online help", command=self.launch_help, style=bootstyle.OUTLINE)
         help_button.pack(side=tk.RIGHT, padx=(8, 0))
+        toggle_theme_mode_button = ttk.Button(
+            action_frame, icon="circle-half", command=self.toggle_theme_mode, style=bootstyle.OUTLINE
+        )
+        toggle_theme_mode_button.pack(side=tk.RIGHT, padx=(8, 0))
 
         self.clear_results()
 
@@ -310,9 +315,9 @@ class ScannerApp(guikit.AsyncWindow):
 
     def update_status_message_and_style(self, new_message: str, new_style: str) -> None:
         """Set the status message to a new string and style."""
-        status_emoji = ttk_icons.Emoji.get("white heavy check mark")
+        status_emoji = "✅"
         if new_style in [bootstyle.WARNING, bootstyle.DANGER]:
-            status_emoji = ttk_icons.Emoji.get("cross mark")
+            status_emoji = "❌"
         self.status_icon_label.configure(text=status_emoji, bootstyle=new_style)
         self.status_message.configure(text=new_message, bootstyle=new_style)
 
@@ -459,9 +464,9 @@ class ScannerApp(guikit.AsyncWindow):
         async def send_message_and_get_response() -> tuple[str, str]:
             await io_protocol.setup_io()
             custom_command = node_classes.ActionInformation.create_custom_command(message)
-            sent_emoji = ttk_icons.Emoji.get("black large square")
-            received_emoji = ttk_icons.Emoji.get("leftwards black arrow")
-            status_emoji = ttk_icons.Emoji.get("white large square")
+            sent_emoji = "⬛"
+            received_emoji = "➡"
+            status_emoji = "⬜"
             self.append_text_to_log(f"{sent_emoji} {message}\n")
             sent_action = await io_protocol.send_message(
                 qtpy_device.node_id, custom_command.command, custom_command.parameters
@@ -500,6 +505,15 @@ class ScannerApp(guikit.AsyncWindow):
         communicate_task = asyncio.create_task(send_message_and_get_response())
         self.background_tasks.add(communicate_task)
         communicate_task.add_done_callback(finalize_message)
+
+    def toggle_theme_mode(self) -> None:
+        """Toggle the theme between its Light and Dark modes."""
+        guikit.ThemeChanger.toggle_light_dark()
+        telescope_image = guikit.image_from_svg(
+            self.telescope_data, fill=self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.Fg), scale_to_height=25
+        )
+        self.svg_images["telescope"] = telescope_image
+        self.title_label.configure(image=telescope_image)
 
     def launch_help(self) -> None:
         """Open online help for the app."""

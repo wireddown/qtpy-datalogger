@@ -1458,7 +1458,7 @@ requires-dist = [
     { name = "psutil", specifier = ">=7.2.2" },
     { name = "pyserial", specifier = ">=3.5" },
     { name = "tksvg", specifier = ">=0.7.4" },
-    { name = "ttkbootstrap", specifier = ">=1.20.2" },
+    { name = "ttkbootstrap", specifier = ">=2.2.0" },
     { name = "ttkbootstrap-icons", specifier = ">=4.0.0" },
     { name = "ttkbootstrap-icons-fa", specifier = ">=1.0.2" },
     { name = "wmi", specifier = ">=1.5.1" },
@@ -1645,14 +1645,14 @@ wheels = [
 
 [[package]]
 name = "ttkbootstrap"
-version = "1.20.3"
+version = "2.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pillow" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bd/88/bb1535edbd12e7b60223bee86241368b5d27043c001ef81d620ae8a56faf/ttkbootstrap-1.20.3.tar.gz", hash = "sha256:3350b80f79b0454c12558a7174c4bc4bd47905758843c3e8b0fbb19a0286fb69", size = 176262, upload-time = "2026-05-07T03:09:26.443Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d1/43/ce6e42ba60211097a9fe4125f2c43943a9f1d586fc650355aa98c1716461/ttkbootstrap-2.2.0.tar.gz", hash = "sha256:3751bb4c5439025408387df11fd5c8599680284b44beb2fd985ba3fdd3ae60cb", size = 603405, upload-time = "2026-08-06T11:26:43.488Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/13/48/a5fd0d5d360e363f9bb289bef29b66103fd4ae1be1e3b6896a01b6e0f993/ttkbootstrap-1.20.3-py3-none-any.whl", hash = "sha256:95a05a4a663e3047be54edc220aa59c494a54f5c617a72a2c59a4bf634b97a5a", size = 191453, upload-time = "2026-05-07T03:09:24.935Z" },
+    { url = "https://files.pythonhosted.org/packages/0d/33/4032969d165bb8e6f599bc4fa9cbc6f309b349dfd9f17eed6a3c62e76cf1/ttkbootstrap-2.2.0-py3-none-any.whl", hash = "sha256:c4a41f8800591f4ab3b8c3ad7dd41eaa51bfc937b49ebb31ae499ce115e37072", size = 553834, upload-time = "2026-08-06T11:26:42.189Z" },
 ]
 
 [[package]]

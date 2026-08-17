@@ -7,7 +7,7 @@ from enum import StrEnum
 from tkinter import font
 
 import ttkbootstrap as ttk
-import ttkbootstrap.colorutils as ttk_colorutils
+import ttkbootstrap.utils as ttk_utils
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg,
@@ -96,13 +96,7 @@ def create_styled_plot_toolbar(
 
 def handle_theme_changed(themed_widget: tk.Misc, event_args: tk.Event) -> None:
     """Handle the virtual event ThemeChanger.Event.BootstrapThemeChanged."""
-    style = ttk.Style.get_instance()
-    if not (style and style.theme):
-        raise ValueError()
-
-    color_palette = gk.palette_for_style(style.theme.name)
-    if not color_palette:
-        color_palette = gk.palette_for_style(bootstyle.DEFAULT_THEME)
+    color_palette = gk.ThemeCatalog.get_instance().active_palette
     if isinstance(themed_widget, tk.Canvas):
         apply_figure_style(themed_widget, color_palette)
     elif isinstance(themed_widget, tk.Frame):
@@ -251,9 +245,9 @@ def style_checkbutton(checkbutton: tk.Checkbutton, color_palette: gk.ColorPalett
 
 def change_color_luminance(original_color: str, delta: int) -> str:
     """Return a new hex color code that represents the same color with a changed brightness."""
-    as_hsl = ttk_colorutils.color_to_hsl(original_color, model="hex")
+    as_hsl = ttk_utils.color_to_hsl(original_color, model="hex")
     new_luminance = as_hsl[-1] + delta
-    new_color = ttk_colorutils.update_hsl_value(
+    new_color = ttk_utils.update_hsl_value(
         original_color,
         lum=new_luminance,
         inmodel="hex",

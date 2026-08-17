@@ -22,10 +22,10 @@ import matplotlib.axes as mpl_axes
 import matplotlib.backend_bases as mpl_backend_bases
 import tksvg
 import ttkbootstrap as ttk
-import ttkbootstrap.icons as ttk_icons
 import ttkbootstrap.style as ttk_style
-import ttkbootstrap.themes.standard as ttk_themes
+import ttkbootstrap.themes.builtin as ttk_themes
 from ttkbootstrap import constants as bootstyle
+from ttkbootstrap.style.theme import Colors as ttk_Colors
 from ttkbootstrap.widgets import tooltip as ttk_tooltip
 from ttkbootstrap_icons import Icon
 from ttkbootstrap_icons.providers import BaseFontProvider
@@ -41,6 +41,7 @@ class StyleKey(enum.StrEnum):
     """A class that extends the palette names of ttkbootstrap styles."""
 
     Fg = "fg"
+    Foreground = "foreground"
     SelectFg = "selectfg"
 
 
@@ -140,6 +141,7 @@ class AsyncDialog:
         self.parent = parent
         self.root_window = ttk.Toplevel(master=self.parent, title=title)
         self.root_window.withdraw()
+        self.theme_catalog = ThemeCatalog.get_instance()
 
         self.io_loop = asyncio.get_running_loop()
         self.should_run_loop = True
@@ -229,6 +231,7 @@ class AsyncWindow:
         # Let subclasses set the window icon
         self.root_window = ttk.Window(iconphoto=None)
         self.root_window.withdraw()
+        self.theme_catalog = ThemeCatalog.get_instance()
 
         self.io_loop = asyncio.get_running_loop()
         self.should_run_loop = True
@@ -309,7 +312,7 @@ class ActionDialog(AsyncDialog):
             ActionDialog.Action.Cancel: ActionDialog.Information(
                 text="Cancel",
                 command=self.exit,
-                style=(bootstyle.OUTLINE, bootstyle.WARNING),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+                style=f"{bootstyle.OUTLINE} {bootstyle.WARNING}",
             ),
         }
 
@@ -324,7 +327,7 @@ class ActionDialog(AsyncDialog):
         unwrapped_message = "\n\n".join(unwrapped_paragraphs)
         self.parent.clipboard_clear()
         self.parent.clipboard_append(unwrapped_message)
-        success_text = f"{ttk_icons.Emoji.get('white heavy check mark')}   Copied!"
+        success_text = "✅   Copied!"
         show_button_feedback(self.copy_button, command_result=True, success_text=success_text)
 
     def create_user_interface(self) -> None:
@@ -369,7 +372,9 @@ class ActionDialog(AsyncDialog):
             image_name = "o"
         if not image_fill:
             image_fill = StyleKey.Fg
-        self.message_image = image_from_icon(name=image_name, fill=hex_string_for_style(image_fill), scale_to_height=40)
+        self.message_image = image_from_icon(
+            name=image_name, fill=self.theme_catalog.hex_color_for_style_key(image_fill), scale_to_height=40
+        )
         if not message_paragraphs:
             message_paragraphs = ["Click OK to close."]
         self.message = "\n\n".join([click.wrap_text(message, width=64) for message in message_paragraphs])
@@ -473,12 +478,10 @@ class AboutDialog(AsyncDialog):
             icon_label.grid(column=icon_column, row=1, rowspan=2)
             self.icon_labels.append(icon_label)
 
-        self.refresh_icons()
-
         name_label = ttk.Label(message_frame, font=font.Font(weight="bold", size=28), text=self.app_name)
         name_label.grid(column=5, row=1, sticky=tk.W)
         self.notice_information = datatypes.SnsrNotice.get_package_notice_info(allow_dev_version=True)
-        bullet = ttk_icons.Emoji.get("black medium small square")
+        bullet = "◾"
         version_label = ttk.Label(
             message_frame,
             text=f"{self.notice_information.version} {bullet} {self.notice_information.timestamp:%Y-%m-%d} {bullet} {self.notice_information.commit}",
@@ -486,10 +489,10 @@ class AboutDialog(AsyncDialog):
         version_label.grid(column=5, row=2, sticky=tk.W, padx=(2, 0))
         separator = ttk.Separator(message_frame)
         separator.grid(column=1, row=3, columnspan=5, sticky=tk.EW, pady=4)
-        button_text_color = hex_string_for_style(StyleKey.SelectFg)
+        button_text_color = self.theme_catalog.hex_color_for_style_key(StyleKey.SelectFg)
         spacer = "   "
         self.help_icon = image_from_icon("parachute-box", fill=button_text_color, scale_to_width=16)
-        help_button = ttk.Button(
+        self.help_button = ttk.Button(
             message_frame,
             compound=tk.LEFT,
             image=self.help_icon,
@@ -498,9 +501,9 @@ class AboutDialog(AsyncDialog):
             width=18,
             command=functools.partial(webbrowser.open_new_tab, self.help_url),
         )
-        help_button.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
+        self.help_button.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
         self.source_icon = image_from_icon("github-alt-brands", fill=button_text_color, scale_to_width=16)
-        source_button = ttk.Button(
+        self.source_button = ttk.Button(
             message_frame,
             compound=tk.LEFT,
             image=self.source_icon,
@@ -509,7 +512,7 @@ class AboutDialog(AsyncDialog):
             width=18,
             command=functools.partial(webbrowser.open_new_tab, self.source_url),
         )
-        source_button.grid(column=5, row=5, sticky=tk.W, pady=(22, 0))
+        self.source_button.grid(column=5, row=5, sticky=tk.W, pady=(22, 0))
 
         button_frame = ttk.Frame(main_frame)
         button_frame.grid(column=0, row=1, sticky=tk.NSEW, padx=(0, 16), pady=(8, 0))
@@ -519,26 +522,37 @@ class AboutDialog(AsyncDialog):
         self.copy_version_button = ttk.Button(
             button_frame,
             text=self.copy_version_text,
-            style=bootstyle.OUTLINE,
+            style=f"{bootstyle.OUTLINE} {bootstyle.PRIMARY}",
             command=self.copy_version,
             width=12,
         )
         self.copy_version_button.grid(column=0, row=0, sticky=tk.E, padx=(0, 16))
-        ok_button = ttk.Button(button_frame, text="OK", command=self.exit)
+        ok_button = ttk.Button(button_frame, text="OK", command=self.exit, style=bootstyle.PRIMARY)
         ok_button.grid(column=1, row=0, sticky=tk.E)
         self.initial_focus = ok_button
 
+        self.refresh_icons()
         ThemeChanger.add_handler(self.root_window, self.on_theme_changed)
 
     def refresh_icons(self) -> None:
         """Refresh the icons in the dialog using the active style."""
         icon_height = 48
-        icon_color = hex_string_for_style(StyleKey.Fg)
         self.app_icon_images.clear()
         for icon_name, icon_label in zip(self.app_icons, self.icon_labels, strict=True):
+            icon_color = self.theme_catalog.hex_color_for_style_key(StyleKey.Foreground, icon_label)
             icon_image = image_from_icon(icon_name, fill=icon_color, scale_to_height=icon_height)
             self.app_icon_images.append(icon_image)
             icon_label.configure(image=icon_image)
+
+        button_icon_height = 16
+        help_icon_fill = self.theme_catalog.hex_color_for_style_key(StyleKey.Foreground, self.help_button)
+        self.help_icon = image_from_icon("parachute-box", fill=help_icon_fill, scale_to_width=button_icon_height)
+        self.help_button.configure(image=self.help_icon)
+        source_icon_fill = self.theme_catalog.hex_color_for_style_key(StyleKey.Foreground, self.source_button)
+        self.source_icon = image_from_icon(
+            "github-alt-brands", fill=source_icon_fill, scale_to_width=button_icon_height
+        )
+        self.source_button.configure(image=self.source_icon)
 
     def copy_version(self) -> None:
         """Copy the version information to the clipboard."""
@@ -549,7 +563,7 @@ class AboutDialog(AsyncDialog):
         }
         self.parent.clipboard_clear()
         self.parent.clipboard_append(json.dumps(formatted_version))
-        success_text = f"{ttk_icons.Emoji.get('white heavy check mark')}   Copied!"
+        success_text = "✅   Copied!"
         show_button_feedback(self.copy_version_button, command_result=True, success_text=success_text)
 
     async def on_loop(self) -> None:
@@ -716,7 +730,7 @@ class AxisToolDialog(AsyncDialog):
             parent=tool_frame,
             values=[AxisToolDialog.AxisScale.Linear, AxisToolDialog.AxisScale.Log],
             width=5,
-            justify=bootstyle.RIGHT,
+            justify=bootstyle.LEFT,
             completion=handle_scale_selection,
         )
         scale_input.grid(column=1, row=3, sticky=(tk.EW, tk.N))
@@ -817,7 +831,7 @@ class NumericInput:
         # - Validate all user actions: key input, focus-in, focus-out
         # - %P: incoming new value to be validated
         input_validator = parent.register(functools.partial(check_float_in_range, self._input_control, limits))
-        self._input_control.configure(validate=tk.ALL, validatecommand=(input_validator, "%P"))
+        self._input_control.configure(validate=tk.ALL, validatecommand=(input_validator, "%P"))  # ty: ignore[invalid-argument-type] -- we're using a registered Tcl function to help
         # Once valid, run a follow-up trace command to accept the new float
         self._input_variable.trace_add("write", functools.partial(handle_new_value, self._input_control))
         # Once a user action commits the new value, emit the value changed event
@@ -838,6 +852,106 @@ class NumericInput:
         return self._value
 
 
+class ThemeCatalog:
+    """A class that describes the available themes."""
+
+    _instance = None
+
+    def __init__(self) -> "ThemeCatalog":
+        """Use ThemeCatalog.get_instance() instead of direct instantiation."""
+        message = "Use ThemeCatalog.get_instance() instead of direct instantiation"
+        raise TypeError(message)
+
+    @classmethod
+    def get_instance(cls) -> "ThemeCatalog":
+        """Get or create the singleton ThemeCatalog instance."""
+        if cls._instance is None:
+            # Bypass the __init__ guard
+            instance = object.__new__(cls)
+            instance._build_catalog()
+            cls._instance = instance
+        return cls._instance
+
+    def _build_catalog(self) -> None:
+        custom_theme_objects = [
+            ttk.Theme(
+                name="cosmo",
+                primary="#2780e3",
+                success="#3fb618",
+                info="#9954bb",
+                warning="#ff7518",
+                danger="#ff0039",
+                secondary="#373a3c",
+                neutral="#adb5bd",
+                light={"background": "#fdfdfd", "foreground": "#212529"},
+                dark={"background": "#212529", "foreground": "#fdfdfd"},
+            ),
+        ]
+        custom_theme_names = set()
+        for custom_theme in custom_theme_objects:
+            custom_theme.register()
+            custom_theme_names.add(custom_theme.name.replace("-", "_").upper())
+
+        self._catalog = {}
+        style = ttk.Style.get_instance() or ttk.Style()
+        for theme_key in style.theme_names():
+            as_lower_name = theme_key.rsplit("-", 1)[0]
+            as_upper_name = as_lower_name.replace("-", "_").upper()
+            name = as_lower_name
+            if not (as_upper_name in custom_theme_names or hasattr(ttk_themes, as_upper_name)):
+                logger.warning(f"Theme '{theme_key}' is unknown, using '{name}' as the base name key.")
+            light_key = f"{name}-light"
+            dark_key = f"{name}-dark"
+            light_name = light_key.replace("-", " ").title()
+            dark_name = dark_key.replace("-", " ").title()
+            self._catalog[light_name] = {
+                "key": light_key,
+            }
+            self._catalog[dark_name] = {
+                "key": dark_key,
+            }
+
+    @property
+    def theme_names(self) -> list[str]:
+        """Get the catalog of available themes by name."""
+        light_themes = sorted(name for name in self._catalog if "Light" in name)
+        dark_themes = sorted(name for name in self._catalog if "Dark" in name)
+        return [*light_themes, *dark_themes]
+
+    @property
+    def active_theme_key(self) -> str:
+        """Get the theme key for the active theme."""
+        style = ttk.Style.get_instance()
+        return style.theme.name
+
+    @property
+    def active_palette(self) -> ColorPalette:
+        """Get the ColorPalette for the active theme."""
+        style = ttk.Style.get_instance()
+        palette = {label: getattr(style.colors, label) for label in ttk_Colors.label_iter()}
+        return palette
+
+    def hex_color_for_style_key(self, style_key: str, widget: tk.Widget | None = None) -> str:
+        """Return the '#RRGGBB' string for the specified style name for the active theme and widget."""
+        if widget:
+            style_name = widget.cget("style")
+            color = ttk.Style().get_instance().lookup(style_name, style_key)
+            return color
+        return self.active_palette[style_key]
+
+    def key_for_name(self, name: str) -> str:
+        """Get the theme key for the specified theme name."""
+        entry = self._catalog[name]
+        return entry["key"]
+
+    def name_for_key(self, key: str) -> str:
+        """Get the theme name for the specified theme key."""
+        for name, entry in self._catalog.items():
+            if entry["key"] == key:
+                return name
+        raise ValueError(key)
+
+
 class ThemeChanger:
     """A class that changes Tk themes and emits a corresponding event."""
 
@@ -854,10 +968,21 @@ class ThemeChanger:
         return owner.winfo_toplevel().bind_all(ThemeChanger.Event.BootstrapThemeChanged, command, add="+")
 
     @staticmethod
-    def use_bootstrap_theme(new_theme: str, owner: tk.Misc) -> None:
+    def use_bootstrap_theme(new_theme_key: str, owner: tk.Misc) -> None:
         """Change the ttkbootstrap theme and notify BootstrapThemeChanged subscribers."""
-        ttk.Style().theme_use(new_theme)
+        ttk.Style.get_instance().theme_use(new_theme_key)
         owner.winfo_toplevel().event_generate(ThemeChanger.Event.BootstrapThemeChanged)
+
+    @staticmethod
+    def toggle_light_dark() -> None:
+        """Toggle the theme between its Light and Dark modes."""
+        style = ttk.Style.get_instance()
+        theme_name_key = style.theme.name
+        name_parts = theme_name_key.split("-")
+        name_parts[-1] = "dark" if theme_name_key.endswith("-light") else "light"
+        new_theme_name_key = "-".join(name_parts)
+        if new_theme_name_key in style.theme_names():
+            ThemeChanger.use_bootstrap_theme(new_theme_name_key, style.master)
 
 
 class CustomFontAwesomeIcon(Icon):
@@ -907,7 +1032,7 @@ class DemoWithAnimation(AsyncWindow):
     def create_user_interface(self) -> None:
         """Create text label to animate and define buttons to demonstrate blocking vs async calls."""
         self.root_window.title("Async Demo")
-        icon = tk.PhotoImage(master=self.root_window, data=ttk_icons.Icon.info)
+        icon = ttk.Icon("info-circle-fill", size=20, color="#444444")
         self.root_window.iconphoto(True, icon)
 
         self.animation = "🤍🤍🤍🤍🤍🤍🤍🤍🤍🤍🩶🖤"
@@ -917,7 +1042,7 @@ class DemoWithAnimation(AsyncWindow):
             main_frame,
             text="Modal",
             command=functools.partial(self.open_dialog, DialogBehavior.Modal),
-            style=(bootstyle.SECONDARY, bootstyle.INFO),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+            style=bootstyle.SECONDARY,
         )
         modal_button.grid(column=0, row=3, sticky=tk.EW, padx=8)
 
@@ -925,7 +1050,7 @@ class DemoWithAnimation(AsyncWindow):
             main_frame,
             text="Modeless",
             command=functools.partial(self.open_dialog, DialogBehavior.Modeless),
-            style=(bootstyle.SECONDARY, bootstyle.INFO),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+            style=bootstyle.SECONDARY,
         )
         modeless_button.grid(column=1, row=3, sticky=tk.EW, pady=8)
 
@@ -986,7 +1111,7 @@ def create_demo_ui(
     progressbar = ttk.Progressbar(
         root,
         length=280,
-        style=(bootstyle.STRIPED, bootstyle.SUCCESS),  # ty: ignore[invalid-argument-type] -- the type hint for ttk uses strings not tuples
+        style=f"{bootstyle.STRIPED} {bootstyle.SUCCESS}",
     )
     progressbar.grid(
         row=1,
@@ -1053,44 +1178,30 @@ async def calculate_async(progressbar: ttk.Progressbar) -> None:
 
 def create_theme_combobox(parent: tk.BaseWidget) -> ttk.Combobox:
     """Create and return a Combobox that lists the available themes and handles the selection event."""
-    style = ttk.Style.get_instance()
-    if not (style and style.theme):
-        raise ValueError()
-    active_theme = style.theme
-    light_themes = []
-    dark_themes = []
-    for theme_name, definition in ttk_themes.STANDARD_THEMES.items():
-        theme_kind = definition["type"]
-        if theme_kind == "light":
-            light_themes.append(theme_name.capitalize())
-        elif theme_kind == "dark":
-            dark_themes.append(theme_name.capitalize())
-        else:
-            raise ValueError()
-    sorted_by_kind = [*sorted(light_themes), *sorted(dark_themes)]
+    theme_catalog = ThemeCatalog.get_instance()
 
     def handle_change_theme(new_selection: str) -> None:
         """Handle the selection event for the theme Combobox."""
-        ThemeChanger.use_bootstrap_theme(new_selection.lower(), parent)
+        new_theme_key = theme_catalog.key_for_name(new_selection)
+        ThemeChanger.use_bootstrap_theme(new_theme_key, parent)
 
     def on_theme_changed(themed_widget: tk.Misc, event_args: tk.Event) -> None:
         """Handle the ThemeChanger.Event.BootstrapThemeChanged event."""
         sending_combobox = themed_widget
         if not isinstance(sending_combobox, ttk.Combobox):
             raise TypeError()
-        style = ttk.Style.get_instance()
-        if not (style and style.theme):
-            raise ValueError()
-        sending_combobox.set(style.theme.name.capitalize())
+        theme_name = theme_catalog.name_for_key(theme_catalog.active_theme_key)
+        sending_combobox.set(theme_name)
 
     theme_combobox = create_dropdown_combobox(
         parent,
-        values=sorted_by_kind,
-        width=12,
+        values=theme_catalog.theme_names,
+        width=17,
         justify=bootstyle.LEFT,
         completion=handle_change_theme,
     )
-    theme_combobox.set(active_theme.name.capitalize())
+    active_theme_name = theme_catalog.name_for_key(theme_catalog.active_theme_key)
+    theme_combobox.set(active_theme_name)
     ThemeChanger.add_handler(theme_combobox, functools.partial(on_theme_changed, theme_combobox))
     return theme_combobox
 
@@ -1104,7 +1215,7 @@ def show_button_feedback(
     """Attach feedback to a ttk.Button command that indicates the command's outcome."""
     normal_text: str = button.cget("text")
     full_style: str = button.cget("style")
-    normal_style = tuple(trait.lower() for trait in full_style.split(".")[:-1])
+    normal_style = " ".join(trait.lower() for trait in full_style.split(".")[:-1])
 
     feedback_text = success_text if command_result else failure_text
     feedback_style = bootstyle.SUCCESS if command_result else bootstyle.DANGER
@@ -1204,30 +1315,6 @@ def image_from_svg(
         "scale": scale,
     }
     return tksvg.SvgImage(**params)
-
-
-def palette_for_style(style_name: str) -> ColorPalette:
-    """Return the color palette for the specified theme name."""
-    requested_theme = ttk_themes.STANDARD_THEMES[style_name]
-    color_palette = requested_theme["colors"]
-    if not (
-        isinstance(color_palette, dict)
-        and all(isinstance(k, str) and isinstance(v, str) for k, v in color_palette.items())
-    ):
-        # No colors in palette
-        return {}
-    return color_palette
-
-
-def hex_string_for_style(style_name: str, theme_name: str = "") -> str:
-    """Return the '#RRGGBB' string for the specified style name for the active or specified theme."""
-    if not theme_name:
-        style = ttk.Style.get_instance()
-        if not (style and style.theme):
-            raise ValueError()
-        theme_name = style.theme.name
-    palette = ttk_themes.STANDARD_THEMES[theme_name]["colors"]
-    return palette[style_name]  # ty: ignore[invalid-argument-type] -- the "colors" entry is a dict[str, str]
 
 
 def open_folder(path: pathlib.Path) -> None:

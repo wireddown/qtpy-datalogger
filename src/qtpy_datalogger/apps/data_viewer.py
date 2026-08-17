@@ -20,7 +20,6 @@ import matplotlib.figure as mpl_figure
 import numpy as np
 import pandas as pd
 import ttkbootstrap as ttk
-import ttkbootstrap.themes.standard as ttk_themes
 from ttkbootstrap import constants as bootstyle
 
 from qtpy_datalogger import guikit, ttkbootstrap_matplotlib
@@ -28,13 +27,6 @@ from qtpy_datalogger import guikit, ttkbootstrap_matplotlib
 logger = logging.getLogger(pathlib.Path(__file__).stem)
 
 app_icon_color = "#07a000"
-
-
-class StyleKey(StrEnum):
-    """A class that extends the palette names of ttkbootstrap styles."""
-
-    Fg = "fg"
-    SelectFg = "selectfg"
 
 
 class AppState:
@@ -52,7 +44,7 @@ class AppState:
     def __init__(self, tk_root: tk.Tk) -> None:
         """Initialize a new AppState instance."""
         self._tk_notifier: tk.Tk = tk_root
-        self._theme_name: str = ""
+        self._theme_key: str = ""
         self._data_file: pathlib.Path = AppState.no_file
         self._replay_active: bool = False
         self._demo_folder: pathlib.Path = pathlib.Path(tempfile.mkdtemp())
@@ -61,14 +53,14 @@ class AppState:
     @property
     def active_theme(self) -> str:
         """Return the name of the active ttkbootstrap theme."""
-        return self._theme_name
+        return self._theme_key
 
     @active_theme.setter
     def active_theme(self, new_value: str) -> None:
         """Set a new value for active_theme and change themes to match."""
-        if new_value == self._theme_name:
+        if new_value == self._theme_key:
             return
-        self._theme_name = new_value
+        self._theme_key = new_value
         guikit.ThemeChanger.use_bootstrap_theme(new_value, self._tk_notifier)
 
     @property
@@ -149,6 +141,7 @@ class DataViewer(guikit.AsyncWindow):
         self.replay_variable = tk.BooleanVar()
         self.plots_variables: list[tk.BooleanVar] = []
         self.svg_images: dict[str, tk.Image] = {}
+        self.svg_buttons: dict[str, ttk.Button] = {}
 
         # Supports app state
         self.replay_index = 0
@@ -212,19 +205,31 @@ class DataViewer(guikit.AsyncWindow):
         action_panel.rowconfigure(1, weight=0)  # Message
 
         self.reload_button = self.create_icon_button(
-            action_panel, text=DataViewer.CommandName.Reload, icon_name="rotate-left", char_width=12
+            action_panel,
+            text=DataViewer.CommandName.Reload,
+            icon_name="rotate-left",
+            char_width=12,
+            bootstyle=bootstyle.PRIMARY,
         )
         self.reload_button.configure(command=functools.partial(self.reload_file, self.reload_button))
         self.reload_button.grid(column=0, row=0, padx=(0, 8))
 
         self.replay_button = self.create_icon_button(
-            action_panel, text=DataViewer.CommandName.Replay, icon_name="clock-rotate-left", char_width=12
+            action_panel,
+            text=DataViewer.CommandName.Replay,
+            icon_name="clock-rotate-left",
+            char_width=12,
+            bootstyle=bootstyle.PRIMARY,
         )
         self.replay_button.configure(command=functools.partial(self.replay_data, self.replay_button))
         self.replay_button.grid(column=1, row=0, padx=8)
 
         self.export_csv_button = self.create_icon_button(
-            action_panel, text=DataViewer.CommandName.Export, icon_name="table", char_width=12
+            action_panel,
+            text=DataViewer.CommandName.Export,
+            icon_name="table",
+            char_width=12,
+            bootstyle=bootstyle.PRIMARY,
         )
         self.export_csv_button.grid(column=4, row=0, padx=(8, 0))
         self.export_csv_button.configure(command=functools.partial(self.export_canvas, self.export_csv_button))
@@ -274,7 +279,7 @@ class DataViewer(guikit.AsyncWindow):
         self.reload_file(sender=main)
 
         # matplotlib elements must be created before setting the theme or the button icons initialize with poor color contrast
-        self.state.active_theme = "flatly"
+        self.state.active_theme = "cosmo-light"
 
     def build_window_menu(self) -> None:
         """Create the entries for the window menu bar."""
@@ -342,16 +347,9 @@ class DataViewer(guikit.AsyncWindow):
             underline=0,
         )
         # Themes submenu
-        light_themes = []
-        dark_themes = []
-        for theme_name, definition in ttk_themes.STANDARD_THEMES.items():
-            theme_kind = definition["type"]
-            if theme_kind == "light":
-                light_themes.append(theme_name)
-            elif theme_kind == "dark":
-                dark_themes.append(theme_name)
-            else:
-                raise ValueError()
+        theme_names = self.theme_catalog.theme_names
+        light_themes = sorted(key for key in theme_names if "Light" in key)
+        dark_themes = sorted(key for key in theme_names if "Dark" in key)
         self.themes_menu = tk.Menu(self.view_menu, name="themes_menu")
         self.view_menu.add_cascade(
             label=DataViewer.CommandName.Theme,
@@ -373,13 +371,13 @@ class DataViewer(guikit.AsyncWindow):
         for theme_name in sorted(light_themes):
             self.light_menu.add_radiobutton(
                 command=functools.partial(self.change_theme, theme_name),
-                label=theme_name.capitalize(),
+                label=theme_name,
                 variable=self.theme_variable,
             )
         for theme_name in sorted(dark_themes):
             self.dark_menu.add_radiobutton(
                 command=functools.partial(self.change_theme, theme_name),
-                label=theme_name.capitalize(),
+                label=theme_name,
                 variable=self.theme_variable,
             )
 
@@ -409,9 +407,8 @@ class DataViewer(guikit.AsyncWindow):
         """Create a ttk.Button using the specified text and FontAwesome icon_name."""
         text_spacing = 3 * " "
         button_image = guikit.image_from_icon(
-            icon_name, fill=guikit.hex_string_for_style(StyleKey.SelectFg), scale_to_height=24
+            icon_name, fill=self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.SelectFg), scale_to_height=24
         )
-        self.svg_images[icon_name] = button_image
         button = ttk.Button(
             parent,
             text=text + spaces * text_spacing,
@@ -421,6 +418,8 @@ class DataViewer(guikit.AsyncWindow):
             padding=(4, 6, 4, 4),
             bootstyle=bootstyle,
         )
+        self.svg_images[icon_name] = button_image
+        self.svg_buttons[icon_name] = button
         return button
 
     async def on_loop(self) -> None:
@@ -547,7 +546,7 @@ class DataViewer(guikit.AsyncWindow):
 
     def change_theme(self, theme_name: str) -> None:
         """Handle the View::Theme selection command."""
-        self.state.active_theme = theme_name
+        self.state.active_theme = self.theme_catalog.key_for_name(theme_name)
 
     def show_about(self) -> None:
         """Handle the Help::About menu command."""
@@ -617,15 +616,27 @@ class DataViewer(guikit.AsyncWindow):
     def on_replay_active_changed(self, event_args: tk.Event) -> None:
         """Handle the ReplayActiveChanged event."""
         replay_active = self.state.replay_active
-        new_style = bootstyle.SUCCESS if replay_active else bootstyle.DEFAULT
+        new_style = bootstyle.SUCCESS if replay_active else bootstyle.PRIMARY
         self.replay_button.configure(bootstyle=new_style)
         self.replay_variable.set(replay_active)
 
     def on_theme_changed(self, event_args: tk.Event) -> None:
         """Handle the ThemeChanger.Event.BootstrapThemeChanged event."""
         theme_name = self.state.active_theme
-        self.theme_variable.set(theme_name.capitalize())
-        self.startup_label.configure(background=guikit.hex_string_for_style(bootstyle.LIGHT))
+        self.theme_variable.set(self.theme_catalog.name_for_key(theme_name))
+        self.startup_label.configure(
+            background=self.theme_catalog.hex_color_for_style_key(bootstyle.LIGHT),
+            foreground=self.theme_catalog.hex_color_for_style_key(bootstyle.DARK),
+        )
+
+        all_button_icon_names = sorted(self.svg_buttons.keys())
+        for button_icon_name in all_button_icon_names:
+            button = self.svg_buttons[button_icon_name]
+            icon_fill = self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.Foreground, button)
+            button_image = guikit.image_from_icon(button_icon_name, fill=icon_fill, scale_to_height=24)
+            self.svg_images[button_icon_name] = button_image
+            button.configure(image=button_image)
+
         all_menus = [
             self.file_menu,
             self.view_menu,
@@ -708,9 +719,10 @@ class DataViewer(guikit.AsyncWindow):
             loc="upper left",
             draggable=True,
         )
-        color_palette = guikit.palette_for_style(self.state.active_theme)
-        if color_palette:
-            ttkbootstrap_matplotlib.apply_legend_style(legend, color_palette)
+        ttkbootstrap_matplotlib.apply_legend_style(legend, self.theme_catalog.active_palette)
+        ttkbootstrap_matplotlib.apply_figure_style(
+            self.canvas_figure.get_tk_widget(), self.theme_catalog.active_palette
+        )
         self.canvas_figure.draw()
         self.update_file_message(f"Duration: {time_coordinates[-1]:.3f}")
         return data_series.keys().to_list()
