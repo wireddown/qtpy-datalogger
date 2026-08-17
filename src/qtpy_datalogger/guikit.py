@@ -973,6 +973,17 @@ class ThemeChanger:
         ttk.Style.get_instance().theme_use(new_theme_key)
         owner.winfo_toplevel().event_generate(ThemeChanger.Event.BootstrapThemeChanged)
 
+    @staticmethod
+    def toggle_light_dark() -> None:
+        """Toggle the theme between its Light and Dark modes."""
+        style = ttk.Style.get_instance()
+        theme_name_key = style.theme.name
+        name_parts = theme_name_key.split("-")
+        name_parts[-1] = "dark" if theme_name_key.endswith("-light") else "light"
+        new_theme_name_key = "-".join(name_parts)
+        if new_theme_name_key in style.theme_names():
+            ThemeChanger.use_bootstrap_theme(new_theme_name_key, style.master)
+
 
 class CustomFontAwesomeIcon(Icon):
     """A custom image renderer for FontAwesome icons."""
