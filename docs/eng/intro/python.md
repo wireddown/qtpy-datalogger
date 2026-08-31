@@ -95,7 +95,7 @@ uv run python -V
 
 With **git**, **Python**, and **`uv`** installed, you can get the project's source code and install its dependencies.
 
-From steps 1 and 2 on the [Environment](environment/#1-get-the-source) page:
+From steps 1 and 2 on our [Environment](environment/#1-get-the-source) page:
 
 ```pwsh title="PowerShell"
 # Clone from GitHub
@@ -215,6 +215,7 @@ uv run poe lint
 # Runs 'ruff check --fix'  then  'ruff format'  then  'ty check --fix'
 uv run poe fix
 ```
+
 
 [**uv**: A Complete Guide]: https://pydevtools.com/handbook/explanation/uv-complete-guide/
 [Python Virtual Environments: A Primer]: https://realpython.com/python-virtual-environments-a-primer/
