@@ -2,7 +2,7 @@
 name: Help request
 about: '🛟 Ask for help running the program or setting up your environment'
 title: ''
-labels: help me, inbox
+labels: inbox, question
 assignees: ''
 
 ---
