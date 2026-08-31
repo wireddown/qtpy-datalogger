@@ -3,7 +3,7 @@ name: Bug report
 about: '🐞 Create a bug report and track in it Issues'
 title: ''
 labels: inbox
-assignees: wireddown
+assignees: ''
 
 ---
 
