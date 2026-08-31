@@ -95,7 +95,7 @@ uv run python -V
 
 With **git**, **Python**, and **`uv`** installed, you can get the project's source code and install its dependencies.
 
-From steps 1 and 2 on our [Environment](environment/#1-get-the-source) page:
+From steps 1 and 2 on our [Environment](environment.md#1-get-the-source) page:
 
 ```pwsh title="PowerShell"
 # Clone from GitHub
