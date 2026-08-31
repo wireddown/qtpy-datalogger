@@ -23,6 +23,6 @@ tags:
 
     Thank you for your help!
 
-    Continue to the [Environment](eng/intro/environment/) page to set up your workstation.
+    Continue to the [Environment](eng/intro/environment.md) page to set up your workstation.
 
 </div>
