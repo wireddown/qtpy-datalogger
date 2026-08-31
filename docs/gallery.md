@@ -47,4 +47,4 @@ Time,Sensor 1,Sensor 2
 ## Demo apps
 
 The GitHub repo has more example GUI apps that you can copy and run.
-Go to the [Customize](customize/) page if you want to try them.
+Go to the [Customize](customize.md) page if you want to try them.
