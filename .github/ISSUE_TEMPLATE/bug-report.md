@@ -10,7 +10,7 @@ assignees: ''
 #### Description
 _Add a clear and concise description of the bug_
 
-#### To reproduce
+#### How to reproduce
 _Add steps to reproduce the behavior_
 1. Open '...'
 1. Click on '....'
