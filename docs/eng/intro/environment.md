@@ -22,7 +22,7 @@ Before you can start developing, you need to download the source and install the
 
 ??? question "New to git and Python?"
 
-    If these tools and commands are not on your system, follow the **[Onboarding guides](tools/)**.
+    If these tools and commands are not on your system, follow our **[Onboarding guides](tools/)**.
 
 ## 1. Get the source
 
