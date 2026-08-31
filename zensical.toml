@@ -65,6 +65,11 @@ nav = [
       { "Workflows" = "eng/intro/workflows.md" },
       { "References" = "eng/intro/references.md" },
     ]},
+    { "How to" = [
+        { "Work with the code" = "eng/howto/code.md" },
+        { "Engage with the project" = "eng/howto/engage.md" },
+        { "Manage the package" = "eng/howto/manage.md" },
+    ] },
     { "Onboarding guides" = [
       { "Tools" = "eng/intro/tools.md" },
       { "Python" = "eng/intro/python.md" },
