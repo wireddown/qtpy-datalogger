@@ -29,5 +29,5 @@ Options:
   -p, --port COM#       Serial COM port to use for connection.
   --help                Show this message and exit.
 
-  Help and home page: https://downtothewire.io/qtpy-datalogger
+  Help and home page: https://downtothewire.io/qtpy-datalogger/
 ```
