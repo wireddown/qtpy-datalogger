@@ -412,7 +412,7 @@ def _query_volumes_from_wmi() -> dict[str, dict[DetailKey, str]]:
     logger.debug(f"Win32_DiskDrive report: {disks_and_descriptions}")
 
     discovered_storage_volumes = {}
-    for drive_letter, _ in drive_letters_and_labels.items():
+    for drive_letter in drive_letters_and_labels:
         drive_label = drive_letters_and_labels[drive_letter][DetailKey.drive_label]
         if drive_letter not in drive_letters_and_partitions:
             continue
