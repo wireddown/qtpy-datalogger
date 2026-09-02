@@ -273,7 +273,7 @@ def test_handle_connect_with_two_usb_devices(  # noqa: PLR0913 PLR0917 -- allow 
     monkeypatch.setattr(discovery, "discover_qtpy_devices", two_usb_qtpy_devices)
     monkeypatch.setattr(click, "prompt", select_last_from_prompt)  # Choose second device to exercise the user-choice
     discovered_devices = discovery.discover_qtpy_devices(Default.MqttGroup)
-    selected_device = sorted(discovered_devices)[-1]
+    selected_device = max(discovered_devices)
     selected_port = discovered_devices[selected_device].com_port
     expected_port = port or selected_port
 
@@ -367,7 +367,7 @@ def test_handle_connect_with_two_dual_mode_devices(  # noqa: PLR0913 PLR0917 -- 
     )
     monkeypatch.setattr(click, "prompt", select_first_from_prompt)  # Choose WiFi connection
     discovered_devices = discovery.discover_qtpy_devices(Default.MqttGroup)
-    selected_device = sorted(discovered_devices)[-1]
+    selected_device = min(discovered_devices)
     selected_node = discovered_devices[selected_device].node_id
     expected_node = node or selected_node
 
