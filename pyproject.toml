@@ -230,6 +230,7 @@ ignore = [
     "PTH208",       # Path.iterdir() is not available
     "SIM105",       # contextlib is not available
     "T201",         # Use direct IO for user REPL
+    "PYI034",       # typing.Self is not available
 ]
 
 [build-system]
