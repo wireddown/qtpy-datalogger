@@ -239,7 +239,7 @@ def test_handle_connect_with_one_usb_device(  # noqa: PLR0913 PLR0917 -- allow m
         discovery.handle_connect(behavior, Default.MqttGroup, node, port)
 
     assert_universal_test_cases(excinfo, expected_exit_code, expected_port)
-    if excinfo.value is serial.SerialException:
+    if isinstance(excinfo.value, serial.SerialException):
         assert excinfo.value.errno is None
         assert (
             excinfo.value.args[0]
@@ -281,7 +281,7 @@ def test_handle_connect_with_two_usb_devices(  # noqa: PLR0913 PLR0917 -- allow 
         discovery.handle_connect(behavior, Default.MqttGroup, node, port)
 
     assert_universal_test_cases(excinfo, expected_exit_code, expected_port)
-    if excinfo.value is serial.SerialException:
+    if isinstance(excinfo.value, serial.SerialException):
         assert excinfo.value.errno is None
         assert (
             excinfo.value.args[0]
@@ -330,7 +330,7 @@ def test_handle_connect_with_one_mqtt_device(  # noqa: PLR0913 PLR0917 -- allow 
         discovery.handle_connect(behavior, Default.MqttGroup, node, port)
 
     assert_universal_test_cases(excinfo, expected_exit_code, expected_node)
-    if excinfo.value is RuntimeError:
+    if isinstance(excinfo.value, RuntimeError):
         assert excinfo.value.args[0] == exception_message
 
 
@@ -371,7 +371,7 @@ def test_handle_connect_with_two_dual_mode_devices(  # noqa: PLR0913 PLR0917 -- 
         discovery.handle_connect(behavior, Default.MqttGroup, node, port)
 
     assert_universal_test_cases(excinfo, expected_exit_code, expected_node)
-    if excinfo.value is RuntimeError:
+    if isinstance(excinfo.value, RuntimeError):
         assert excinfo.value.args[0] == exception_message
 
 
