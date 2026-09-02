@@ -103,7 +103,7 @@ class NoticeInformation:
 class DescriptorInformation:
     """A class that describes a sensor_node's hardware, software, network, and version details."""
 
-    def __init__(  # noqa: PLR0913 -- allow more than 5 parameters
+    def __init__(  # noqa: PLR0913 PLR0917 -- allow more than 5 parameters
         self: "DescriptorInformation",
         node_id: str,
         serial_number: str,
