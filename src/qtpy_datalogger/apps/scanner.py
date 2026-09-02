@@ -282,7 +282,7 @@ class ScannerApp(guikit.AsyncWindow):
     def on_combobox_selected(self, new_selection: str) -> None:
         """Handle the user selecting a new entry in the combobox."""
         selected_serial_number = Constants.NoneChoice
-        for _, devices_in_group in self.scan_db.devices_by_group.items():
+        for devices_in_group in self.scan_db.devices_by_group.values():
             for serial_number, device_info in devices_in_group.items():
                 if new_selection in [device_info.node_id, device_info.com_port]:
                     selected_serial_number = serial_number
