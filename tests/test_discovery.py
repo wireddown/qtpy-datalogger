@@ -321,7 +321,9 @@ def test_handle_connect_with_one_mqtt_device(  # noqa: PLR0913 PLR0917 -- allow 
     monkeypatch.setattr(discovery, "discover_qtpy_devices", one_mqtt_qtpy_device)
     exception_message = "connect() tried to correctly open the (monkeypatched) node"
     monkeypatch.setattr(
-        network, "open_session_on_node", lambda group, node: raise_exception(raised_exception, exception_message)
+        network,
+        "open_session_on_node",
+        lambda group, node: raise_exception(raised_exception, f"{exception_message} {node}"),
     )
     discovered_node = discovery.discover_qtpy_devices(Default.MqttGroup).popitem()[1].node_id
     expected_node = node or discovered_node
@@ -331,7 +333,7 @@ def test_handle_connect_with_one_mqtt_device(  # noqa: PLR0913 PLR0917 -- allow 
 
     assert_universal_test_cases(excinfo, expected_exit_code, expected_node)
     if isinstance(excinfo.value, RuntimeError):
-        assert excinfo.value.args[0] == exception_message
+        assert excinfo.value.args[0] == f"{exception_message} {expected_node}"
 
 
 @pytest.mark.parametrize(
@@ -359,7 +361,9 @@ def test_handle_connect_with_two_dual_mode_devices(  # noqa: PLR0913 PLR0917 -- 
     monkeypatch.setattr(discovery, "discover_qtpy_devices", two_dual_mode_qtpy_devices)
     exception_message = "connect() tried to correctly open the (monkeypatched) node"
     monkeypatch.setattr(
-        network, "open_session_on_node", lambda group, node: raise_exception(raised_exception, exception_message)
+        network,
+        "open_session_on_node",
+        lambda group, node: raise_exception(raised_exception, f"{exception_message} {node}"),
     )
     monkeypatch.setattr(click, "prompt", select_first_from_prompt)  # Choose WiFi connection
     discovered_devices = discovery.discover_qtpy_devices(Default.MqttGroup)
@@ -372,7 +376,7 @@ def test_handle_connect_with_two_dual_mode_devices(  # noqa: PLR0913 PLR0917 -- 
 
     assert_universal_test_cases(excinfo, expected_exit_code, expected_node)
     if isinstance(excinfo.value, RuntimeError):
-        assert excinfo.value.args[0] == exception_message
+        assert excinfo.value.args[0] == f"{exception_message} {expected_node}"
 
 
 def test_windows_discovery(monkeypatch: pytest.MonkeyPatch) -> None:
