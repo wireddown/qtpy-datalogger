@@ -76,7 +76,7 @@ dev = [
 ]
 
 [tool.poe.tasks]
-_ruff_check = "uv run ruff check"
+_ruff_check = "uv run ruff check --output-format concise"
 _ruff_diff = "uv run ruff format --diff"
 _ty_check = "uv run ty check --output-format concise"
 _ruff_check_fix = "uv run ruff check --fix"
@@ -230,6 +230,7 @@ ignore = [
     "PTH208",       # Path.iterdir() is not available
     "SIM105",       # contextlib is not available
     "T201",         # Use direct IO for user REPL
+    "PYI034",       # typing.Self is not available
 ]
 
 [build-system]

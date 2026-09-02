@@ -10,7 +10,7 @@ def test_mqtt_topic_functions() -> None:
 
     all_mqtt_topics = node_mqtt.get_mqtt_topics(group_id, node_id)
 
-    active_version = "/".join([node_mqtt.get_domain(), node_mqtt.get_api_version()])
+    active_version = f"{node_mqtt.get_domain()}/{node_mqtt.get_api_version()}"
     assert all(all_mqtt_topics[t].startswith(active_version) for t in all_mqtt_topics)
     assert all_mqtt_topics["acquired_data"] == node_mqtt.get_acquired_data_topic(group_id)
     assert all_mqtt_topics["broadcast"] == node_mqtt.get_broadcast_topic(group_id)

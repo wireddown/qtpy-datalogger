@@ -190,7 +190,7 @@ def assert_universal_test_cases(excinfo: pytest.ExceptionInfo, expected_exit_cod
         ),  # This exception means connect() failed because no QT Py devices were discovered
     ],
 )
-def test_handle_connect_with_no_devices(  # noqa: PLR0913 -- allow more than 5 parameters
+def test_handle_connect_with_no_devices(  # noqa: PLR0913 PLR0917 -- allow more than 5 parameters
     monkeypatch: pytest.MonkeyPatch,
     behavior: discovery.Behavior,
     node: str,
@@ -222,7 +222,7 @@ def test_handle_connect_with_no_devices(  # noqa: PLR0913 -- allow more than 5 p
         ),  # This exception means connect() tried to correctly open the (monkeypatched) port
     ],
 )
-def test_handle_connect_with_one_usb_device(  # noqa: PLR0913 -- allow more than 5 parameters
+def test_handle_connect_with_one_usb_device(  # noqa: PLR0913 PLR0917 -- allow more than 5 parameters
     monkeypatch: pytest.MonkeyPatch,
     behavior: discovery.Behavior,
     node: str,
@@ -239,7 +239,7 @@ def test_handle_connect_with_one_usb_device(  # noqa: PLR0913 -- allow more than
         discovery.handle_connect(behavior, Default.MqttGroup, node, port)
 
     assert_universal_test_cases(excinfo, expected_exit_code, expected_port)
-    if excinfo.value is serial.SerialException:
+    if isinstance(excinfo.value, serial.SerialException):
         assert excinfo.value.errno is None
         assert (
             excinfo.value.args[0]
@@ -261,7 +261,7 @@ def test_handle_connect_with_one_usb_device(  # noqa: PLR0913 -- allow more than
         ),  # This exception means connect() tried to correctly open the (monkeypatched) port
     ],
 )
-def test_handle_connect_with_two_usb_devices(  # noqa: PLR0913 -- allow more than 5 parameters
+def test_handle_connect_with_two_usb_devices(  # noqa: PLR0913 PLR0917 -- allow more than 5 parameters
     monkeypatch: pytest.MonkeyPatch,
     behavior: discovery.Behavior,
     node: str,
@@ -273,7 +273,7 @@ def test_handle_connect_with_two_usb_devices(  # noqa: PLR0913 -- allow more tha
     monkeypatch.setattr(discovery, "discover_qtpy_devices", two_usb_qtpy_devices)
     monkeypatch.setattr(click, "prompt", select_last_from_prompt)  # Choose second device to exercise the user-choice
     discovered_devices = discovery.discover_qtpy_devices(Default.MqttGroup)
-    selected_device = sorted(discovered_devices)[-1]
+    selected_device = max(discovered_devices)
     selected_port = discovered_devices[selected_device].com_port
     expected_port = port or selected_port
 
@@ -281,7 +281,7 @@ def test_handle_connect_with_two_usb_devices(  # noqa: PLR0913 -- allow more tha
         discovery.handle_connect(behavior, Default.MqttGroup, node, port)
 
     assert_universal_test_cases(excinfo, expected_exit_code, expected_port)
-    if excinfo.value is serial.SerialException:
+    if isinstance(excinfo.value, serial.SerialException):
         assert excinfo.value.errno is None
         assert (
             excinfo.value.args[0]
@@ -309,7 +309,7 @@ def test_handle_connect_with_two_usb_devices(  # noqa: PLR0913 -- allow more tha
         ),  # This exception means connect() tried to correctly open the (monkeypatched) node
     ],
 )
-def test_handle_connect_with_one_mqtt_device(  # noqa: PLR0913 -- allow more than 5 parameters
+def test_handle_connect_with_one_mqtt_device(  # noqa: PLR0913 PLR0917 -- allow more than 5 parameters
     monkeypatch: pytest.MonkeyPatch,
     behavior: discovery.Behavior,
     node: str,
@@ -321,7 +321,9 @@ def test_handle_connect_with_one_mqtt_device(  # noqa: PLR0913 -- allow more tha
     monkeypatch.setattr(discovery, "discover_qtpy_devices", one_mqtt_qtpy_device)
     exception_message = "connect() tried to correctly open the (monkeypatched) node"
     monkeypatch.setattr(
-        network, "open_session_on_node", lambda group, node: raise_exception(raised_exception, exception_message)
+        network,
+        "open_session_on_node",
+        lambda group, node: raise_exception(raised_exception, f"{exception_message} {node}"),
     )
     discovered_node = discovery.discover_qtpy_devices(Default.MqttGroup).popitem()[1].node_id
     expected_node = node or discovered_node
@@ -330,8 +332,8 @@ def test_handle_connect_with_one_mqtt_device(  # noqa: PLR0913 -- allow more tha
         discovery.handle_connect(behavior, Default.MqttGroup, node, port)
 
     assert_universal_test_cases(excinfo, expected_exit_code, expected_node)
-    if excinfo.value is RuntimeError:
-        assert excinfo.value.args[0] == exception_message
+    if isinstance(excinfo.value, RuntimeError):
+        assert excinfo.value.args[0] == f"{exception_message} {expected_node}"
 
 
 @pytest.mark.parametrize(
@@ -347,7 +349,7 @@ def test_handle_connect_with_one_mqtt_device(  # noqa: PLR0913 -- allow more tha
         ),  # This exception means connect() tried to correctly open the (monkeypatched) node
     ],
 )
-def test_handle_connect_with_two_dual_mode_devices(  # noqa: PLR0913 -- allow more than 5 parameters
+def test_handle_connect_with_two_dual_mode_devices(  # noqa: PLR0913 PLR0917 -- allow more than 5 parameters
     monkeypatch: pytest.MonkeyPatch,
     behavior: discovery.Behavior,
     node: str,
@@ -359,11 +361,13 @@ def test_handle_connect_with_two_dual_mode_devices(  # noqa: PLR0913 -- allow mo
     monkeypatch.setattr(discovery, "discover_qtpy_devices", two_dual_mode_qtpy_devices)
     exception_message = "connect() tried to correctly open the (monkeypatched) node"
     monkeypatch.setattr(
-        network, "open_session_on_node", lambda group, node: raise_exception(raised_exception, exception_message)
+        network,
+        "open_session_on_node",
+        lambda group, node: raise_exception(raised_exception, f"{exception_message} {node}"),
     )
     monkeypatch.setattr(click, "prompt", select_first_from_prompt)  # Choose WiFi connection
     discovered_devices = discovery.discover_qtpy_devices(Default.MqttGroup)
-    selected_device = sorted(discovered_devices)[-1]
+    selected_device = min(discovered_devices)
     selected_node = discovered_devices[selected_device].node_id
     expected_node = node or selected_node
 
@@ -371,8 +375,8 @@ def test_handle_connect_with_two_dual_mode_devices(  # noqa: PLR0913 -- allow mo
         discovery.handle_connect(behavior, Default.MqttGroup, node, port)
 
     assert_universal_test_cases(excinfo, expected_exit_code, expected_node)
-    if excinfo.value is RuntimeError:
-        assert excinfo.value.args[0] == exception_message
+    if isinstance(excinfo.value, RuntimeError):
+        assert excinfo.value.args[0] == f"{exception_message} {expected_node}"
 
 
 def test_windows_discovery(monkeypatch: pytest.MonkeyPatch) -> None:

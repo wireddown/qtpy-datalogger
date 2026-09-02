@@ -16,7 +16,7 @@ from snsr.node.mqtt import get_descriptor_topic, get_result_topic
 from snsr.settings import settings
 
 
-def can_handle_message(message: str) -> None | ActionPayload:
+def can_handle_message(message: str) -> ActionPayload | None:
     """Return an ActionPayload if the node can respond to the message."""
     if not message:
         return None

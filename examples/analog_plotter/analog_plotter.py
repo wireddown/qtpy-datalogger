@@ -190,7 +190,7 @@ class AnalogPlotter(guikit.AsyncWindow):
             # Do UART-only scan with empty group_id
             uart_nodes = await discovery.discover_qtpy_devices_async(group_id="")
             if uart_nodes:
-                first_node_key = sorted(uart_nodes)[0]
+                first_node_key = min(uart_nodes)
                 first_node = uart_nodes[first_node_key]
                 self.uart = uart.open_uart(first_node.com_port)
 
