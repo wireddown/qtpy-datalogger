@@ -135,6 +135,7 @@ include = ["examples"]
 
 [tool.ty.overrides.rules]
 invalid-argument-type = "ignore"
+unsound-return-statement = "ignore"
 
 [tool.ty.src]
 exclude = [
