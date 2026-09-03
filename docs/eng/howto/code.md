@@ -79,6 +79,7 @@ Any function in a file where **both** names start with `test_` is categorized as
     - Example: [tests\test_console.py]
     ```python title="tests\test_console.py"
     def test_generate_notice_option():
+        # Test code
         ...
     ```
 1. Write the test function using the ["Arrange, Act, Assert, Cleanup"] pattern
