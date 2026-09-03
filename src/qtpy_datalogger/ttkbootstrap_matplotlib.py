@@ -102,7 +102,7 @@ def handle_theme_changed(themed_widget: tk.Misc, event_args: tk.Event) -> None:
     elif isinstance(themed_widget, tk.Frame):
         apply_toolbar_style(themed_widget, color_palette)
     else:
-        raise TypeError()
+        raise TypeError(type(themed_widget))
 
 
 def apply_figure_style(canvas: tk.Canvas, color_palette: gk.ColorPalette) -> None:
@@ -116,7 +116,9 @@ def apply_figure_style(canvas: tk.Canvas, color_palette: gk.ColorPalette) -> Non
     plot_area_color = color_palette[palette_color_key["background"]]
     text_color = color_palette[palette_color_key["xtra_window_fg"]]
 
-    figure: Figure = mpl_figure_canvas.figure
+    figure = mpl_figure_canvas.figure
+    if not isinstance(figure, Figure):
+        raise TypeError(type(figure), Figure)
     figure.set_facecolor(fill_color)
 
     all_axes: list[Axes] = figure.axes
@@ -190,7 +192,7 @@ def style_tree(widget: tk.Widget, color_palette: gk.ColorPalette) -> None:
     elif isinstance(widget, tk.Checkbutton):
         style_checkbutton(widget, color_palette)
     else:
-        raise TypeError()
+        raise TypeError(type(widget))
 
     if widget.children:
         for child in widget.children.values():
@@ -254,5 +256,5 @@ def change_color_luminance(original_color: str, delta: int) -> str:
         outmodel="hex",
     )
     if not isinstance(new_color, str):
-        raise TypeError()
+        raise TypeError(type(new_color), str)
     return new_color
