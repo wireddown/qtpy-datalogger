@@ -85,7 +85,7 @@ class IOTracer:
 
     def __init__(self, input_stream: BinaryIO, output_stream: BinaryIO) -> None:
         """Create an IOTracer that logs all IO with input_stream and output_stream."""
-        self._shared_tracelog = []
+        self._shared_tracelog: list[str] = []
         self._traced_input = TracedReader(input_stream, self._shared_tracelog, log_prefix="")
         self._traced_output = TracedWriter(output_stream, self._shared_tracelog, log_prefix="")
 

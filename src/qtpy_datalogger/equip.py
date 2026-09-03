@@ -444,7 +444,7 @@ def _equip_snsr_node(behavior: Behavior, comparison_information: dict[str, SnsrN
 def _create_notice_file_contents(allow_dev_version: bool) -> str:
     """Format the notice.toml file for the package."""
     snsr_notice = SnsrNotice.get_package_notice_info(allow_dev_version)
-    file_contents = toml.dumps(snsr_notice._asdict())
+    file_contents = str(toml.dumps(snsr_notice._asdict()))
     return file_contents
 
 
@@ -586,7 +586,9 @@ def _query_modules_from_circup(main_folder: pathlib.Path, log_info: bool) -> lis
             logger.info(f" * {name:<20} {details['__version__']}")
             for name, details in sorted(installed_cp_modules.items())
         ]
-    modules_with_version = [(name, details["__version__"]) for name, details in sorted(installed_cp_modules.items())]
+    modules_with_version = [
+        (str(name), str(details["__version__"])) for name, details in sorted(installed_cp_modules.items())
+    ]
     return modules_with_version
 
 
@@ -719,4 +721,4 @@ def _handle_list_builtin_modules(board_id: str) -> str:
         "standard_library": stdlib_module_names,
         board_id: builtin_module_names,
     }
-    return toml.dumps(full_contents)
+    return str(toml.dumps(full_contents))

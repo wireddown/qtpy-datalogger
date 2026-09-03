@@ -725,7 +725,8 @@ class DataViewer(guikit.AsyncWindow):
         )
         self.canvas_figure.draw()
         self.update_file_message(f"Duration: {time_coordinates[-1]:.3f}")
-        return data_series.keys().to_list()
+        column_titles = [str(column_title) for column_title in data_series.keys().to_list()]
+        return column_titles
 
     def on_graph_mouse_down(self, event_args: mpl_backend_bases.Event) -> None:
         """Handle mouse-down events from the graph."""
@@ -791,7 +792,10 @@ class DataViewer(guikit.AsyncWindow):
         else:
             time_coordinates = time_index.to_list()
 
+        time_coordinates = [float(coordinate) for coordinate in time_coordinates]
         measurement_series = data_file_df[data_file_df.columns[1:]].select_dtypes(include=np.number)
+        if not isinstance(measurement_series, pd.DataFrame):
+            raise TypeError(type(measurement_series), pd.DataFrame)
         return time_coordinates, measurement_series
 
 

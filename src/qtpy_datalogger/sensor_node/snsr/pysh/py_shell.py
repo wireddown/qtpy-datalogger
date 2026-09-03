@@ -74,7 +74,7 @@ class InMemoryHistory:
 
     def __init__(self) -> None:
         """Create a new in-memory history buffer."""
-        self._history = []
+        self._history: list[str] = []
 
     def append_string(self, string: str) -> None:
         """Append a string to the history of commands."""

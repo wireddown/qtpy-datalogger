@@ -52,6 +52,8 @@ def get_app(received_action: ActionInformation) -> SnsrApp:
 
     snsr_app_module = __import__(f"snsr/apps/{snsr_app_name}")
     app = snsr_app_module.create_app(received_action)
+    if not isinstance(app, SnsrApp):
+        raise TypeError(type(app), SnsrApp)
     return app
 
 

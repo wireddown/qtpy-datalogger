@@ -25,10 +25,10 @@ def query_ports_from_serial() -> dict[str, dict[DetailKey, str]]:
     from serial.tools.list_ports_windows import comports  # noqa: PLC0415 -- dynamic import at runtime for Windows
 
     discovered_comports = {
-        comport.device: {
-            DetailKey.com_port: comport.device,
-            DetailKey.com_id: comport.hwid,
-            DetailKey.serial_number: comport.serial_number,
+        str(comport.device): {
+            DetailKey.com_port: str(comport.device),
+            DetailKey.com_id: str(comport.hwid),
+            DetailKey.serial_number: str(comport.serial_number),
         }
         for comport in sorted(comports())
         if comport.device != "COM1"
@@ -100,9 +100,10 @@ def open_uart(port: str) -> serial.Serial:
     logger.debug(serial_options)
     com_port = serial.serial_for_url(**serial_options)
 
-    if isinstance(com_port, serial.Serial):
-        com_port.exclusive = True
+    if not isinstance(com_port, serial.Serial):
+        raise TypeError(type(com_port), serial.Serial)
 
+    com_port.exclusive = True
     com_port.open()
     com_port.reset_input_buffer()
     com_port.reset_output_buffer()
