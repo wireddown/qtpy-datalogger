@@ -65,7 +65,7 @@ class AsyncApp:
 
         """
         if not issubclass(async_window_type, AsyncWindow):
-            raise TypeError()
+            raise TypeError(async_window_type, AsyncWindow)
 
         app = async_window_type()
         app.create_user_interface()
@@ -817,7 +817,7 @@ class NumericInput:
             """Handle the Enter key and FocusOut events."""
             sender = event_args.widget
             if not isinstance(sender, ttk.Spinbox):
-                raise TypeError()
+                raise TypeError(type(sender), ttk.Spinbox)
             sender.icursor(tk.END)
 
             # Widget events like MouseWheel fire before the widget receives the new value
@@ -870,6 +870,8 @@ class ThemeCatalog:
             instance = object.__new__(cls)
             instance._build_catalog()
             cls._instance = instance
+        if not isinstance(cls._instance, ThemeCatalog):
+            raise TypeError(type(cls._instance), ThemeCatalog)
         return cls._instance
 
     def _build_catalog(self) -> None:
@@ -922,13 +924,13 @@ class ThemeCatalog:
     def active_theme_key(self) -> str:
         """Get the theme key for the active theme."""
         style = ttk.Style.get_instance()
-        return style.theme.name
+        return str(style.theme.name)
 
     @property
     def active_palette(self) -> ColorPalette:
         """Get the ColorPalette for the active theme."""
         style = ttk.Style.get_instance()
-        palette = {label: getattr(style.colors, label) for label in ttk_Colors.label_iter()}
+        palette = {str(label): str(getattr(style.colors, label)) for label in ttk_Colors.label_iter()}
         return palette
 
     def hex_color_for_style_key(self, style_key: str, widget: tk.Widget | None = None) -> str:
@@ -936,7 +938,7 @@ class ThemeCatalog:
         if widget:
             style_name = widget.cget("style")
             color = ttk.Style().get_instance().lookup(style_name, style_key)
-            return color
+            return str(color)
         return self.active_palette[style_key]
 
     def key_for_name(self, name: str) -> str:
@@ -1152,7 +1154,7 @@ def create_theme_combobox(parent: tk.BaseWidget) -> ttk.Combobox:
         """Handle the ThemeChanger.Event.BootstrapThemeChanged event."""
         sending_combobox = themed_widget
         if not isinstance(sending_combobox, ttk.Combobox):
-            raise TypeError()
+            raise TypeError(type(sending_combobox), ttk.Combobox)
         theme_name = theme_catalog.name_for_key(theme_catalog.active_theme_key)
         sending_combobox.set(theme_name)
 
@@ -1176,8 +1178,8 @@ def show_button_feedback(
     failure_text: str = "",
 ) -> None:
     """Attach feedback to a ttk.Button command that indicates the command's outcome."""
-    normal_text: str = button.cget("text")
-    full_style: str = button.cget("style")
+    normal_text = button.cget("text")
+    full_style = button.cget("style")
     normal_style = " ".join(trait.lower() for trait in full_style.split(".")[:-1])
 
     feedback_text = success_text if command_result else failure_text
@@ -1206,7 +1208,7 @@ def create_dropdown_combobox(
         """Handle the selection event for the combobox."""
         sender = event_args.widget
         if not isinstance(sender, ttk.Combobox):
-            raise TypeError()
+            raise TypeError(type(sender), ttk.Combobox)
         sender.selection_clear()
         selected_value = sender.get()
         completion(selected_value)
@@ -1224,11 +1226,13 @@ def is_left_double_click(mouse_args: mpl_backend_bases.MouseEvent) -> bool:
     return mouse_args.dblclick
 
 
-def get_first_in_range(upper_bound: float, selection: dict) -> float:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
+def get_first_in_range(upper_bound: float, selection: dict) -> int | float:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
     """Get the first value in the selection that is lower than the upper_bound."""
     descending = sorted(selection.keys(), reverse=True)
     first_in_range_index = [upper_bound > entry for entry in descending].index(True)
     first_value_in_range = selection[descending[first_in_range_index]]
+    if not (isinstance(first_value_in_range, (int, float))):
+        raise TypeError(type(first_value_in_range), (int, float))
     return first_value_in_range
 
 
