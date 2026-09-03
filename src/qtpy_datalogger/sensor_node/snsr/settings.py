@@ -119,12 +119,12 @@ class Settings:
     @property
     def used_kb(self) -> float:
         """Return the used memory in kB."""
-        return gc.mem_alloc() / 1024.0  # ty: ignore[unresolved-attribute] -- this is a builtin CircuitPython extension
+        return float(gc.mem_alloc() / 1024.0)  # ty: ignore[unresolved-attribute] -- this is a builtin CircuitPython extension
 
     @property
     def free_kb(self) -> float:
         """Return the free memory in kB."""
-        return gc.mem_free() / 1024.0  # ty: ignore[unresolved-attribute] -- this is a builtin CircuitPython extension
+        return float(gc.mem_free() / 1024.0)  # ty: ignore[unresolved-attribute] -- this is a builtin CircuitPython extension
 
     @property
     def uptime(self) -> float:
@@ -241,6 +241,8 @@ class Settings:
         """Initialize the Stemma as an I2C port."""
         if not self._stemma_bus:
             self._stemma_bus = board.STEMMA_I2C()  # ty: ignore[unresolved-attribute] -- this is a builtin CircuitPython extension
+        if not isinstance(self._stemma_bus, busio.I2C):
+            raise TypeError(type(self._stemma_bus), busio.I2C)
         return self._stemma_bus
 
     def get_app_settings(self, app_name: str) -> dict:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
