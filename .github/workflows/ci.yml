@@ -53,9 +53,10 @@ jobs:
         echo '</details>' >> $env:GITHUB_STEP_SUMMARY
         echo '<details>' >> $env:GITHUB_STEP_SUMMARY
         echo '<summary>Build-time dependencies</summary>' >> $env:GITHUB_STEP_SUMMARY
-        uv tree --only-dev >> $env:GITHUB_STEP_SUMMARY
-        echo '</details>' >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
+        uv tree --only-dev >> $env:GITHUB_STEP_SUMMARY
+        echo '```' >> $env:GITHUB_STEP_SUMMARY
+        echo '</details>' >> $env:GITHUB_STEP_SUMMARY
 
     - name: Run pytest
       run: uv run pytest --verbose --junit-xml=junit/pytest-results-py${{ matrix.python_version }}-${{ runner.os }}.xml
