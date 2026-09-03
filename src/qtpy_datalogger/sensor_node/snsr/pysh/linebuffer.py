@@ -11,7 +11,7 @@ class LineBuffer:
         self._first_terminal_column = 1
         self.prompt_length = prompt_length
         self.tab_size = tab_size
-        self.ord_codes = []
+        self.ord_codes: list[int] = []
         self.input_cursor = 0
         self.terminal_column = self._get_column_at_cursor()
 
