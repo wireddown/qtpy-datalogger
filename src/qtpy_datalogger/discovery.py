@@ -422,11 +422,11 @@ def _query_volumes_from_wmi() -> dict[str, dict[DetailKey, str]]:
         disk_description = disks_and_descriptions[disk_id][DetailKey.device_description]
         discovered_storage_volumes.update(
             {
-                drive_letter: {
-                    DetailKey.drive_root: drive_letter,
-                    DetailKey.drive_label: drive_label,
-                    DetailKey.serial_number: disk_serial_number,
-                    DetailKey.device_description: disk_description,
+                str(drive_letter): {
+                    DetailKey.drive_root: str(drive_letter),
+                    DetailKey.drive_label: str(drive_label),
+                    DetailKey.serial_number: str(disk_serial_number),
+                    DetailKey.device_description: str(disk_description),
                 }
             }
         )
@@ -457,7 +457,7 @@ def _query_node_info_from_drive(drive_root: str) -> tuple[str, str, str]:
 
     settings_contents = toml.load(settings_file)
     mqtt_group = settings_contents.get("QTPY_NODE_GROUP", "")
-    return (python_implementation, snsr_notice.version, mqtt_group)
+    return (python_implementation, snsr_notice.version, str(mqtt_group))
 
 
 def _parse_boot_out_file(main_folder: pathlib.Path) -> dict[DetailKey, str]:
