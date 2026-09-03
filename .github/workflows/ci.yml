@@ -41,10 +41,20 @@ jobs:
         uv lock --check
         uv sync --verbose
         echo '## :package: Installed plugins and dependencies' >> $env:GITHUB_STEP_SUMMARY
+        echo "Using" >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
         uv self version >> $env:GITHUB_STEP_SUMMARY
+        echo '```' >> $env:GITHUB_STEP_SUMMARY
+        echo '<details>' >> $env:GITHUB_STEP_SUMMARY
+        echo '<summary>Run-time dependencies</summary>' >> $env:GITHUB_STEP_SUMMARY
+        echo '```' >> $env:GITHUB_STEP_SUMMARY
         uv tree --no-dev >> $env:GITHUB_STEP_SUMMARY
+        echo '```' >> $env:GITHUB_STEP_SUMMARY
+        echo '</details>' >> $env:GITHUB_STEP_SUMMARY
+        echo '<details>' >> $env:GITHUB_STEP_SUMMARY
+        echo '<summary>Build-time dependencies</summary>' >> $env:GITHUB_STEP_SUMMARY
         uv tree --only-dev >> $env:GITHUB_STEP_SUMMARY
+        echo '</details>' >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
 
     - name: Run pytest
