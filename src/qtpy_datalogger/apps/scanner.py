@@ -266,7 +266,7 @@ class ScannerApp(guikit.AsyncWindow):
     def on_row_selected(self, event_args: tk.Event) -> None:
         """Handle the user selecting a row in the results table."""
         if not isinstance(event_args.widget, ttk.Treeview):
-            raise TypeError()
+            raise TypeError(type(event_args.widget), ttk.Treeview)
         selected_rows = event_args.widget.selection()
         if not selected_rows:
             return
