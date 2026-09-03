@@ -37,7 +37,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        echo '# :checkered_flag: Run Tests and Analyzers _(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
+        echo '# :checkered_flag: Python ${{ matrix.python_version }}: Run Tests and Analyzers' >> $env:GITHUB_STEP_SUMMARY
+        echo '_(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
         uv lock --check
         uv sync --verbose
         echo '## :package: Installed plugins and dependencies' >> $env:GITHUB_STEP_SUMMARY
