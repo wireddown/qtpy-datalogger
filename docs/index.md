@@ -35,7 +35,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
 ![Screenshot of Analog Plotter demo app](gallery/ex-analog-plotter.png)
 
-[Preview in 5 minutes &nbsp;:lucide-cable:{ .lg .middle }](get-started/){ .md-button .md-button--primary }
+[Preview in 5 minutes &nbsp;:lucide-cable:{ .lg .middle }](get-started.md){ .md-button .md-button--primary }
 
 ## Complete and custom
 
@@ -47,7 +47,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     Read and write both **analog** and **digital** pins. Control **SPI** and **I^2^C** peripherals. Blink the **NeoPixel** :lucide-siren:{ .🦜 }
 
-    :octicons-arrow-right-24: [Features](features/)
+    :octicons-arrow-right-24: [Features](features.md)
 
 -   :lucide-square-activity:{ .lg .middle .qtpy }&nbsp; __Adapt to any use case__
 
@@ -55,7 +55,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     Use the app API to deploy custom code for remote acquisition and control.
 
-    :octicons-arrow-right-24: [Customize](customize/)
+    :octicons-arrow-right-24: [Customize](customize.md)
 
 </div>
 
@@ -67,7 +67,7 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     Includes built-in GUI applications for detecting sensor nodes and viewing data.
 
-    :octicons-arrow-right-24: [Gallery](gallery/)
+    :octicons-arrow-right-24: [Gallery](gallery.md)
 
 -   :lucide-zap:{ .lg .middle .qtpy }&nbsp; __Preview in 5 minutes__
 
@@ -75,13 +75,13 @@ The PC host controls and communicates with any number of sensor nodes on the wir
 
     Install `qtpy-datalogger` with `pip` and get up and logging in minutes.
 
-    :octicons-arrow-right-24: [Get started](get-started/)
+    :octicons-arrow-right-24: [Get started](get-started.md)
 
 </div>
 
 ## Questions and help
 
-Please go to the [Welcome](welcome/) page for questions and help.
+Please go to the [Welcome](welcome.md) page for questions and help.
 
 
 [Adafruit QT Py S3]: https://learn.adafruit.com/adafruit-qt-py-esp32-s3

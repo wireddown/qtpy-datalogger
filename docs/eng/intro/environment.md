@@ -22,7 +22,7 @@ Before you can start developing, you need to download the source and install the
 
 ??? question "New to git and Python?"
 
-    If these tools and commands are not on your system, follow the **[Onboarding guides](tools/)**.
+    If these tools and commands are not on your system, follow our **[Onboarding guides](tools.md)**.
 
 ## 1. Get the source
 
@@ -43,7 +43,7 @@ uv sync
 
 Run these commands to install and configure the Mosquitto MQTT broker.
 
-!!! info "For details, see the [MQTT](mqtt/) page"
+!!! info "For details, see the [MQTT](mqtt.md) page"
 
 ```pwsh title="Administrator Powershell"
 # Install Mosquitto Broker

@@ -37,15 +37,32 @@ jobs:
 
     - name: Install dependencies
       run: |
-        echo '# :checkered_flag: Run Tests and Analyzers _(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
+        echo '# :shield: Python ${{ matrix.python_version }}: Run Tests and Analyzers' >> $env:GITHUB_STEP_SUMMARY
+        echo '_(run ${{ github.run_number }} attempt ${{ github.run_attempt }})_' >> $env:GITHUB_STEP_SUMMARY
         uv lock --check
         uv sync --verbose
         echo '## :package: Installed plugins and dependencies' >> $env:GITHUB_STEP_SUMMARY
+        echo "Using" >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
         uv self version >> $env:GITHUB_STEP_SUMMARY
+        echo '```' >> $env:GITHUB_STEP_SUMMARY
+        echo "for this run." >> $env:GITHUB_STEP_SUMMARY
+        echo '<details>' >> $env:GITHUB_STEP_SUMMARY
+        echo '<summary> :package: <strong>Run-time</strong> dependencies</summary>' >> $env:GITHUB_STEP_SUMMARY
+        echo '' >> $env:GITHUB_STEP_SUMMARY
+        echo '```' >> $env:GITHUB_STEP_SUMMARY
         uv tree --no-dev >> $env:GITHUB_STEP_SUMMARY
+        echo '```' >> $env:GITHUB_STEP_SUMMARY
+        echo '' >> $env:GITHUB_STEP_SUMMARY
+        echo '</details>' >> $env:GITHUB_STEP_SUMMARY
+        echo '<details>' >> $env:GITHUB_STEP_SUMMARY
+        echo '<summary> :building_construction: <strong>Build-time</strong> dependencies</summary>' >> $env:GITHUB_STEP_SUMMARY
+        echo '' >> $env:GITHUB_STEP_SUMMARY
+        echo '```' >> $env:GITHUB_STEP_SUMMARY
         uv tree --only-dev >> $env:GITHUB_STEP_SUMMARY
         echo '```' >> $env:GITHUB_STEP_SUMMARY
+        echo '' >> $env:GITHUB_STEP_SUMMARY
+        echo '</details>' >> $env:GITHUB_STEP_SUMMARY
 
     - name: Run pytest
       run: uv run pytest --verbose --junit-xml=junit/pytest-results-py${{ matrix.python_version }}-${{ runner.os }}.xml

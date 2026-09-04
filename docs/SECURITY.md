@@ -29,4 +29,5 @@ This table lists the system impacts when using `qtpy-datalogger`.
 
 If you encounter a vulnerability or have questions, create a [new GitHub Issue].
 
+
 [new GitHub issue]: https://github.com/wireddown/qtpy-datalogger/issues/new/choose

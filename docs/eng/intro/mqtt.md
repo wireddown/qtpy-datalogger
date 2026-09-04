@@ -189,7 +189,7 @@ In order to communicate on the WiFi network, the QT Py sensor node must have:
 
 ### Connect
 
-Use the [**Scanner app**](../../gallery/#scanner) to confirm communication.
+Use the [**Scanner app**](../../gallery.md#scanner) to confirm communication.
 
 ```pwsh title="PowerShell"
 # Run the Scanner app

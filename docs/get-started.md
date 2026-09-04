@@ -45,7 +45,7 @@ tags:
     # Ctrl-] to quit
     ```
 
-- Plot data in the [**Analog Plotter**](customize/#analog-plotter) demo GUI app
+- Plot data in the [**Analog Plotter**](customize.md#analog-plotter) demo GUI app
     ![Screenshot of Analog Plotter demo app](gallery/ex-analog-plotter.png)
 - Optionally, delete the folder `qtpy-preview` when you are done
 
@@ -58,4 +58,4 @@ In order to communicate on the WiFi network, the QT Py sensor node must also hav
 - an MQTT broker
 - WiFi credentials
 
-Continue to the [MQTT](eng/intro/mqtt/) page if you want to try [the demo apps](customize/) over the network.
+Continue to the [MQTT](eng/intro/mqtt.md) page if you want to try [the demo apps](customize.md) over the network.

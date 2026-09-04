@@ -25,7 +25,7 @@ git switch --create users/__YOU__/__NEW_TOPIC__
 #    git switch users/__YOU__/__EXISTING_TOPIC__
 # 2. Rebase or merge
 #    A. Replay and resolve your changes on the latest main
-#       git rebase origin/main
+#       git rebase --autostash origin/main
 #    B. Merge and resolve your changes with the latest main
 #       git merge origin/main
 

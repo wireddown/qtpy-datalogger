@@ -7,7 +7,7 @@ tags:
 
 # Customize
 
-Once you've [gotten started](get-started/), use these simple demos as branching points to extend the system to your use case.
+Once you've [gotten started](get-started.md), use these simple demos as branching points to extend the system to your use case.
 
 ## Analog Plotter
 
@@ -28,7 +28,7 @@ A custom host-side app that plots analog data using the built-in sensor node app
     ```
 1. **Edit** the [variables at the top] of `get_and_plot_data()` to exercise the features
     - Note that this example only enables UART communication to start
-    - If you setup [MQTT](eng/intro/mqtt/) to use WiFi, change **`use_mqtt`** to **`True`**
+    - If you setup [MQTT](eng/intro/mqtt.md) to use WiFi, change **`use_mqtt`** to **`True`**
     ```python title="get_and_plot_data()"
       # Customize
       use_uart = True
@@ -46,7 +46,7 @@ A custom host-side app that plots analog data using the built-in sensor node app
 
 ## Ready for more?
 
-See [Develop](develop/) and choose:
+See [Develop](develop.md) and choose:
 
 - Add `qtpy-datalogger` to your project
 - Or fork-and-branch
