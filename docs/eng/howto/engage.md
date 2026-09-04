@@ -17,9 +17,11 @@ If you want to learn about the build and release actions, go to our [Manage the 
 
 ## Use issues
 
-We do not follow any automated or formalized processes for labeling or addressing issues.
+We do not follow any automated or formal processes for handling issues, but as a baseline:
 
-For a baseline, we use labels to categorize issues, and we require code changes to reference an issue.
+- We use labels to categorize issues
+- We require code changes to reference an issue
+
 These sections explain how we use GitHub issues in the project.
 
 ### Create an issue
@@ -74,7 +76,7 @@ For specific workflows about using git and running the tests and analyzers for `
 ### Triage new issues
 
 When someone creates a new issue, GitHub adds an **inbox** label.
-If they selected a different request, GitHub adds another corresponding label.
+Depending on the type of the issue that they selected, GitHub adds additional labels.
 
 Once we notice a new issue, we can help it get the right attention by categorizing them.
 
@@ -101,7 +103,7 @@ See the [full label list] for other views of this project's issues.
 This project uses the same GitHub repository for its source code and website documentation.
 Changes to either happen with pull requests.
 
-Before opening a pull request, please create or select an issue from the [issues list] for your changes.
+Before opening a pull request, please select an issue from the [issues list] and assign it to yourself.
 
 ### Open a pull request
 
