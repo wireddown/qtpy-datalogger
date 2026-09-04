@@ -50,11 +50,11 @@ We change the version by hand when we make a notable behavior or API change as r
     We're reworking its new capabilities into the main package as reusable APIs for other applications to use.
     We shall bump the **minor** version once the additions are complete and we publish that application with the main package.
 
-    Until these two are resolved, we shall continue bumping the **1.0.x** patch version.
+    Until these two are resolved, we shall continue bumping the **1.0.x** patch version and may include API changes.
 
 To change the version of `qtpy-datalogger`, use **[uv version]**.
 
-```pwsh
+```pwsh title="PowerShell"
 # Show the current version
 uv version
 
@@ -88,7 +88,7 @@ We use the GitHub web interface to interactively draft and publish new releases.
     - Keep the previous tag set to _Auto_
     - Click the **Generate release notes** button
     - Reformat the generated notes to match this template
-    ```markdown
+    ```markdown title="Release announcement template"
     ## Highlight of the release
 
     Describe the highlights of the release
@@ -206,8 +206,8 @@ We create new GitHub actions when we want to add a new automation to the project
 
 #### Practical exercises
 
-- [Hello GitHub Actions]: Learn how to create action files, trigger action, and find action logs
-- [Test with Actions]: Learn how to create a action that runs tests and produces test reports
+- [Hello GitHub Actions]: Learn how to create action files, trigger actions, and find action logs
+- [Test with Actions]: Learn how to create an action that runs tests and produces test reports
 - [Secure your repository's supply chain]: Learn how to enable Dependabot
 
 
