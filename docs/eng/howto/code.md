@@ -15,7 +15,7 @@ Continue reading if you want to customize the code or contribute to the project 
 
 ## Debug code
 
-The two most effective ways to understand and examine a program's behavior are
+The two most effective ways to understand and examine a program's behavior are:
 
 - Pausing the program and inspecting or changing live data
 - Tracing the program's execution and tracking its function calls
