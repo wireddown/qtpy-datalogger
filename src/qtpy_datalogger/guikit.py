@@ -1302,6 +1302,7 @@ def create_demo_ui(
     progressbar.grid(
         row=1,
         columnspan=3,
+        sticky=tk.EW,
         padx=(8, 8),
         pady=(16, 0),
     )
@@ -1309,14 +1310,14 @@ def create_demo_ui(
     button_block = ttk.Button(
         root,
         text="Sync",
-        width=10,
+        width=14,
         style=bootstyle.PRIMARY,
         command=functools.partial(calculate_sync, progressbar),
     )
     button_block.grid(
         row=2,
         column=0,
-        sticky=tk.W,
+        sticky=tk.EW,
         padx=8,
         pady=8,
     )
@@ -1330,14 +1331,14 @@ def create_demo_ui(
     button_non_block = ttk.Button(
         root,
         text="Async",
-        width=10,
+        width=14,
         style=bootstyle.INFO,
         command=lambda: io_loop.create_task(calculate_async(progressbar)),
     )
     button_non_block.grid(
         row=2,
         column=2,
-        sticky=tk.E,
+        sticky=tk.EW,
         padx=8,
         pady=8,
     )
