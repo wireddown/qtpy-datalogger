@@ -137,13 +137,16 @@ On the command line, [use **git log**] to search and show history.
 # Show the five most recent commit messages
 git log --oneline --max-count 5
 
-# Search the commit messages for a string
+# Show the commits that changed a file
+git log --oneline --max-count 5 -- path/to/file.py
+
+# Search the commit messages for a string pattern
 git log --grep "search string"
 
 # Show the line changes for the most recent commit
 git log --patch --max-count 1
 
-# Search the line changes for a string
+# Search the line changes for a string pattern
 git log -G "search string"
 ```
 
