@@ -855,6 +855,210 @@ class NumericInput:
         return self._value
 
 
+class IconButton:
+    """A class that wraps a ttkbootstrap.Button to support custom icons from tkinter-icons or SVG resources."""
+
+    def __init__(  # noqa PLR0913 PLR0917 -- allow many parameters for a framework class method
+        self,
+        parent: tk.Widget,
+        text: str = "",
+        fa_icon_name: str = "",
+        svg_contents: str = "",
+        icon_size: int = 24,
+        icon_position: bootstyle.Side = tk.LEFT,
+        spaces: int = 0,
+        bootstyle: str = bootstyle.PRIMARY,
+    ) -> None:
+        """
+        Initialize a new IconButton.
+
+        Use the class factory methods for a simpler API:
+
+        - IconButton.with_text(...)
+        - IconButton.from_svg(...)
+
+        Parameters
+        ----------
+        parent
+            The owner of the button.
+        text
+            The text to show in the button.
+        fa_icon_name
+            The name of the FontAwesome icon to use from tkinter-icons[fontawesome].
+        svg_contents
+            The string contents of an SVG drawing to use.
+        icon_size
+            The size of the icon in the button.
+        icon_position
+            The location for the icon relative to text: tk.LEFT or tk.RIGHT.
+        spaces
+            Include additional space characters to help internal padding between
+            the icon and text.
+        bootstyle
+            The initial bootstyle to apply to the button.
+
+        """
+        self._theme_catalog = ThemeCatalog.get_instance()
+        self._button_images: dict[str, tk.PhotoImage] = {}
+
+        if text:
+            if icon_position == tk.RIGHT:
+                text = f"{text}{spaces * ' '}"
+            elif icon_position == tk.LEFT:
+                text = f"{spaces * ' '}{text}"
+            else:
+                # Please open a bug report and describe your use-case so we can address it
+                # https://github.com/wireddown/qtpy-datalogger/issues/new?template=bug-report.md
+                raise ValueError(icon_position)
+            compound = icon_position
+            char_width = len(text)
+            padding = (4, 6, 4, 4)  # Increase click target size, with a slightly lower eye line for the text
+        else:
+            compound = ""
+            char_width = 0
+            padding = 0
+
+        if svg_contents:
+            self._icon_data = svg_contents
+            self._create_icon = image_from_svg
+        else:
+            self._icon_data = fa_icon_name or "o"
+            self._create_icon = image_from_icon
+
+        self._icon_size = icon_size
+
+        self._button = ttk.Button(
+            parent,
+            text=text,
+            width=char_width,
+            compound=compound,
+            bootstyle=bootstyle,
+            padding=padding,
+        )
+
+        ThemeChanger.add_handler(self._button, self._on_theme_changed)
+        self._button.bind("<Enter>", self._on_mouse_transit)
+        self._button.bind("<Leave>", self._on_mouse_transit)
+        self._refresh_icon()
+
+    @staticmethod
+    def with_text(  # noqa PLR0913 PLR0917 -- allow many parameters for a framework class method
+        parent: tk.Widget,
+        text: str,
+        spaces: int = 0,
+        fa_icon_name: str = "o",
+        icon_size: int = 24,
+        icon_position: bootstyle.Side = tk.LEFT,
+        bootstyle: str = bootstyle.PRIMARY,
+    ) -> "IconButton":
+        """
+        Create an IconButton using the specified text and options.
+
+        Parameters
+        ----------
+        parent
+            The owner of the button.
+        text
+            The text to show in the button.
+        spaces
+            Include additional space characters to help internal padding between
+            the icon and text.
+        fa_icon_name
+            The name of the FontAwesome icon to use from tkinter-icons[fontawesome].
+        icon_size
+            The size of the icon in the button.
+        icon_position
+            The location for the icon relative to text: tk.LEFT or tk.RIGHT.
+        bootstyle
+            The initial bootstyle to apply to the button.
+
+        """
+        return IconButton(
+            parent=parent,
+            text=text,
+            fa_icon_name=fa_icon_name,
+            icon_size=icon_size,
+            icon_position=icon_position,
+            spaces=spaces,
+            bootstyle=bootstyle,
+        )
+
+    @staticmethod
+    def from_svg(
+        parent: tk.Widget,
+        svg_contents: str,
+        icon_size: int = 24,
+        bootstyle: str = bootstyle.PRIMARY,
+    ) -> "IconButton":
+        """
+        Create an IconButton from an SVG drawing.
+
+        Parameters
+        ----------
+        parent
+            The owner of the button.
+        svg_contents
+            The string contents of an SVG drawing to use.
+        icon_size
+            The size of the icon in the button.
+        bootstyle
+            The initial bootstyle to apply to the button.
+
+        """
+        return IconButton(
+            parent=parent,
+            svg_contents=svg_contents,
+            icon_size=icon_size,
+            bootstyle=bootstyle,
+        )
+
+    @property
+    def widget(self) -> ttk.Button:
+        """Return the wrapped ttkbootstrap.Button."""
+        return self._button
+
+    def set_bootstyle(self, new_style: str) -> None:
+        """Set the specified style on the button."""
+        self._button.configure(bootstyle=new_style)
+        self._refresh_icon()
+
+    def enable(self) -> None:
+        """Enable the button so it receives click events."""
+        self._button.configure(state=tk.NORMAL)
+        self._refresh_icon()
+
+    def disable(self) -> None:
+        """Disable the button so it does not receive click events."""
+        self._button.configure(state=tk.DISABLED)
+        self._refresh_icon()
+
+    def enable_on_condition(self, condition: bool) -> None:
+        """Use the specified condition to disable or enable the button."""
+        if condition:
+            self.enable()
+        else:
+            self.disable()
+
+    def _refresh_icon(self) -> None:
+        """Update the button so that its icon color matches its text color."""
+        text_color = self._theme_catalog.hex_color_for_style_key(StyleKey.Foreground, self._button)
+        image_key = f"{hash(self._icon_data)}-{text_color}"
+        if image_key not in self._button_images:
+            self._button_images[image_key] = self._create_icon(
+                self._icon_data, fill=text_color, scale_to_width=self._icon_size
+            )
+        new_icon = self._button_images[image_key]
+        self._button.configure(image=new_icon)
+
+    def _on_theme_changed(self, event_args: tk.Event) -> None:
+        """Handle the ThemeChanger.Event.BootstrapThemeChanged event."""
+        self._refresh_icon()
+
+    def _on_mouse_transit(self, event_args: tk.Event) -> None:
+        """Handle the mouse <Enter> and <Leave> events."""
+        self._refresh_icon()
+
+
 class ThemeCatalog:
     """A class that describes the available themes."""
 
