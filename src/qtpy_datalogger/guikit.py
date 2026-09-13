@@ -492,30 +492,28 @@ class AboutDialog(AsyncDialog):
         version_label.grid(column=5, row=2, sticky=tk.W, padx=(2, 0))
         separator = ttk.Separator(message_frame)
         separator.grid(column=1, row=3, columnspan=5, sticky=tk.EW, pady=4)
-        button_text_color = self.theme_catalog.hex_color_for_style_key(StyleKey.SelectFg)
-        spacer = "   "
-        self.help_icon = image_from_icon("parachute-box", fill=button_text_color, scale_to_width=16)
-        self.help_button = ttk.Button(
-            message_frame,
-            compound=tk.LEFT,
-            image=self.help_icon,
-            text=f"{spacer}Online help ",  # The trailing space helps with internal margins
-            style=bootstyle.INFO,
-            width=18,
-            command=functools.partial(webbrowser.open_new_tab, self.help_url),
+        self.help_button = IconButton.with_text(
+            parent=message_frame,
+            text="Online help",
+            spaces=2,
+            fa_icon_name="parachute-box",
+            icon_size=16,
+            icon_position=tk.LEFT,
+            bootstyle=bootstyle.INFO,
         )
-        self.help_button.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
-        self.source_icon = image_from_icon("github-alt-brands", fill=button_text_color, scale_to_width=16)
-        self.source_button = ttk.Button(
-            message_frame,
-            compound=tk.LEFT,
-            image=self.source_icon,
-            text=f"{spacer}Source code",
-            style=bootstyle.INFO,
-            width=18,
-            command=functools.partial(webbrowser.open_new_tab, self.source_url),
+        self.help_button.widget.configure(command=functools.partial(webbrowser.open_new_tab, self.help_url))
+        self.help_button.widget.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
+        self.source_button = IconButton.with_text(
+            parent=message_frame,
+            text="Source code",
+            spaces=2,
+            fa_icon_name="github-alt-brands",
+            icon_size=16,
+            icon_position=tk.LEFT,
+            bootstyle=bootstyle.INFO,
         )
-        self.source_button.grid(column=5, row=5, sticky=tk.W, pady=(22, 0))
+        self.source_button.widget.configure(command=functools.partial(webbrowser.open_new_tab, self.source_url))
+        self.source_button.widget.grid(column=5, row=5, sticky=tk.W, pady=(22, 0))
 
         button_frame = ttk.Frame(main_frame)
         button_frame.grid(column=0, row=1, sticky=tk.NSEW, padx=(0, 16), pady=(8, 0))
@@ -546,16 +544,6 @@ class AboutDialog(AsyncDialog):
             icon_image = image_from_icon(icon_name, fill=icon_color, scale_to_height=icon_height)
             self.app_icon_images.append(icon_image)
             icon_label.configure(image=icon_image)
-
-        button_icon_height = 16
-        help_icon_fill = self.theme_catalog.hex_color_for_style_key(StyleKey.Foreground, self.help_button)
-        self.help_icon = image_from_icon("parachute-box", fill=help_icon_fill, scale_to_width=button_icon_height)
-        self.help_button.configure(image=self.help_icon)
-        source_icon_fill = self.theme_catalog.hex_color_for_style_key(StyleKey.Foreground, self.source_button)
-        self.source_icon = image_from_icon(
-            "github-alt-brands", fill=source_icon_fill, scale_to_width=button_icon_height
-        )
-        self.source_button.configure(image=self.source_icon)
 
     def copy_version(self) -> None:
         """Copy the version information to the clipboard."""
