@@ -1224,29 +1224,41 @@ class DemoWithAnimation(AsyncWindow):
         self.animation = "🤍🤍🤍🤍🤍🤍🤍🤍🤍🤍🩶🖤"
         main_frame, self.label, self.progressbar = create_demo_ui(self.root_window, self.io_loop)
 
-        modal_button = ttk.Button(
-            main_frame,
+        modal_button = IconButton.with_text(
+            parent=main_frame,
             text="Modal",
-            command=functools.partial(self.open_dialog, DialogBehavior.Modal),
-            style=bootstyle.SECONDARY,
+            fa_icon_name="hourglass-half",
+            icon_size=16,
+            icon_position=tk.LEFT,
+            spaces=2,
+            bootstyle=f"{bootstyle.WARNING} {bootstyle.OUTLINE}",
         )
-        modal_button.grid(column=0, row=3, sticky=tk.EW, padx=8)
+        modal_button.widget.configure(command=functools.partial(self.open_dialog, DialogBehavior.Modal))
+        modal_button.widget.grid(column=0, row=3, sticky=tk.EW, padx=8)
 
-        modeless_button = ttk.Button(
-            main_frame,
+        modeless_button = IconButton.with_text(
+            parent=main_frame,
             text="Modeless",
-            command=functools.partial(self.open_dialog, DialogBehavior.Modeless),
-            style=bootstyle.SECONDARY,
+            fa_icon_name="gear",
+            icon_size=16,
+            icon_position=tk.LEFT,
+            spaces=2,
+            bootstyle=f"{bootstyle.SECONDARY} {bootstyle.OUTLINE}",
         )
-        modeless_button.grid(column=1, row=3, sticky=tk.EW, pady=8)
+        modeless_button.widget.configure(command=functools.partial(self.open_dialog, DialogBehavior.Modeless))
+        modeless_button.widget.grid(column=1, row=3, sticky=tk.EW, pady=8)
 
-        standalone_button = ttk.Button(
-            main_frame,
+        standalone_button = IconButton.with_text(
+            parent=main_frame,
             text="Standalone",
-            command=functools.partial(self.open_dialog, DialogBehavior.Standalone),
-            style=bootstyle.SECONDARY,
+            fa_icon_name="maximize",
+            icon_size=16,
+            icon_position=tk.LEFT,
+            spaces=2,
+            bootstyle=f"{bootstyle.SUCCESS} {bootstyle.OUTLINE}",
         )
-        standalone_button.grid(column=2, row=3, sticky=tk.EW, padx=8)
+        standalone_button.widget.configure(command=functools.partial(self.open_dialog, DialogBehavior.Standalone))
+        standalone_button.widget.grid(column=2, row=3, sticky=tk.EW, padx=8)
 
     async def on_loop(self) -> None:
         """Update the animation."""
