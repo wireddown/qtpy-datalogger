@@ -936,8 +936,22 @@ class ThemeCatalog:
     def hex_color_for_style_key(self, style_key: str, widget: tk.Widget | None = None) -> str:
         """Return the '#RRGGBB' string for the specified style name for the active theme and widget."""
         if widget:
+            # Query the widget because ttkbootstrap dynamically overrides some colors
+            # based on best-contrast and does not always use the theme's defined color
+            style = ttk.Style.get_instance()
             style_name = widget.cget("style")
-            color = ttk.Style().get_instance().lookup(style_name, style_key)
+            color = style.lookup(style_name, style_key)
+            overrides = style.map(style_name, style_key)
+            states = ()
+            if isinstance(widget, ttk.Button):
+                states = widget.state()
+            special_cases = {"hover", "disabled"}
+            active_cases = special_cases.intersection(states)
+            if active_cases:
+                for override in overrides:
+                    if not active_cases.intersection(override):
+                        continue
+                    color = override[-1]  # Does not detect both special cases simultaneously, takes last found
             return str(color)
         return self.active_palette[style_key]
 
