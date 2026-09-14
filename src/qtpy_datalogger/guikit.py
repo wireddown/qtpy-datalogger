@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass
 from tkinter import font
-from typing import ClassVar, NamedTuple
+from typing import ClassVar, NamedTuple, SupportsFloat, TypeVar
 
 import click
 import matplotlib.axes as mpl_axes
@@ -33,6 +33,8 @@ from ttkbootstrap.widgets import tooltip as ttk_tooltip
 from qtpy_datalogger import datatypes
 
 ColorPalette = dict[str, str]
+ComparableNumeric = TypeVar("ComparableNumeric", bound=SupportsFloat)
+AnyType = TypeVar("AnyType")
 
 logger = logging.getLogger(__name__)
 
@@ -1240,13 +1242,11 @@ def is_left_double_click(mouse_args: mpl_backend_bases.MouseEvent) -> bool:
     return mouse_args.dblclick
 
 
-def get_first_in_range(upper_bound: float, selection: dict) -> int | float:  # ty: ignore[missing-type-argument] -- allow flexible dict elements
+def get_first_in_range(upper_bound: SupportsFloat, selection: dict[ComparableNumeric, AnyType]) -> AnyType:
     """Get the first value in the selection that is lower than the upper_bound."""
     descending = sorted(selection.keys(), reverse=True)
-    first_in_range_index = [upper_bound > entry for entry in descending].index(True)
+    first_in_range_index = [upper_bound > entry for entry in descending].index(True)  # ty: ignore[unsupported-operator] -- floats are comparable
     first_value_in_range = selection[descending[first_in_range_index]]
-    if not (isinstance(first_value_in_range, (int, float))):
-        raise TypeError(type(first_value_in_range), (int, float))
     return first_value_in_range
 
 
