@@ -15,6 +15,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass
 from tkinter import font
+from tkinter.ttk import Widget as _ttkWidget
 from typing import ClassVar, NamedTuple, SupportsFloat, TypeVar
 
 import click
@@ -945,8 +946,8 @@ class ThemeCatalog:
             color = style.lookup(style_name, style_key)
             overrides = style.map(style_name, style_key)
             states = ()
-            if isinstance(widget, ttk.Button):
-                states = widget.state()
+            if issubclass(type(widget), _ttkWidget):
+                states = widget.state()  # ty: ignore [unresolved-attribute] -- we type check for this call at runtime
             special_cases = {"hover", "disabled"}
             active_cases = special_cases.intersection(states)
             if active_cases:
