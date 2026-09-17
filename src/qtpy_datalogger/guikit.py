@@ -15,6 +15,7 @@ import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass
 from tkinter import font
+from tkinter.ttk import Widget as _ttkWidget
 from typing import ClassVar, NamedTuple, SupportsFloat, TypeVar
 
 import click
@@ -491,30 +492,28 @@ class AboutDialog(AsyncDialog):
         version_label.grid(column=5, row=2, sticky=tk.W, padx=(2, 0))
         separator = ttk.Separator(message_frame)
         separator.grid(column=1, row=3, columnspan=5, sticky=tk.EW, pady=4)
-        button_text_color = self.theme_catalog.hex_color_for_style_key(StyleKey.SelectFg)
-        spacer = "   "
-        self.help_icon = image_from_icon("parachute-box", fill=button_text_color, scale_to_width=16)
-        self.help_button = ttk.Button(
-            message_frame,
-            compound=tk.LEFT,
-            image=self.help_icon,
-            text=f"{spacer}Online help ",  # The trailing space helps with internal margins
-            style=bootstyle.INFO,
-            width=18,
-            command=functools.partial(webbrowser.open_new_tab, self.help_url),
+        self.help_button = IconButton.with_text(
+            parent=message_frame,
+            text="Online help",
+            spaces=2,
+            fa_icon_name="parachute-box",
+            icon_size=16,
+            icon_position=tk.LEFT,
+            bootstyle=bootstyle.INFO,
         )
-        self.help_button.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
-        self.source_icon = image_from_icon("github-alt-brands", fill=button_text_color, scale_to_width=16)
-        self.source_button = ttk.Button(
-            message_frame,
-            compound=tk.LEFT,
-            image=self.source_icon,
-            text=f"{spacer}Source code",
-            style=bootstyle.INFO,
-            width=18,
-            command=functools.partial(webbrowser.open_new_tab, self.source_url),
+        self.help_button.widget.configure(command=functools.partial(webbrowser.open_new_tab, self.help_url))
+        self.help_button.widget.grid(column=5, row=4, sticky=tk.W, pady=(18, 0))
+        self.source_button = IconButton.with_text(
+            parent=message_frame,
+            text="Source code",
+            spaces=2,
+            fa_icon_name="github-alt-brands",
+            icon_size=16,
+            icon_position=tk.LEFT,
+            bootstyle=bootstyle.INFO,
         )
-        self.source_button.grid(column=5, row=5, sticky=tk.W, pady=(22, 0))
+        self.source_button.widget.configure(command=functools.partial(webbrowser.open_new_tab, self.source_url))
+        self.source_button.widget.grid(column=5, row=5, sticky=tk.W, pady=(22, 0))
 
         button_frame = ttk.Frame(main_frame)
         button_frame.grid(column=0, row=1, sticky=tk.NSEW, padx=(0, 16), pady=(8, 0))
@@ -545,16 +544,6 @@ class AboutDialog(AsyncDialog):
             icon_image = image_from_icon(icon_name, fill=icon_color, scale_to_height=icon_height)
             self.app_icon_images.append(icon_image)
             icon_label.configure(image=icon_image)
-
-        button_icon_height = 16
-        help_icon_fill = self.theme_catalog.hex_color_for_style_key(StyleKey.Foreground, self.help_button)
-        self.help_icon = image_from_icon("parachute-box", fill=help_icon_fill, scale_to_width=button_icon_height)
-        self.help_button.configure(image=self.help_icon)
-        source_icon_fill = self.theme_catalog.hex_color_for_style_key(StyleKey.Foreground, self.source_button)
-        self.source_icon = image_from_icon(
-            "github-alt-brands", fill=source_icon_fill, scale_to_width=button_icon_height
-        )
-        self.source_button.configure(image=self.source_icon)
 
     def copy_version(self) -> None:
         """Copy the version information to the clipboard."""
@@ -854,6 +843,210 @@ class NumericInput:
         return self._value
 
 
+class IconButton:
+    """A class that wraps a ttkbootstrap.Button to support custom icons from tkinter-icons or SVG resources."""
+
+    def __init__(  # noqa PLR0913 PLR0917 -- allow many parameters for a framework class method
+        self,
+        parent: tk.Widget,
+        text: str = "",
+        fa_icon_name: str = "",
+        svg_contents: str = "",
+        icon_size: int = 24,
+        icon_position: bootstyle.Side = tk.LEFT,
+        spaces: int = 0,
+        bootstyle: str = bootstyle.PRIMARY,
+    ) -> None:
+        """
+        Initialize a new IconButton.
+
+        Use the class factory methods for a simpler API:
+
+        - IconButton.with_text(...)
+        - IconButton.from_svg(...)
+
+        Parameters
+        ----------
+        parent
+            The owner of the button.
+        text
+            The text to show in the button.
+        fa_icon_name
+            The name of the FontAwesome icon to use from tkinter-icons[fontawesome].
+        svg_contents
+            The string contents of an SVG drawing to use.
+        icon_size
+            The size of the icon in the button.
+        icon_position
+            The location for the icon relative to text: tk.LEFT or tk.RIGHT.
+        spaces
+            Include additional space characters to help internal padding between
+            the icon and text.
+        bootstyle
+            The initial bootstyle to apply to the button.
+
+        """
+        self._theme_catalog = ThemeCatalog.get_instance()
+        self._button_images: dict[str, tk.PhotoImage] = {}
+
+        if text:
+            if icon_position == tk.RIGHT:
+                text = f"{text}{spaces * ' '}"
+            elif icon_position == tk.LEFT:
+                text = f"{spaces * ' '}{text}"
+            else:
+                # Please open a bug report and describe your use-case so we can address it
+                # https://github.com/wireddown/qtpy-datalogger/issues/new?template=bug-report.md
+                raise ValueError(icon_position)
+            compound = icon_position
+            char_width = len(text)
+            padding = (4, 6, 4, 4)  # Increase click target size, with a slightly lower eye line for the text
+        else:
+            compound = ""
+            char_width = 0
+            padding = 0
+
+        if svg_contents:
+            self._icon_data = svg_contents
+            self._create_icon = image_from_svg
+        else:
+            self._icon_data = fa_icon_name or "o"
+            self._create_icon = image_from_icon
+
+        self._icon_size = icon_size
+
+        self._button = ttk.Button(
+            parent,
+            text=text,
+            width=char_width,
+            compound=compound,
+            bootstyle=bootstyle,
+            padding=padding,
+        )
+
+        ThemeChanger.add_handler(self._button, self._on_theme_changed)
+        self._button.bind("<Enter>", self._on_mouse_transit)
+        self._button.bind("<Leave>", self._on_mouse_transit)
+        self._refresh_icon()
+
+    @staticmethod
+    def with_text(  # noqa PLR0913 PLR0917 -- allow many parameters for a framework class method
+        parent: tk.Widget,
+        text: str,
+        spaces: int = 0,
+        fa_icon_name: str = "o",
+        icon_size: int = 24,
+        icon_position: bootstyle.Side = tk.LEFT,
+        bootstyle: str = bootstyle.PRIMARY,
+    ) -> "IconButton":
+        """
+        Create an IconButton using the specified text and options.
+
+        Parameters
+        ----------
+        parent
+            The owner of the button.
+        text
+            The text to show in the button.
+        spaces
+            Include additional space characters to help internal padding between
+            the icon and text.
+        fa_icon_name
+            The name of the FontAwesome icon to use from tkinter-icons[fontawesome].
+        icon_size
+            The size of the icon in the button.
+        icon_position
+            The location for the icon relative to text: tk.LEFT or tk.RIGHT.
+        bootstyle
+            The initial bootstyle to apply to the button.
+
+        """
+        return IconButton(
+            parent=parent,
+            text=text,
+            fa_icon_name=fa_icon_name,
+            icon_size=icon_size,
+            icon_position=icon_position,
+            spaces=spaces,
+            bootstyle=bootstyle,
+        )
+
+    @staticmethod
+    def from_svg(
+        parent: tk.Widget,
+        svg_contents: str,
+        icon_size: int = 24,
+        bootstyle: str = bootstyle.PRIMARY,
+    ) -> "IconButton":
+        """
+        Create an IconButton from an SVG drawing.
+
+        Parameters
+        ----------
+        parent
+            The owner of the button.
+        svg_contents
+            The string contents of an SVG drawing to use.
+        icon_size
+            The size of the icon in the button.
+        bootstyle
+            The initial bootstyle to apply to the button.
+
+        """
+        return IconButton(
+            parent=parent,
+            svg_contents=svg_contents,
+            icon_size=icon_size,
+            bootstyle=bootstyle,
+        )
+
+    @property
+    def widget(self) -> ttk.Button:
+        """Return the wrapped ttkbootstrap.Button."""
+        return self._button
+
+    def set_bootstyle(self, new_style: str) -> None:
+        """Set the specified style on the button."""
+        self._button.configure(bootstyle=new_style)
+        self._refresh_icon()
+
+    def enable(self) -> None:
+        """Enable the button so it receives click events."""
+        self._button.configure(state=tk.NORMAL)
+        self._refresh_icon()
+
+    def disable(self) -> None:
+        """Disable the button so it does not receive click events."""
+        self._button.configure(state=tk.DISABLED)
+        self._refresh_icon()
+
+    def enable_on_condition(self, condition: bool) -> None:
+        """Use the specified condition to disable or enable the button."""
+        if condition:
+            self.enable()
+        else:
+            self.disable()
+
+    def _refresh_icon(self) -> None:
+        """Update the button so that its icon color matches its text color."""
+        text_color = self._theme_catalog.hex_color_for_style_key(StyleKey.Foreground, self._button)
+        image_key = f"{hash(self._icon_data)}-{text_color}"
+        if image_key not in self._button_images:
+            self._button_images[image_key] = self._create_icon(
+                self._icon_data, fill=text_color, scale_to_width=self._icon_size
+            )
+        new_icon = self._button_images[image_key]
+        self._button.configure(image=new_icon)
+
+    def _on_theme_changed(self, event_args: tk.Event) -> None:
+        """Handle the ThemeChanger.Event.BootstrapThemeChanged event."""
+        self._refresh_icon()
+
+    def _on_mouse_transit(self, event_args: tk.Event) -> None:
+        """Handle the mouse <Enter> and <Leave> events."""
+        self._refresh_icon()
+
+
 class ThemeCatalog:
     """A class that describes the available themes."""
 
@@ -945,8 +1138,8 @@ class ThemeCatalog:
             color = style.lookup(style_name, style_key)
             overrides = style.map(style_name, style_key)
             states = ()
-            if isinstance(widget, ttk.Button):
-                states = widget.state()
+            if issubclass(type(widget), _ttkWidget):
+                states = widget.state()  # ty: ignore [unresolved-attribute] -- we type check for this call at runtime
             special_cases = {"hover", "disabled"}
             active_cases = special_cases.intersection(states)
             if active_cases:
@@ -1019,29 +1212,41 @@ class DemoWithAnimation(AsyncWindow):
         self.animation = "🤍🤍🤍🤍🤍🤍🤍🤍🤍🤍🩶🖤"
         main_frame, self.label, self.progressbar = create_demo_ui(self.root_window, self.io_loop)
 
-        modal_button = ttk.Button(
-            main_frame,
+        modal_button = IconButton.with_text(
+            parent=main_frame,
             text="Modal",
-            command=functools.partial(self.open_dialog, DialogBehavior.Modal),
-            style=bootstyle.SECONDARY,
+            fa_icon_name="hourglass-half",
+            icon_size=16,
+            icon_position=tk.LEFT,
+            spaces=2,
+            bootstyle=f"{bootstyle.WARNING} {bootstyle.OUTLINE}",
         )
-        modal_button.grid(column=0, row=3, sticky=tk.EW, padx=8)
+        modal_button.widget.configure(command=functools.partial(self.open_dialog, DialogBehavior.Modal))
+        modal_button.widget.grid(column=0, row=3, sticky=tk.EW, padx=8)
 
-        modeless_button = ttk.Button(
-            main_frame,
+        modeless_button = IconButton.with_text(
+            parent=main_frame,
             text="Modeless",
-            command=functools.partial(self.open_dialog, DialogBehavior.Modeless),
-            style=bootstyle.SECONDARY,
+            fa_icon_name="gear",
+            icon_size=16,
+            icon_position=tk.LEFT,
+            spaces=2,
+            bootstyle=f"{bootstyle.SECONDARY} {bootstyle.OUTLINE}",
         )
-        modeless_button.grid(column=1, row=3, sticky=tk.EW, pady=8)
+        modeless_button.widget.configure(command=functools.partial(self.open_dialog, DialogBehavior.Modeless))
+        modeless_button.widget.grid(column=1, row=3, sticky=tk.EW, pady=8)
 
-        standalone_button = ttk.Button(
-            main_frame,
+        standalone_button = IconButton.with_text(
+            parent=main_frame,
             text="Standalone",
-            command=functools.partial(self.open_dialog, DialogBehavior.Standalone),
-            style=bootstyle.SECONDARY,
+            fa_icon_name="maximize",
+            icon_size=16,
+            icon_position=tk.LEFT,
+            spaces=2,
+            bootstyle=f"{bootstyle.SUCCESS} {bootstyle.OUTLINE}",
         )
-        standalone_button.grid(column=2, row=3, sticky=tk.EW, padx=8)
+        standalone_button.widget.configure(command=functools.partial(self.open_dialog, DialogBehavior.Standalone))
+        standalone_button.widget.grid(column=2, row=3, sticky=tk.EW, padx=8)
 
     async def on_loop(self) -> None:
         """Update the animation."""
@@ -1097,6 +1302,7 @@ def create_demo_ui(
     progressbar.grid(
         row=1,
         columnspan=3,
+        sticky=tk.EW,
         padx=(8, 8),
         pady=(16, 0),
     )
@@ -1104,14 +1310,14 @@ def create_demo_ui(
     button_block = ttk.Button(
         root,
         text="Sync",
-        width=10,
+        width=14,
         style=bootstyle.PRIMARY,
         command=functools.partial(calculate_sync, progressbar),
     )
     button_block.grid(
         row=2,
         column=0,
-        sticky=tk.W,
+        sticky=tk.EW,
         padx=8,
         pady=8,
     )
@@ -1125,14 +1331,14 @@ def create_demo_ui(
     button_non_block = ttk.Button(
         root,
         text="Async",
-        width=10,
+        width=14,
         style=bootstyle.INFO,
         command=lambda: io_loop.create_task(calculate_async(progressbar)),
     )
     button_non_block.grid(
         row=2,
         column=2,
-        sticky=tk.E,
+        sticky=tk.EW,
         padx=8,
         pady=8,
     )

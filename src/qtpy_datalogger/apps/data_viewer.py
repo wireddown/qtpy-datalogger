@@ -140,8 +140,6 @@ class DataViewer(guikit.AsyncWindow):
         self.theme_variable = tk.StringVar()
         self.replay_variable = tk.BooleanVar()
         self.plots_variables: list[tk.BooleanVar] = []
-        self.svg_images: dict[str, tk.Image] = {}
-        self.svg_buttons: dict[str, ttk.Button] = {}
 
         # Supports app state
         self.replay_index = 0
@@ -194,45 +192,58 @@ class DataViewer(guikit.AsyncWindow):
         toolbar_row.columnconfigure(0, weight=1)  # Action panel
         toolbar_row.columnconfigure(1, weight=0)  # Graph toolbar
 
+        action_button_width = 114 + 2 * 8  # Account for 8px padding on each side
         action_panel = ttk.Frame(toolbar_row, name="action_panel")
         action_panel.grid(column=0, row=0, sticky=tk.EW, padx=(0, 8))
-        action_panel.columnconfigure(0, weight=0)  # Button one
-        action_panel.columnconfigure(1, weight=0)  # Button two
+        action_panel.columnconfigure(0, weight=0, minsize=action_button_width)  # Button one
+        action_panel.columnconfigure(1, weight=0, minsize=action_button_width)  # Button two
         action_panel.columnconfigure(2, weight=1)  # Spacer
-        action_panel.columnconfigure(3, weight=0)  # Button three
-        action_panel.columnconfigure(4, weight=0)  # Button four
+        action_panel.columnconfigure(3, weight=0, minsize=action_button_width)  # Button three
+        action_panel.columnconfigure(4, weight=0, minsize=action_button_width)  # Button four
         action_panel.rowconfigure(0, weight=0)  # Buttons
         action_panel.rowconfigure(1, weight=0)  # Message
 
-        self.reload_button = self.create_icon_button(
-            action_panel,
+        self.reload_button = guikit.IconButton.with_text(
+            parent=action_panel,
             text=DataViewer.CommandName.Reload,
-            icon_name="rotate-left",
-            char_width=12,
+            spaces=4,
+            fa_icon_name="rotate-left",
+            icon_size=24,
+            icon_position=tk.RIGHT,
             bootstyle=bootstyle.PRIMARY,
         )
-        self.reload_button.configure(command=functools.partial(self.reload_file, self.reload_button))
-        self.reload_button.grid(column=0, row=0, padx=(0, 8))
+        self.reload_button.widget.configure(
+            command=functools.partial(self.reload_file, self.reload_button.widget),
+        )
+        self.reload_button.widget.grid(column=0, row=0, sticky=tk.EW, padx=(0, 16))
 
-        self.replay_button = self.create_icon_button(
-            action_panel,
+        self.replay_button = guikit.IconButton.with_text(
+            parent=action_panel,
             text=DataViewer.CommandName.Replay,
-            icon_name="clock-rotate-left",
-            char_width=12,
+            spaces=4,
+            fa_icon_name="clock-rotate-left",
+            icon_size=24,
+            icon_position=tk.RIGHT,
             bootstyle=bootstyle.PRIMARY,
         )
-        self.replay_button.configure(command=functools.partial(self.replay_data, self.replay_button))
-        self.replay_button.grid(column=1, row=0, padx=8)
+        self.replay_button.widget.configure(
+            command=functools.partial(self.replay_data, self.replay_button.widget),
+        )
+        self.replay_button.widget.grid(column=1, row=0, sticky=tk.EW, padx=(0, 16))
 
-        self.export_csv_button = self.create_icon_button(
-            action_panel,
+        self.export_csv_button = guikit.IconButton.with_text(
+            parent=action_panel,
             text=DataViewer.CommandName.Export,
-            icon_name="table",
-            char_width=12,
+            spaces=4,
+            fa_icon_name="table",
+            icon_size=24,
+            icon_position=tk.RIGHT,
             bootstyle=bootstyle.PRIMARY,
         )
-        self.export_csv_button.grid(column=4, row=0, padx=(8, 0))
-        self.export_csv_button.configure(command=functools.partial(self.export_canvas, self.export_csv_button))
+        self.export_csv_button.widget.configure(
+            command=functools.partial(self.export_canvas, self.export_csv_button.widget),
+        )
+        self.export_csv_button.widget.grid(column=4, row=0, sticky=tk.EW, padx=(16, 0))
 
         self.file_message = ttk.Label(action_panel)
         self.file_message.grid(row=1, columnspan=5, sticky=tk.W, pady=(8, 0))
@@ -242,7 +253,9 @@ class DataViewer(guikit.AsyncWindow):
 
         self.canvas_cover = ttk.Frame(main, name="canvas_cover", style=bootstyle.LIGHT)
         self.canvas_cover.grid(column=0, row=0, sticky=tk.NSEW)
-        self.canvas_cover.columnconfigure(0, weight=1)
+        self.canvas_cover.columnconfigure(0, weight=1)  # Filler
+        self.canvas_cover.columnconfigure(1, weight=0)  # Widget column, locked to constrain button width
+        self.canvas_cover.columnconfigure(2, weight=1)  # Filler
         self.canvas_cover.rowconfigure(0, weight=1)  # Name label
         self.canvas_cover.rowconfigure(1, weight=0)  # Button one
         self.canvas_cover.rowconfigure(2, weight=1)  # Button two
@@ -250,27 +263,31 @@ class DataViewer(guikit.AsyncWindow):
         self.startup_label = ttk.Label(
             self.canvas_cover, font=font.Font(weight="bold", size=24), text=DataViewer.app_name
         )
-        self.startup_label.grid(column=0, row=0, pady=16)
+        self.startup_label.grid(column=0, columnspan=3, row=0, pady=16)
 
-        open_file_button = self.create_icon_button(
-            self.canvas_cover,
+        open_file_button = guikit.IconButton.with_text(
+            parent=self.canvas_cover,
             text=DataViewer.CommandName.OpenCSV,
-            icon_name="file-csv",
-            spaces=2,
-            bootstyle=bootstyle.INFO,
-        )
-        open_file_button.grid(column=0, row=1, sticky=tk.S, pady=(0, 16))
-        open_file_button.configure(command=functools.partial(self.open_file, open_file_button))
-
-        demo_button = self.create_icon_button(
-            self.canvas_cover,
-            text=DataViewer.CommandName.Demo,
-            icon_name="chart-line",
             spaces=4,
+            fa_icon_name="file-csv",
+            icon_size=24,
+            icon_position=tk.RIGHT,
             bootstyle=bootstyle.INFO,
         )
-        demo_button.grid(column=0, row=2, sticky=tk.N, pady=(0, 16))
-        demo_button.configure(command=functools.partial(self.open_demo, demo_button))
+        open_file_button.widget.grid(column=1, row=1, sticky=f"{tk.EW} {tk.S}", pady=(0, 16))
+        open_file_button.widget.configure(command=functools.partial(self.open_file, open_file_button.widget))
+
+        demo_button = guikit.IconButton.with_text(
+            parent=self.canvas_cover,
+            text=DataViewer.CommandName.Demo,
+            spaces=10,
+            fa_icon_name="chart-line",
+            icon_size=24,
+            icon_position=tk.RIGHT,
+            bootstyle=bootstyle.INFO,
+        )
+        demo_button.widget.grid(column=1, row=2, sticky=f"{tk.EW} {tk.N}", pady=(0, 16))
+        demo_button.widget.configure(command=functools.partial(self.open_demo, demo_button.widget))
 
         self.root_window.bind(AppState.Event.DataFileChanged, self.on_data_file_changed)
         self.root_window.bind(AppState.Event.ReplayActiveChanged, self.on_replay_active_changed)
@@ -395,33 +412,6 @@ class DataViewer(guikit.AsyncWindow):
         )
         self.root_window.bind("<F1>", lambda e: self.show_about())
 
-    def create_icon_button(  # noqa PLR0913 -- allow many parameters for a factory method
-        self,
-        parent: tk.Widget,
-        text: str,
-        icon_name: str,
-        char_width: int = 15,
-        spaces: int = 2,
-        bootstyle: str = bootstyle.DEFAULT,
-    ) -> ttk.Button:
-        """Create a ttk.Button using the specified text and FontAwesome icon_name."""
-        text_spacing = 3 * " "
-        button_image = guikit.image_from_icon(
-            icon_name, fill=self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.SelectFg), scale_to_height=24
-        )
-        button = ttk.Button(
-            parent,
-            text=text + spaces * text_spacing,
-            image=button_image,
-            compound=tk.RIGHT,
-            width=char_width,
-            padding=(4, 6, 4, 4),
-            bootstyle=bootstyle,
-        )
-        self.svg_images[icon_name] = button_image
-        self.svg_buttons[icon_name] = button
-        return button
-
     async def on_loop(self) -> None:
         """Update the window with new information."""
         await asyncio.sleep(1e-6)
@@ -438,7 +428,7 @@ class DataViewer(guikit.AsyncWindow):
         time_coordinates, data_series = self.get_data()
         if self.replay_index == len(time_coordinates):
             self.state.replay_active = False
-            self.reload_file(self.reload_button)
+            self.reload_file(self.reload_button.widget)
 
         plot_lines = self.plot_axes.lines
         times = time_coordinates[:draw_to]
@@ -576,7 +566,7 @@ class DataViewer(guikit.AsyncWindow):
             self.export_csv_button,
         ]
         for button in button_list:
-            button.configure(state=new_enabled_state)
+            button.enable_on_condition(new_enabled_state == tk.NORMAL)
         menu_entries = {
             self.file_menu: [
                 DataViewer.CommandName.Reload,
@@ -617,7 +607,7 @@ class DataViewer(guikit.AsyncWindow):
         """Handle the ReplayActiveChanged event."""
         replay_active = self.state.replay_active
         new_style = bootstyle.SUCCESS if replay_active else bootstyle.PRIMARY
-        self.replay_button.configure(bootstyle=new_style)
+        self.replay_button.set_bootstyle(new_style=new_style)
         self.replay_variable.set(replay_active)
 
     def on_theme_changed(self, event_args: tk.Event) -> None:
@@ -628,15 +618,6 @@ class DataViewer(guikit.AsyncWindow):
             background=self.theme_catalog.hex_color_for_style_key(bootstyle.LIGHT),
             foreground=self.theme_catalog.hex_color_for_style_key(bootstyle.DARK),
         )
-
-        all_button_icon_names = sorted(self.svg_buttons.keys())
-        for button_icon_name in all_button_icon_names:
-            button = self.svg_buttons[button_icon_name]
-            icon_fill = self.theme_catalog.hex_color_for_style_key(guikit.StyleKey.Foreground, button)
-            button_image = guikit.image_from_icon(button_icon_name, fill=icon_fill, scale_to_height=24)
-            self.svg_images[button_icon_name] = button_image
-            button.configure(image=button_image)
-
         all_menus = [
             self.file_menu,
             self.view_menu,
