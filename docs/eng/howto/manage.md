@@ -80,10 +80,10 @@ We use the GitHub web interface to interactively draft and publish new releases.
 
 1. From the [Releases] page, click the **Draft a new release** button
 1. Set the git tag, target branch, and release title
-    - Lookup the new version from **`pyproject.toml`** in the `main` branch
-    - Create a new tag that matches the new version
+    - Look up the `Major.Minor.Patch` version number from **`pyproject.toml`** in the `main` branch
+    - Use the dropdown to create a new tag that matches the new version number
     - Keep the release target on the `main` branch
-    - Use the new version as the title for the release
+    - Use the new `Major.Minor.Patch` version number as the title for the release
 1. Write the release notes
     - Keep the previous tag set to _Auto_
     - Click the **Generate release notes** button
@@ -146,7 +146,7 @@ Its purpose is to evaluate the quality of the changes by running the tests and a
 
 This action **automatically runs** for two reasons.
 
-- A Python dependency has an update for a **security vulnerability**
+- A dependency has an update for a **security vulnerability**
 - The **monthly scheduled run** executes and queries for new versions
 
 Its purpose is to minimize `qtpy-datalogger`'s exposure to vulnerabilities, regularly keep its dependencies updated, and detect new incompatibilities.
@@ -155,7 +155,7 @@ When GitHub runs this action, the Dependabot account opens a [new pull request w
 We [configure Dependabot] to use two package ecosystems
 
 - `uv` to update our Python dependencies
-- `github-actions` to update our GitHub action definitions
+- `github-actions` to update our GitHub action references
 
 ### [Docs: Build and Publish]
 
