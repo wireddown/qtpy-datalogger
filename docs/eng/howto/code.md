@@ -24,7 +24,7 @@ The two most effective ways to understand and examine a program's behavior are:
 
 In VS Code, [debug settings] are configured in the `.vscode/launch.json` file.
 Each new entry in this file adds an entry to the [Run and Debug] dropdown combobox.
-In addition to the default entries, this project has one defined that launches `qtpy_datalogger` as a command line program.
+In addition to the default entries, this project has one defined that launches `qtpy-datalogger` as a command line program.
 
 1. To start debugging the **code**
     - Modify or add a new launch configuration
