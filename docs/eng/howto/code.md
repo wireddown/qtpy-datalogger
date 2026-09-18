@@ -24,7 +24,7 @@ The two most effective ways to understand and examine a program's behavior are:
 
 In VS Code, [debug settings] are configured in the `.vscode/launch.json` file.
 Each new entry in this file adds an entry to the [Run and Debug] dropdown combobox.
-In addition to the default entries, this project has one defined that launches `qtpy_datalogger` as a command line program.
+In addition to the default entries, this project has one defined that launches `qtpy-datalogger` as a command line program.
 
 1. To start debugging the **code**
     - Modify or add a new launch configuration
@@ -150,6 +150,33 @@ git log --patch --max-count 1
 git log -G "search string"
 ```
 
+### Command shortcuts
+
+You can shorten git commands by creating alias entries for them.
+
+This example creates an alias that uses **[git show]** to summarize commits by their hash, date, title message, and changed files.
+
+```pwsh title="PowerShell"
+# Create an alias named 'sum' that calls the 'show' command
+git config --global alias.sum `
+    "show --numstat --date=format:'%Y-%m-%d %H:%M:%S' --pretty='format:%C(auto)%h %C(green)%ad%C(reset) %C(cyan)%s%C(reset)'"
+```
+
+<div style="font-size: 12.8px;">
+<pre style="border-radius: 7px; padding: 1em; background: var(--md-code-bg-color)";>
+<span style="color: var(--md-code-hl-comment-color);"># Use the alias with 'git show' options</span>
+git sum 1.0.15..HEAD
+
+<span style="color: #ff9100;">e1196ad</span> <span style="color: #00c753;">2026-09-16 18:14:30</span> <span style="color: #2094f3;">Host API: Add IconButton to guikit module (#335)</span>
+58      77      src/qtpy_datalogger/apps/data_viewer.py
+259     53      src/qtpy_datalogger/guikit.py
+
+<span style="color: #ff9100;">41044e9</span> <span style="color: #00c753;">2026-09-14 19:40:26</span> <span style="color: #2094f3;">pyproject.toml: Update version to 1.0.16 (#334)</span>
+1       1       pyproject.toml
+1       1       uv.lock
+</pre>
+</div>
+
 
 [debug settings]: https://code.visualstudio.com/docs/python/debugging#_set-configuration-options
 [Run and Debug]: https://code.visualstudio.com/docs/debugtest/debugging-configuration#_start-a-debugging-session-with-a-launch-configuration
@@ -174,3 +201,4 @@ git log -G "search string"
 [use **uv add**]: https://docs.astral.sh/uv/concepts/projects/dependencies/#adding-dependencies
 
 [use **git log**]: https://git-scm.com/docs/git-log
+[git show]: https://git-scm.com/docs/git-show
