@@ -40,8 +40,8 @@ DEFAULT_HELP_URL = Links.Homepage
 @click.pass_context
 def cli(
     ctx: click.Context,
-    generate_notice: pathlib.Path,
-    list_builtin_modules: tuple[str, pathlib.Path],
+    generate_notice: pathlib.Path | None,
+    list_builtin_modules: tuple[str, pathlib.Path] | None,
     quiet: bool,
     verbose: bool,
 ) -> None:
@@ -223,7 +223,7 @@ def equip(behavior: str, root: pathlib.Path | None, secrets: str) -> None:
     help="Send a MESSAGE to the service on the specified TOPIC.",
 )
 @click.help_option()
-def server(behavior: str, publish: tuple[str, str]) -> None:
+def server(behavior: str, publish: tuple[str, str] | None) -> None:
     """Query and control the MQTT server."""
     server_behavior = _server.Behavior(behavior)
     _server.handle_server(server_behavior, publish)
