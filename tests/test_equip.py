@@ -93,7 +93,6 @@ def test_describe(tmp_path: pathlib.Path) -> None:
             behavior=equip.Behavior.Describe, root=tmp_path, secrets=equip.SecretsBehavior.Noop.as_full_name()
         )
 
-    assert excinfo
     exception = excinfo.value
     exception_type = type(exception)
     assert exception_type is SystemExit
@@ -109,7 +108,6 @@ def test_compare(tmp_path: pathlib.Path) -> None:
             behavior=equip.Behavior.Compare, root=tmp_path, secrets=equip.SecretsBehavior.Noop.as_full_name()
         )
 
-    assert excinfo
     exception = excinfo.value
     exception_type = type(exception)
     assert exception_type is SystemExit
@@ -125,7 +123,6 @@ def test_cannot_install_with_mqtt(monkeypatch: pytest.MonkeyPatch) -> None:
             behavior=equip.Behavior.Upgrade, root=None, secrets=equip.SecretsBehavior.Noop.as_full_name()
         )
 
-    assert excinfo
     exception = excinfo.value
     exception_type = type(exception)
     assert exception_type is SystemExit

@@ -256,7 +256,7 @@ class ScannerApp(guikit.AsyncWindow):
         key_character = event_args.char
         if key_character not in ["\r"]:  # noqa: FURB171 -- allow additional control characters
             return
-        if key_character == "\r":
+        if key_character == "\r":  # ty: ignore[redundant-condition-strict] -- waiting for multi-OS support
             parent = event_args.widget.winfo_parent()
             if "scan_frame" in parent:
                 self.start_scan()

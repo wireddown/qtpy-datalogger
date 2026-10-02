@@ -23,7 +23,7 @@ def program_args(args: list[str] | None = None):  # noqa: ANN201
 
 def test_import_as_module():  # noqa: ANN201
     """Can Python import it?"""
-    assert importlib.import_module("qtpy_datalogger"), "cannot load qtpy_datalogger as a module"
+    importlib.import_module("qtpy_datalogger"), "cannot load qtpy_datalogger as a module"
 
 
 def test_run_as_module(capsys):  # noqa: ANN001, ANN201
