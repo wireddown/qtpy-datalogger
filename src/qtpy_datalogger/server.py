@@ -69,7 +69,7 @@ class MqttBrokerInformation(NamedTuple):
         return any(rule.action == "Allow" for rule in self.firewall_rules)
 
 
-def handle_server(behavior: Behavior, publish: tuple[str, str]) -> None:
+def handle_server(behavior: Behavior, publish: tuple[str, str] | None) -> None:
     """Handle the command for server."""
     mqtt_broker_information = _query_mqtt_broker_information_from_wmi()
     if not mqtt_broker_information:
