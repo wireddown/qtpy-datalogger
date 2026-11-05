@@ -1,6 +1,6 @@
 """Functions for creating, configuring, and updating QT Py sensor nodes."""
 
-import datetime
+import datetime as dt
 import logging
 import pathlib
 import shutil
@@ -170,7 +170,7 @@ def _detect_snsr_bundle(main_folder: pathlib.Path) -> SnsrNodeBundle:
         comment="(uninitialized)",
         version="(missing)",
         commit="(missing)",
-        timestamp=datetime.datetime.fromisoformat("0001-01-01T01:01:01+00:00"),
+        timestamp=dt.datetime.fromisoformat("0001-01-01T01:01:01+00:00"),
     )
     device_files = []
     circuitpy_version = "9.2.1"
