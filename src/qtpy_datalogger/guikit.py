@@ -1450,8 +1450,8 @@ def is_left_double_click(mouse_args: mpl_backend_bases.MouseEvent) -> bool:
 
 def get_first_in_range(upper_bound: SupportsFloat, selection: dict[ComparableNumeric, AnyType]) -> AnyType:
     """Get the first value in the selection that is lower than the upper_bound."""
-    descending = sorted(selection.keys(), reverse=True)
-    first_in_range_index = [upper_bound > entry for entry in descending].index(True)  # ty: ignore[unsupported-operator] -- floats are comparable
+    descending = sorted(selection.keys(), reverse=True)  # ty: ignore[invalid-argument-type] -- floats are comparable
+    first_in_range_index = [upper_bound > entry for entry in descending].index(True)
     first_value_in_range = selection[descending[first_in_range_index]]
     return first_value_in_range
 
