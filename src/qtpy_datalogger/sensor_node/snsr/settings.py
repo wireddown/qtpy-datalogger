@@ -105,14 +105,14 @@ class Settings:
     @property
     def app_catalog(self) -> list[str]:
         """Return the apps on the sensor_node."""
-        if not self._app_catalog:
+        if not isinstance(self._app_catalog, list):
             self._app_catalog = discover_apps()
         return self._app_catalog
 
     @property
     def cpu_temperature(self) -> float:
         """Return the temperature of the CPU in degrees C."""
-        if not cpu.temperature:
+        if not isinstance(cpu.temperature, float):
             return 0.0
         return cpu.temperature
 

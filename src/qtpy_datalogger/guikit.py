@@ -378,7 +378,7 @@ class ActionDialog(AsyncDialog):
         self.message_image = image_from_icon(
             name=image_name, fill=self.theme_catalog.hex_color_for_style_key(image_fill), scale_to_height=40
         )
-        if not message_paragraphs:
+        if not isinstance(message_paragraphs, list):
             message_paragraphs = ["Click OK to close."]
         self.message = "\n\n".join([click.wrap_text(message, width=64) for message in message_paragraphs])
         if action1 == ActionDialog.Action.NoAction:
@@ -436,7 +436,7 @@ class AboutDialog(AsyncDialog):
         self.app_name = app_name
         if not app_icon:
             app_icon = "chart-line"
-        if not all_icons:
+        if not isinstance(all_icons, list):
             all_icons = ["microchip", "worm", app_icon]
         self.app_icons = all_icons[:3]
         self.icon_labels = []
@@ -1450,8 +1450,8 @@ def is_left_double_click(mouse_args: mpl_backend_bases.MouseEvent) -> bool:
 
 def get_first_in_range(upper_bound: SupportsFloat, selection: dict[ComparableNumeric, AnyType]) -> AnyType:
     """Get the first value in the selection that is lower than the upper_bound."""
-    descending = sorted(selection.keys(), reverse=True)
-    first_in_range_index = [upper_bound > entry for entry in descending].index(True)  # ty: ignore[unsupported-operator] -- floats are comparable
+    descending = sorted(selection.keys(), reverse=True)  # ty: ignore[invalid-argument-type] -- floats are comparable
+    first_in_range_index = [upper_bound > entry for entry in descending].index(True)
     first_value_in_range = selection[descending[first_in_range_index]]
     return first_value_in_range
 

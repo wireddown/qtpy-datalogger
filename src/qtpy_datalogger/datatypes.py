@@ -121,7 +121,7 @@ class SnsrNotice(NamedTuple):
         my_commit = snsr_notice.commit
         my_timestamp = snsr_notice.timestamp
 
-        if __package__:
+        if isinstance(__package__, str):
             # We're installed
             import importlib.metadata  # noqa: PLC0415 -- must use dynamic import at runtime
 

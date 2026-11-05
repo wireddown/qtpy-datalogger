@@ -117,7 +117,7 @@ def handle_equip(behavior: Behavior, root: pathlib.Path | None, secrets: str) ->
         if not qtpy_device:
             logger.error("No QT Py devices found!")
             raise SystemExit(ExitCode.Discovery_Failure)
-        if not communication_transport:
+        if not isinstance(communication_transport, ConnectionTransport):
             logger.error(
                 f"Cannot compare or equip '{qtpy_device.node_id}' with MQTT connection. Please connect with USB."
             )
@@ -663,7 +663,7 @@ def _handle_list_builtin_modules(board_id: str) -> str:
         live_html_bytes = urllib.request.urlopen(page_request).read()  # noqa: S310 -- URL is hardcoded to https
         live_html = live_html_bytes.decode("UTF-8")
         soup = bs4.BeautifulSoup(live_html, "html.parser")
-        if not soup.title:
+        if not isinstance(soup.title, bs4.Tag):
             logger.error(f"Missing page title for {reference_url}")
             raise SystemExit(ExitCode.Board_Lookup_Failure)
         page_title = soup.title.text.split("-")[0].strip()
@@ -673,18 +673,18 @@ def _handle_list_builtin_modules(board_id: str) -> str:
         def row_matches_board_id(tag: bs4.Tag) -> bool:
             if tag.name != "tr":
                 return False
-            if not tag.td:
+            if not isinstance(tag.td, bs4.Tag):
                 return False
-            if not tag.td.p:
+            if not isinstance(tag.td.p, bs4.Tag):
                 return False
             return tag.td.p.text == board_id
 
         the_table = soup.find("table", class_="support-matrix-table")
-        if not the_table:
+        if not isinstance(the_table, bs4.Tag):
             logger.error(f"Cannot find 'support-matrix-table' on {reference_url}")
             raise SystemExit(ExitCode.Board_Lookup_Failure)
         the_row = the_table.find(name=row_matches_board_id)
-        if not the_row:
+        if not isinstance(the_row, bs4.Tag):
             logger.error(f"Cannot find CircuitPython board with name '{board_id}'!")
             logger.error(f"Confirm spelling from '{reference_url}'")
             raise SystemExit(ExitCode.Board_Lookup_Failure)
@@ -699,7 +699,7 @@ def _handle_list_builtin_modules(board_id: str) -> str:
         live_html = live_html_bytes.decode("UTF-8")
         soup = bs4.BeautifulSoup(live_html, "html.parser")
         the_stdlib_section = soup.find(id="python-standard-libraries")
-        if not the_stdlib_section:
+        if not isinstance(the_stdlib_section, bs4.Tag):
             logger.error(f"Cannot find 'python-standard-libraries' on {reference_url}")
             raise SystemExit(ExitCode.Board_Lookup_Failure)
         list_items = the_stdlib_section.select("li a span")
