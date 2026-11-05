@@ -33,7 +33,7 @@ def main_loop(skip_mqtt: bool) -> str:
         uart_connected = settings.uart_connected
         if mqtt_client:
             did_receive = mqtt_client.loop(timeout=1.0)  # Smallest supported timeout
-            if not (did_receive or uart_connected):
+            if not (isinstance(did_receive, list) or uart_connected):
                 sleep(4)  # Conserve battery by not constantly polling the network
 
         if uart_connected:
