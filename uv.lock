@@ -524,11 +524,11 @@ wheels = [
 
 [[package]]
 name = "gmqtt"
-version = "0.7.0"
+version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/21/70/73ec54da16079da319b035af48b908204f9629ecd1187720d11799ac35d8/gmqtt-0.7.0.tar.gz", hash = "sha256:bedfec7bac26b6b4ce1f0c4c32cff3d663526a54c882d323d41560fc3b9b44a2", size = 27663, upload-time = "2024-11-22T13:13:48.679Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cf/12/bffb634a05bb12a9cb64fdce6e26854f11e3eff56a06c59021af52868d7f/gmqtt-0.8.0.tar.gz", hash = "sha256:61fb7641109f57ca29f73d2d8f2cb487de49d76338ef8c68228db961b6e9696a", size = 44696, upload-time = "2026-10-08T09:24:27.069Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3e/2f/63922e256799a74b0e1fb1c12e98dc435edf1ddaa7e31eaadc60cbd16593/gmqtt-0.7.0-py3-none-any.whl", hash = "sha256:3e5571a20e9c115d83d600caa228b06f716087653e241035e29cec73277b52cc", size = 30688, upload-time = "2024-11-22T13:13:46.479Z" },
+    { url = "https://files.pythonhosted.org/packages/83/31/50c7313a004e4b6168a4ed3faf823921b79403910a8bf06982399d3844cc/gmqtt-0.8.0-py3-none-any.whl", hash = "sha256:bd40fa51147b929486628f4f9d473b6e5f19132019345645600641a7063d7a5b", size = 37679, upload-time = "2026-10-08T09:24:25.736Z" },
 ]
 
 [[package]]
