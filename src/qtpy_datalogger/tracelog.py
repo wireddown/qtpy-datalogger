@@ -87,7 +87,7 @@ class ColorFormatter(logging.Formatter):
 
     def format(self: "ColorFormatter", record: logging.LogRecord) -> str:
         """Format the specified record."""
-        if record.exc_info:
+        if isinstance(record.exc_info, tuple) and record.exc_info[0] is not None:
             default_formatter = logging.Formatter()
             formatted_message = default_formatter.format(record)
         else:
