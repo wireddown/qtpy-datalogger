@@ -50,7 +50,7 @@ def cli(
     tracelog.initialize(log_level)
     logger.debug(f"generate_notice: '{generate_notice}' list_builtin_modules: '{list_builtin_modules}'")
 
-    if ctx.invoked_subcommand:
+    if isinstance(ctx.invoked_subcommand, str):
         pass
     elif generate_notice:
         if generate_notice.exists():
