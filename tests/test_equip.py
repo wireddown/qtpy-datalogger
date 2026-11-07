@@ -444,18 +444,216 @@ def test_cannot_install_with_mqtt(monkeypatch: pytest.MonkeyPatch) -> None:
     assert_exit_code(excinfo, ExitCode.Equip_Without_USB_Failure)
 
 
-def test_install_new(tmp_path: pathlib.Path) -> None:
+def test_install_node(reference_snsr: pathlib.Path, tmp_path: pathlib.Path, caplog: pytest.LogCaptureFixture) -> None:
     """Does it install when the device isn't a sensor node?"""
-    equip.handle_equip(
-        behavior=equip.Behavior.Upgrade, root=tmp_path, secrets=equip.SecretsBehavior.Noop.as_full_name()
+    test_device_folder = prepare_uninitialized_device(tmp_path)
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert_new_installation_succeeded(caplog)
+    assert_device_matches_self(reference_snsr, test_device_folder)
+
+
+def test_equip_repairs_missing_files_and_modules(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it repair missing files and CircuitPython modules?"""
+    clone_test_device_into_folder(reference_snsr, tmp_path)
+    snsr_file_path = tmp_path.joinpath(SnsrPath.root, "core.py")
+    snsr_file_path.unlink()
+    snsr_app_path = tmp_path.joinpath(SnsrPath.apps, "qtpycmd.py")
+    snsr_app_path.unlink()
+    adafruit_ticks_path = tmp_path.joinpath("lib", "adafruit_ticks.mpy")
+    adafruit_ticks_path.unlink()
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(),
+            root=tmp_path,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert "QT Py Datalogger Sensor Node" in caplog.text
+    assert_equip_operation_succeeded(caplog, expect_repair=True, expect_circup=True)
+    assert_device_matches_self(reference_snsr, tmp_path)
+    assert "Detected MISSING sensor_node runtime components" in caplog.text
+    assert f" ! File:    {snsr_file_path.relative_to(tmp_path)!s}" in caplog.text
+    assert f" ! App:     {snsr_app_path.stem}" in caplog.text
+    assert f" ! Module:  {adafruit_ticks_path.stem}" in caplog.text
+    assert "Repairing missing sensor_node runtime components" in caplog.text
+    assert snsr_file_path.exists()
+    assert snsr_app_path.exists()
+    assert adafruit_ticks_path.exists()
+
+
+def test_install_node_cannot_overwrite_builtin_app(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it skip installing a user app when it matches a builtin runtime app?"""
+    test_device_folder = prepare_uninitialized_device(tmp_path)
+    echo_app_name = "echo.py"
+    user_override_contents = "# echo user app"
+    user_app = prepare_user_app(tmp_path, echo_app_name, user_override_contents)
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(user_app,),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert_new_installation_succeeded(caplog)
+    assert_device_matches_self(reference_snsr, test_device_folder)
+    assert "cannot overwrite builtin app" in caplog.text
+    assert test_device_folder.joinpath(SnsrPath.apps, echo_app_name).read_text() != user_override_contents
+
+
+def test_install_node_with_compatible_app(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it install the runtime with a user app when the device isn't a sensor node?"""
+    test_device_folder = prepare_uninitialized_device(tmp_path)
+    user_app_name = "new_app.py"
+    user_app_contents = "# new user app"
+    user_app = prepare_user_app(tmp_path, user_app_name, user_app_contents)
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(user_app,),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert_new_installation_succeeded(caplog)
+    assert_device_matches_self(reference_snsr, test_device_folder, extra_expected_apps=[user_app])
+    assert_user_app_matches_contents(test_device_folder, user_app_name, user_app_contents)
+    assert "Installing apps" in caplog.text
+    assert f" * {user_app.stem}" in caplog.text
+
+
+def test_install_node_with_incompatible_app_and_dependency(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it install a new CircuitPython dependency for an app when the device isn't a sensor node?"""
+    test_device_folder = prepare_uninitialized_device(tmp_path)
+    user_app_name = "new_app_dependency.py"
+    new_dependency_name = "adafruit_ble"
+    user_app_contents = f"import {new_dependency_name}"
+    user_app = prepare_user_app(tmp_path, user_app_name, user_app_contents)
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(user_app,),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert_new_installation_succeeded(caplog)
+    assert_device_matches_self(
+        reference_snsr,
+        test_device_folder,
+        extra_expected_apps=[user_app],
+        extra_expected_imports=[new_dependency_name],
+        extra_expected_modules=[new_dependency_name],
+    )
+    assert_user_app_matches_contents(test_device_folder, user_app_name, user_app_contents)
+    assert "Installing apps" in caplog.text
+    assert f" * {user_app.stem}" in caplog.text
+    assert test_device_folder.joinpath("lib", new_dependency_name).exists()
+    assert new_dependency_name in caplog.text
+
+
+def test_equip_repairs_hand_copied_user_app(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it install missing CircuitPython modules for user apps directly copied to the sensor_node?"""
+    test_device_folder, unrelated_app, existing_app = prepare_initialized_device_with_options(reference_snsr, tmp_path)
+    user_app_name = "new_app_dependency.py"
+    new_dependency_name = "adafruit_ble"
+    user_app_contents = f"import {new_dependency_name}"
+    user_app = prepare_user_app(tmp_path, user_app_name, user_app_contents)
+    shutil.copy2(
+        user_app,
+        test_device_folder.joinpath(SnsrPath.apps),
     )
 
-    comparison_results = get_bundle_comparison(tmp_path)
-    assert_device_matches_self(comparison_results)
-    assert tmp_path.joinpath("lib").exists()
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert "Found a QT Py Datalogger Sensor Node" in caplog.text
+    assert_equip_operation_succeeded(caplog, expect_repair=True, expect_circup=True)
+    assert_device_matches_self(
+        reference_snsr,
+        test_device_folder,
+        extra_expected_apps=[unrelated_app, existing_app, user_app],
+        extra_expected_imports=[new_dependency_name],
+        extra_expected_modules=[new_dependency_name],
+    )
+    assert "Detected MISSING sensor_node runtime components" in caplog.text
+    assert f" ! Module:  {new_dependency_name}" in caplog.text
+    assert "Repairing missing sensor_node runtime components" in caplog.text
+    assert test_device_folder.joinpath("lib", new_dependency_name).exists()
+    assert new_dependency_name in caplog.text
 
 
-def test_upgrade(tmp_path: pathlib.Path) -> None:
+def test_install_compatible_app(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it install a compatible user app on a same-version sensor node without re-installing CircuitPython modules?"""
+    test_device_folder, unrelated_app, existing_app = prepare_initialized_device_with_options(reference_snsr, tmp_path)
+    user_app_name = "new_app.py"
+    user_app_contents = "# user app installed correctly"
+    user_app = prepare_user_app(tmp_path, user_app_name, user_app_contents)
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(user_app,),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert "Found a QT Py Datalogger Sensor Node" in caplog.text
+    assert_equip_operation_succeeded(caplog, expected_new_apps=[user_app], expect_circup=False)
+    assert_device_matches_self(
+        reference_snsr, test_device_folder, extra_expected_apps=[unrelated_app, existing_app, user_app]
+    )
+    assert_user_app_matches_contents(test_device_folder, user_app_name, user_app_contents)
+
     """Does it upgrade when the device is an older sensor node?"""
     create_test_device_folder(tmp_path)
     device_toml = get_device_notice(tmp_path)
