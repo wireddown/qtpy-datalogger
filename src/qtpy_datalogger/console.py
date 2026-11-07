@@ -141,37 +141,39 @@ def run(behavior: str, app_name: str) -> None:
     apps.handle_run(run_behavior, app_name)
 
 
-@cli.command(epilog=f"Help and home page: {DEFAULT_HELP_URL}")
+@cli.command(epilog=f"More: {Links.Homepage}eng/usage/equip/")
 @click.option(
     "--upgrade",
     "behavior",
     flag_value=_equip.Behavior.Upgrade,
     default=True,
-    help="Behavior: [default] Install the sensor_node bundle from this package onto a new device or upgrade an existing version.",
+    help="Behavior: [default] Install the sensor_node runtime from this package onto a new device or upgrade an existing version.",
 )
 @click.option(
     "--compare",
     "behavior",
     flag_value=_equip.Behavior.Compare,
-    help="Behavior: Show the version and date information between this package and the sensor_node bundle on the device and exit.",
+    help="Behavior: Show the version and date information between this package and the sensor_node runtime on the device and exit.",
 )
 @click.option(
     "--describe",
     "behavior",
     flag_value=_equip.Behavior.Describe,
-    help="Behavior: Show the contents and dependencies of the sensor_node bundle in this package.",
+    help="Behavior: Show the contents and dependencies of the sensor_node runtime in this package.",
 )
 @click.option(
     "--force",
     "behavior",
     flag_value=_equip.Behavior.Force,
-    help="Behavior: Force the installation of the sensor_node bundle on the device.",
+    help="Behavior: Force the installation of the sensor_node runtime on the device.",
 )
 @click.option(
-    "--newer-files-only",
-    "behavior",
-    flag_value=_equip.Behavior.NewerFilesOnly,
-    help="Behavior: Only update sensor_node bundle files that are newer, skip installing CircuitPython support libraries.",
+    "--with-app",
+    "with_app",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True, path_type=pathlib.Path),
+    multiple=True,
+    metavar="FILE",
+    help="Install the sensor_node app FILE, including its CircuitPython dependencies, to the device. Accepted multiple times.",
 )
 @click.option(
     "-r",
@@ -189,10 +191,10 @@ def run(behavior: str, app_name: str) -> None:
     help="Update the secrets on the sensor_node from FILE or stdin with '-'. Without FILE, show which are missing.",
 )
 @click.help_option()
-def equip(behavior: str, root: pathlib.Path | None, secrets: str) -> None:
-    """Install the QT Py Sensor Node runtime on a CircuitPython device."""
+def equip(behavior: str, with_app: tuple[pathlib.Path], root: pathlib.Path | None, secrets: str) -> None:
+    """Install the sensor_node runtime on a CircuitPython device."""
     equip_behavior = _equip.Behavior(behavior)
-    _equip.handle_equip(equip_behavior, root, secrets)
+    _equip.handle_equip(equip_behavior, with_app, root, secrets)
 
 
 @cli.command(epilog=f"Detailed help online\n\n{Links.MQTT_Walkthrough}")
