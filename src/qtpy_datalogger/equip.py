@@ -736,8 +736,15 @@ class CircupTool:
         return_code = result.returncode
         return return_code
 
+
+def handle_equip(  # noqa: PLR0912 PLR0915 -- we need many lines and statements to handle CLI commands
+    behavior: Behavior,
+    with_apps: tuple[pathlib.Path, ...],
+    root: pathlib.Path | None,
+    secrets: str,
+) -> None:
     """Handle the equip CLI command."""
-    logger.debug(f"behavior: '{behavior}', root: '{root}', secrets: '{secrets}'")
+    logger.debug(f"behavior: '{behavior}', with_app: '{with_apps}', root: '{root}', secrets: '{secrets}'")
 
     secrets_file = None
     if secrets == SecretsBehavior.Noop.as_full_name():
@@ -750,18 +757,16 @@ class CircupTool:
             pass
         else:
             secrets_file = pathlib.Path(secrets)
-            if not (secrets_file.is_file() and secrets_file.exists()):
+            if not (secrets_file.exists() and secrets_file.is_file()):
                 logger.error(f"Cannot open secrets file '{secrets_file!s}'.")
                 raise SystemExit(ExitCode.Secrets_File_Missing)
 
-    this_file = pathlib.Path(__file__)
-    this_folder = this_file.parent
-    this_sensor_node_root = this_folder.joinpath("sensor_node")
-    this_bundle = _detect_snsr_bundle(this_sensor_node_root)
-
     if behavior == Behavior.Describe:
-        self_description = _format_bundle_description(this_bundle)
-        _ = [logger.info(line) for line in self_description]
+        default_runtime = SnsrDeviceSnapshot.as_runtime(
+            board_id=_FALLBACK_QTPY_BOARD_ID,
+            circuitpy_version=_FALLBACK_CPY_VERSION,
+        )
+        _print_runtime_description(default_runtime)
         raise SystemExit(ExitCode.Success)
 
     if not root:
@@ -779,28 +784,25 @@ class CircupTool:
             raise SystemExit(ExitCode.Equip_Without_USB_Failure)
         root = pathlib.Path(qtpy_device.drive_root).resolve()
 
-    device_bundle = _detect_snsr_bundle(root)
-    comparison_information = {
-        "device bundle": device_bundle,
-        "runtime bundle": this_bundle,
-    }
+    device_runtime = SnsrDeviceSnapshot.from_folder(root)
 
     if secrets_behavior == SecretsBehavior.Analyze:
-        node_secrets = _detect_node_secrets(device_bundle.device_files[0])
-        secrets_description = _format_secrets_description(node_secrets)
-        _ = [logger.info(line) for line in secrets_description]
+        node_secrets = _detect_node_secrets(device_runtime.files.root)
+        _print_secrets_description(node_secrets)
+
+    package_runtime = SnsrDeviceSnapshot.as_runtime(
+        board_id=device_runtime.board_id,
+        circuitpy_version=device_runtime.circuitpython,
+    )
+    comparison = SnsrDeviceComparison.between_runtime_and_device(package_runtime, device_runtime)
 
     if behavior == Behavior.Compare:
-        runtime_freshness = _compare_file_trees(
-            this_bundle.device_files,
-            device_bundle.device_files,
-            _EQUIP_IGNORE_PATTERNS,
-        )
-        comparison_report = _format_bundle_comparison(comparison_information, runtime_freshness)
-        _ = [logger.info(line) for line in comparison_report]
+        if logger.isEnabledFor(logging.DEBUG):
+            _print_snapshot_report(comparison)
+        _print_snapshot_comparison(comparison)
         raise SystemExit(ExitCode.Success)
 
-    should_install, skip_reason = _should_install(behavior, comparison_information)
+    _print_snapshot_report(comparison)
 
     match secrets_behavior:
         case SecretsBehavior.Noop:
@@ -809,8 +811,23 @@ class CircupTool:
             pass
         case SecretsBehavior.Update:
             logger.info("Updating sensor_node secrets")
-            _update_secrets(secrets_file, device_bundle.device_files[0])
+            _update_secrets(secrets_file, device_runtime.files.root)
             logger.info("Secrets updated")
+
+    app_import_usage = _validate_user_apps(with_apps, package_runtime)
+
+    install_plan = _make_equip_plan(behavior, comparison, app_import_usage)
+    if install_plan.is_empty:
+        exit_code = ExitCode.Success
+        if install_plan.goal == EquipSnsrPlan.Goal.SkipVersion:
+            logger.info(
+                f"Skipping installation: not an upgrade, use '{click.style('--force', 'magenta')}' to override or '{click.style('--compare', 'magenta')}' to show differences"
+            )
+        elif install_plan.goal == EquipSnsrPlan.Goal.SkipFiles:
+            logger.info(click.style("All runtime files and CircuitPython modules up to date with the host", "green"))
+    else:
+        exit_code = _execute_equip_plan(install_plan)
+    raise SystemExit(exit_code)
 
 
 def _print_runtime_description(device: SnsrDeviceSnapshot) -> None:
