@@ -435,13 +435,13 @@ def test_cannot_install_with_mqtt(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(SystemExit) as excinfo:
         equip.handle_equip(
-            behavior=equip.Behavior.Upgrade, root=None, secrets=equip.SecretsBehavior.Noop.as_full_name()
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(),
+            root=None,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
         )
 
-    exception = excinfo.value
-    exception_type = type(exception)
-    assert exception_type is SystemExit
-    assert exception.code == ExitCode.Equip_Without_USB_Failure
+    assert_exit_code(excinfo, ExitCode.Equip_Without_USB_Failure)
 
 
 def test_install_new(tmp_path: pathlib.Path) -> None:
