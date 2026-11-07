@@ -23,6 +23,9 @@ from qtpy_datalogger import discovery
 from .datatypes import ConnectionTransport, ExitCode, Links, SnsrNotice, SnsrPath
 
 logger = logging.getLogger(__name__)
+circup_logger = circup.logger
+if not logger.isEnabledFor(logging.DEBUG):
+    circup_logger.setLevel(logging.CRITICAL)
 
 _PC_ONLY_IMPORTS = [
     "typing",
