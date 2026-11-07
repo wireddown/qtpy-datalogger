@@ -1246,10 +1246,10 @@ def _query_modules_from_circup(main_folder: pathlib.Path, log_info: bool) -> lis
     return modules_with_version
 
 
-def _detect_node_secrets(device_root: pathlib.Path) -> dict[str, bool]:
-    """Parse the settings.toml file on the sensor_node and return a dictionary of detected secrets."""
+def _detect_node_secrets(main_folder: pathlib.Path) -> dict[str, bool]:
+    """Parse the settings.toml file in the main_folder and return a dictionary of detected secrets."""
     expected_secrets = dict.fromkeys(_SNSR_NODE_SECRET_KEY_NAMES, False)
-    settings_file = device_root.joinpath(SnsrPath.settings)
+    settings_file = main_folder.joinpath(SnsrPath.settings_toml)
     if not settings_file.exists():
         return expected_secrets
     device_settings = toml.load(settings_file)
@@ -1260,19 +1260,20 @@ def _detect_node_secrets(device_root: pathlib.Path) -> dict[str, bool]:
     return detected_secrets
 
 
-def _format_secrets_description(node_secrets: dict[str, bool]) -> list[str]:
-    """Format and return a list of lines that describes this sensor_node's secrets."""
+def _print_secrets_description(node_secrets: dict[str, bool]) -> None:
+    """Format and print a summary that describes node_secrets."""
     secrets_report = []
-    secrets_report.append("Detecting secrets")
+    secrets_report.append("Detected secrets")
     for secret_name, is_defined in node_secrets.items():
         message = "ok" if is_defined else click.style("MISSING", "yellow")
         secrets_report.append(f" * {secret_name:<24}  {message}")
-    return secrets_report
+    for line in secrets_report:
+        logger.info(line)
 
 
-def _update_secrets(new_secrets_file: pathlib.Path | None, device_root: pathlib.Path) -> None:
-    """Update the secrets on the sensor_node."""
-    secrets_file = device_root.joinpath(SnsrPath.settings)
+def _update_secrets(new_secrets_file: pathlib.Path | None, main_folder: pathlib.Path) -> None:
+    """Update the settings.toml file in the main_folder."""
+    secrets_file = main_folder.joinpath(SnsrPath.settings_toml)
     if new_secrets_file:
         shutil.copy(new_secrets_file, secrets_file)
         return
@@ -1280,7 +1281,7 @@ def _update_secrets(new_secrets_file: pathlib.Path | None, device_root: pathlib.
     click.echo()
     click.echo(f"Set a new value or press {click.style('<Enter>', 'bright_cyan')} to skip")
     new_secrets = {}
-    detected_secrets = _detect_node_secrets(device_root)
+    detected_secrets = _detect_node_secrets(main_folder)
     for secret in detected_secrets:
         user_input = click.prompt(
             text=f"  {click.style(secret, 'bright_green')}",
