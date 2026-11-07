@@ -12,7 +12,7 @@ import urllib.request
 from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import NamedTuple
+from typing import NamedTuple, TypeVar
 
 import bs4
 import circup
@@ -27,6 +27,7 @@ from qtpy_datalogger import discovery
 from .datatypes import UNKNOWN_VERSION, ConnectionTransport, ExitCode, Links, SnsrNotice, SnsrPath
 
 CircupModuleCatalog = dict[str, LazyMetadata]
+MatchedKeyType = TypeVar("MatchedKeyType", str, pathlib.Path)
 
 logger = logging.getLogger(__name__)
 circup_logger = circup.logger
@@ -1095,155 +1096,192 @@ def _equip_snsr_node(behavior: Behavior, comparison_information: dict[str, SnsrN
         logger.error(f"circup exited with code '{return_code}'")
 
 
+def _validate_user_apps(candidates: Sequence[pathlib.Path], runtime_snapshot: SnsrDeviceSnapshot) -> AppImportUsage:
+    """Inspect the specified candidates and return the valid apps and their imports."""
+    user_apps = []
+    for app in candidates:
+        if app.stem in runtime_snapshot.files.reserved_app_names:
+            logger.warning(f"Skipping '{app}': cannot overwrite builtin app")
+            continue
+        if app.suffix not in _ALLOWED_USER_APP_FILE_TYPES:
+            logger.warning(f"Skipping '{app}': not an allowed app file")
+            continue
+        user_apps.append(app)
+    import_usage = AppImportUsage.from_files(user_apps)
+    if import_usage.imports.unused:
+        logger.warning(click.style("Detected app with unused imports", "yellow"))
+        for unused_import in import_usage.imports.unused:
+            logger.warning(ImportUsage.format_reference(unused_import))
+    return import_usage
+
+
+def _compare_modules(
+    runtime_modules: Sequence[ModuleWithVersion],
+    device_modules: Sequence[ModuleWithVersion],
+) -> ModuleComparison:
+    """Compare the collections of CircuitPython modules and return a ModuleComparison."""
+    runtime_module_map = dict(runtime_modules)
+    device_module_map = dict(device_modules)
+    runtime_module_names = set(runtime_module_map.keys())
+    device_module_names = set(device_module_map.keys())
+    matching_modules_names = runtime_module_names.intersection(device_module_names)
+    runtime_only_modules = {
+        ModuleWithVersion(name, runtime_module_map[name]) for name in runtime_module_names - device_module_names
+    }
+    device_only_modules = {
+        ModuleWithVersion(name, device_module_map[name]) for name in device_module_names - runtime_module_names
+    }
+    newer_runtime_modules = set()
+    older_runtime_modules = set()
+    matching_modules = set()
+    for name in matching_modules_names:
+        matching_entry = ModuleWithVersion(name, runtime_module_map[name])
+        if runtime_module_map[name] > device_module_map[name]:
+            newer_runtime_modules.add(matching_entry)
+        elif runtime_module_map[name] < device_module_map[name]:
+            older_runtime_modules.add(matching_entry)
+        else:
+            matching_modules.add(matching_entry)
+    return ModuleComparison(
+        same=tuple(sorted(matching_modules)),
+        newer=tuple(sorted(newer_runtime_modules)),
+        older=tuple(sorted(older_runtime_modules)),
+        group1_only=tuple(sorted(runtime_only_modules)),
+        group2_only=tuple(sorted(device_only_modules)),
+    )
+
+
+def _separate_apps_by_freshness(
+    user_apps: Sequence[pathlib.Path],
+    device_apps: Sequence[FileWithAge],
+) -> FileTreeComparison:
+    """Compare the user_apps with those in the device and return a FileComparisonReport."""
+    device_app_age_map = dict(device_apps)
+    device_app_file_map = {file.name: file for file in device_app_age_map}
+    user_app_age_map = dict(FileWithAge.from_path(app) for app in user_apps)
+    user_app_file_map = {file.name: file for file in user_app_age_map}
+    return _build_file_comparison(
+        candidate_file_map=user_app_file_map,
+        candidate_age_map=user_app_age_map,
+        baseline_file_map=device_app_file_map,
+        baseline_age_map=device_app_age_map,
+    )
+
+
+def _compare_snsr_file_trees(runtime: SnsrFileTree, device: SnsrFileTree) -> FileTreeComparison:
+    """Compare the SnsrFileTrees and return a FileTreeComparison."""
+    relative_self_age_map = dict(
+        entry for entry in runtime.relative_tree if runtime.root.joinpath(entry.path).is_file()
+    )
+    relative_self_file_map = {entry: entry for entry in relative_self_age_map}
+    relative_other_age_map = dict(entry for entry in device.relative_tree if device.root.joinpath(entry.path).is_file())
+    relative_other_file_map = {entry: entry for entry in relative_other_age_map}
+    return _build_file_comparison(
+        candidate_file_map=relative_self_file_map,
+        candidate_age_map=relative_self_age_map,
+        baseline_file_map=relative_other_file_map,
+        baseline_age_map=relative_other_age_map,
+    )
+
+
+def _build_file_comparison(
+    candidate_file_map: dict[MatchedKeyType, pathlib.Path],
+    candidate_age_map: dict[pathlib.Path, dt.datetime],
+    baseline_file_map: dict[MatchedKeyType, pathlib.Path],
+    baseline_age_map: dict[pathlib.Path, dt.datetime],
+) -> FileTreeComparison:
+    """
+    Use the candidate and baseline file maps to group files by their ages.
+
+    The file_map dictionaries must use the same type for their keys because this
+    function compares them against each other to detect shared and unique entries.
+
+    Further, this function uses the dictionary values stored by the file_map parameters
+    as the keys for the age_map dictionaries.
+
+    """
+    equal_files = []
+    updated_files = []
+    older_files = []
+    candidate_only_files = []
+    other_only_files = []
+
+    shared_file_keys = set(candidate_file_map.keys()).intersection(set(baseline_file_map.keys()))
+    for file_key in shared_file_keys:
+        candidate_file = candidate_file_map[file_key]
+        candidate_age = candidate_age_map[candidate_file]
+        baseline_file = baseline_file_map[file_key]
+        baseline_age = baseline_age_map[baseline_file]
+        sorted_candidate_file = FileWithAge(candidate_file, candidate_age)
+        if candidate_age > baseline_age:
+            updated_files.append(sorted_candidate_file)
+            continue
+        if candidate_age < baseline_age:
+            older_files.append(sorted_candidate_file)
+            continue
+        equal_files.append(sorted_candidate_file)
+
+    candidate_only_file_keys = candidate_file_map.keys() - baseline_file_map.keys()
+    for file_key in candidate_only_file_keys:
+        file = candidate_file_map[file_key]
+        age = candidate_age_map[file]
+        candidate_only_files.append(FileWithAge(file, age))
+
+    baseline_only_file_keys = baseline_file_map.keys() - candidate_file_map.keys()
+    for file_key in baseline_only_file_keys:
+        file = baseline_file_map[file_key]
+        age = baseline_age_map[file]
+        other_only_files.append(FileWithAge(file, age))
+
+    comparison_report = FileTreeComparison(
+        same=tuple(sorted(equal_files)),
+        newer=tuple(sorted(updated_files)),
+        older=tuple(sorted(older_files)),
+        tree1_only=tuple(sorted(candidate_only_files)),
+        tree2_only=tuple(sorted(other_only_files)),
+    )
+    return comparison_report
+
+
+def _collect_relative_folder_details(main_folder: pathlib.Path) -> Sequence[FileWithAge]:
+    """Return a relative list of all the folders and files under the specified folder."""
+
+    def recursive_folder_scan(folder: pathlib.Path, root: pathlib.Path) -> Sequence[FileWithAge]:
+        """Recursively collect the folder and files and return their relative paths from the root."""
+        folder_details = [FileWithAge.make_relative(folder, root)]
+        folder_listing = list(folder.iterdir())
+        subfolders = [entry for entry in folder_listing if entry.is_dir()]
+        subfiles = [
+            entry
+            for entry in folder_listing
+            if entry.is_file() and all(pattern not in str(entry) for pattern in _EQUIP_IGNORE_PATTERNS)
+        ]
+        for subfolder in subfolders:
+            subfolder_details = recursive_folder_scan(subfolder, root)
+            folder_details.extend(subfolder_details)
+        for entry in subfiles:
+            folder_details.append(FileWithAge.make_relative(entry, root))
+        return tuple(folder_details)
+
+    logger.debug(f"Collecting files from '{main_folder}'")
+    details = recursive_folder_scan(main_folder, root=main_folder)
+    return tuple(sorted(details))
+
+
+@functools.cache
+def _load_builtin_import_data() -> dict[str, Sequence[str]]:
+    """Load the builtin CircuitPython module data."""
+    this_file = pathlib.Path(__file__)
+    builtin_circuitpython_imports_file = this_file.with_name("builtin_circuitpython_modules.toml")
+    builtin_circuitpython_imports = toml.load(builtin_circuitpython_imports_file)
+    return builtin_circuitpython_imports  # ty: ignore[unsound-return-statement] -- runtime type checking doesn't help in this case for some reason
+
+
 def _create_notice_file_contents(allow_dev_version: bool) -> str:
     """Format the notice.toml file for the package."""
     snsr_notice = SnsrNotice.get_package_notice_info(allow_dev_version)
     file_contents = str(toml.dumps(snsr_notice._asdict()))
     return file_contents
-
-
-def _get_plugins(folder_list: list[pathlib.Path]) -> list[str]:
-    """Return a list of the installed sensor_node plugins."""
-    main_folder = folder_list[0]
-    snsr_root = main_folder.joinpath(SnsrPath.root)
-    plugins = [entry for entry in folder_list if entry.is_relative_to(snsr_root) and entry.is_dir()]
-    return [entry.name for entry in plugins[1:]]
-
-
-def _recursive_folder_scan(main_folder: pathlib.Path) -> list[pathlib.Path]:
-    """Return a sorted list of all the files and folders under the specified folder."""
-    logger.debug(f"Scanning folder '{main_folder}'")
-
-    full_list = [main_folder]
-    full_list.extend(_collect_file_list(main_folder))
-    return full_list
-
-
-def _collect_file_list(folder: pathlib.Path) -> list[pathlib.Path]:
-    """Recursively collect the files and folders under the specified folder and return a sorted list."""
-    if folder.is_dir():
-        folder_contents = sorted(folder.iterdir())
-        subfolders = [entry for entry in folder_contents if entry.is_dir()]
-        for subfolder in subfolders:
-            subfolder_list = _collect_file_list(subfolder)
-            folder_contents.extend(subfolder_list)
-        return sorted(folder_contents)
-    return [folder]
-
-
-def _compare_file_trees(
-    tree1: list[pathlib.Path],
-    tree2: list[pathlib.Path],
-    ignore_list: frozenset[str],
-) -> dict[pathlib.Path, str]:
-    """Compare two lists of paths, identifying newer. A value of "newer" means tree1's file is newer than tree2's file."""
-    set1 = {path.relative_to(tree1[0]) for path in tree1 if all(pattern not in str(path) for pattern in ignore_list)}
-    set2 = {path.relative_to(tree2[0]) for path in tree2 if all(pattern not in str(path) for pattern in ignore_list)}
-    shared_in_both = set1 & set2
-    tree1_file_ages = {}
-    for path in shared_in_both:
-        modification_time1 = tree1[0].joinpath(path).stat().st_mtime
-        modification_time2 = tree2[0].joinpath(path).stat().st_mtime
-        age = "equal"
-        if modification_time1 > modification_time2:
-            age = "newer"
-        if modification_time1 < modification_time2:
-            age = "older"
-        tree1_file_ages[path] = age
-    for path in set1 - set2:
-        tree1_file_ages[path] = "newer"
-    return tree1_file_ages
-
-
-def _get_circuitpython_dependencies(device_files: list[pathlib.Path], device_id: str, log_info: bool) -> list[str]:
-    """Scan the sensor_node files for Python dependencies and return a list of external module imports."""
-    # Get the folder and file names under the snsr folder
-    main_folder = device_files[0]
-    snsr_folder = main_folder.joinpath(SnsrPath.root)
-    snsr_node_listing = [entry for entry in device_files if entry.is_relative_to(snsr_folder)]
-    snsr_node_folders = [entry for entry in snsr_node_listing if entry.is_dir()]
-    snsr_node_files = [entry for entry in snsr_node_listing if entry.is_file() and str(entry).endswith(".py")]
-
-    # Collect the used and unused imports from each file
-    all_used_imports = []
-    all_unused_imports = []
-    for file in snsr_node_files:
-        used_imports, unused_imports = findimports.find_imports_and_track_names(str(file))
-        all_used_imports.extend(used_imports)
-        all_unused_imports.extend(unused_imports)
-    all_import_names = sorted({module.name for module in all_used_imports})
-    _ = [logger.debug(f" * {name}") for name in all_import_names]
-    all_base_imports = sorted({name.split(".", maxsplit=1)[0] for name in all_import_names} - {*_PC_ONLY_IMPORTS})
-    if all_unused_imports:
-        logger.warning("Detected unused imports")
-        _ = [logger.warning(f" * {module.name}") for module in all_unused_imports]
-
-    # Group the internal module names
-    internal_folders = [folder.name for folder in snsr_node_folders]
-    internal_files = [file.stem for file in snsr_node_files]
-    internal_modules = {*internal_folders, *internal_files}
-    internal_modules.discard("__init__")
-    internal_modules.discard("__pycache__")
-
-    # Group the builtin CircuitPython module names
-    this_file = pathlib.Path(__file__)
-    builtin_circuitpython_modules_file = this_file.with_name("builtin_circuitpython_modules.toml")
-    builtin_circuitpython_modules = toml.load(builtin_circuitpython_modules_file)
-    stdlib_module_names = builtin_circuitpython_modules["standard_library"]
-    builtin_module_names = builtin_circuitpython_modules.get(device_id, [])
-    if not builtin_module_names:
-        logger.warning(f"Missing information for builtin modules on CircuitPython device '{device_id}'")
-        logger.warning(f"  Visit '{Links.Board_Support_Matrix}' and find your BOARD NAME")
-        logger.warning(
-            "  Then use 'qtpy-datalogger --list-builtin-modules \"BOARD NAME\" -' to get the builtin modules"
-        )
-        logger.warning(f"  And create a new Issue with this information at '{Links.New_Bug}'")
-    all_builtin_circuitpython_modules = {*stdlib_module_names, *builtin_module_names}
-    name_collisions = all_builtin_circuitpython_modules & internal_modules
-    if name_collisions:
-        logger.warning("Detected module name collisions")
-        _ = [logger.warning(f" * {module}") for module in name_collisions]
-
-    # The external CircuitPython module names remain after we remove the internal names and the builtin names
-    external_module_names = {*all_base_imports} - internal_modules - all_builtin_circuitpython_modules
-
-    # Show an import report
-    if all_base_imports and (log_info or logger.isEnabledFor(logging.DEBUG)):
-
-        def get_module_mark(module_name: str) -> str:
-            if module_name in external_module_names:
-                return "*"
-            if module_name in all_builtin_circuitpython_modules:
-                return "."
-            return "~"
-
-        grouped_by_source = sorted([f"{get_module_mark(module):>2} {module}" for module in all_base_imports])
-        logger.info(f"Found {len(all_base_imports)} total module references   * external   . builtin   ~ internal")
-        _ = [logger.info(line) for line in grouped_by_source]
-    return sorted(external_module_names)
-
-
-def _query_modules_from_circup(main_folder: pathlib.Path, log_info: bool) -> list[tuple[str, str]]:
-    """Use circup to detect the installed CircuitPython modules and versions found in the specified folder."""
-    if main_folder.joinpath("lib").exists() and (log_info or logger.isEnabledFor(logging.DEBUG)):
-        logger.info("Detecting installed external CircuitPython modules")
-
-    circup_logger = logger
-    if not logger.isEnabledFor(logging.DEBUG):
-        muted_logger = logging.getLogger("muted")
-        muted_logger.setLevel(logging.CRITICAL)
-        circup_logger = muted_logger
-    circup_backend = circup.DiskBackend(str(main_folder), circup_logger)
-    installed_cp_modules = circup_backend.get_device_versions()
-    if installed_cp_modules and (log_info or logger.isEnabledFor(logging.DEBUG)):
-        _ = [
-            logger.info(f" * {name:<20} {details['__version__']}")
-            for name, details in sorted(installed_cp_modules.items())
-        ]
-    modules_with_version = [
-        (str(name), str(details["__version__"])) for name, details in sorted(installed_cp_modules.items())
-    ]
-    return modules_with_version
 
 
 def _detect_node_secrets(main_folder: pathlib.Path) -> dict[str, bool]:
