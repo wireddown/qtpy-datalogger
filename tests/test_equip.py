@@ -570,43 +570,60 @@ def test_only_newer_files(
 
 def test_detect_missing_secrets(tmp_path: pathlib.Path, caplog: pytest.LogCaptureFixture) -> None:
     """Does it detect missing secrets with '--secrets'?"""
-    with caplog.at_level(logging.INFO):
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
         equip.handle_equip(
-            behavior=equip.Behavior.Upgrade, root=tmp_path, secrets=equip.SecretsBehavior.Analyze.as_full_name()
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(),
+            root=tmp_path,
+            secrets=equip.SecretsBehavior.Analyze.as_full_name(),
         )
 
-    assert "Detecting secrets" in caplog.text
+    assert_safe_exit(excinfo)
+    assert "Detected secrets" in caplog.text
     assert " MISSING" in caplog.text
 
 
 def test_prompt_for_secrets(
+    reference_snsr: pathlib.Path,
     tmp_path: pathlib.Path,
     capsys: pytest.CaptureFixture[str],
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Does it prompt the user for secrets with '--secrets -'?"""
-    create_test_device_folder(tmp_path)  # Pre-install so equip doesn't invoke circup which fails with capsys
+    clone_test_device_into_folder(
+        reference_snsr, tmp_path
+    )  # Pre-install so equip doesn't invoke circup which fails with capsys
     monkeypatch.setattr(click, "prompt", skip_secrets)
 
-    with caplog.at_level(logging.INFO):
-        equip.handle_equip(behavior=equip.Behavior.Upgrade, root=tmp_path, secrets="-")
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(),
+            root=tmp_path,
+            secrets="-",
+        )
 
+    assert_safe_exit(excinfo)
+    assert "Found a QT Py Datalogger Sensor Node" in caplog.text
     assert "Updating sensor_node secrets" in caplog.text
     assert "Set a new value or press <Enter> to skip" in capsys.readouterr().out
     assert "Secrets updated" in caplog.text
-    assert tmp_path.joinpath(SnsrPath.settings).exists()
+    assert tmp_path.joinpath(SnsrPath.settings_toml).exists()
 
 
 def test_merge_secrets(
+    reference_snsr: pathlib.Path,
     tmp_path: pathlib.Path,
     capsys: pytest.CaptureFixture[str],
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Does it correctly merge unrelated, old, and new secrets with '--secrets -'?"""
-    create_test_device_folder(tmp_path)  # Pre-install so equip doesn't invoke circup which fails with capsys
-    secrets_file = tmp_path.joinpath(SnsrPath.settings)
+    clone_test_device_into_folder(
+        reference_snsr, tmp_path
+    )  # Pre-install so equip doesn't invoke circup which fails with capsys
+    secrets_file = tmp_path.joinpath(SnsrPath.settings_toml)
     old_secrets = {
         "CIRCUITPY_WIFI_SSID": "old ssid",
         "CIRCUITPY_WIFI_PASSWORD": "old password",
@@ -619,9 +636,17 @@ def test_merge_secrets(
         toml.dump(old_secrets, settings_fd)
     monkeypatch.setattr(click, "prompt", merge_secrets)
 
-    with caplog.at_level(logging.INFO):
-        equip.handle_equip(behavior=equip.Behavior.Upgrade, root=tmp_path, secrets="-")
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(),
+            root=tmp_path,
+            secrets="-",
+        )
 
+    assert_safe_exit(excinfo)
+    assert "Found a QT Py Datalogger Sensor Node" in caplog.text
+    assert_device_matches_self(reference_snsr, tmp_path)
     assert "Updating sensor_node secrets" in caplog.text
     assert "Set a new value or press <Enter> to skip" in capsys.readouterr().out
     assert "Secrets updated" in caplog.text
