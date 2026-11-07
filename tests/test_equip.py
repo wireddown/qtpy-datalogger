@@ -1,8 +1,12 @@
 """Acceptance tests for the equip module."""
 
+import contextlib
 import logging
 import pathlib
+import re
 import shutil
+import tempfile
+from collections.abc import Generator
 
 import click
 import pytest
@@ -13,63 +17,265 @@ from qtpy_datalogger import discovery, equip
 from qtpy_datalogger.datatypes import ExitCode, SnsrNotice, SnsrPath
 
 
-def create_test_device_folder(tmp_folder: pathlib.Path) -> None:
-    """Make tmp_folder into a sensor_node."""
-    this_file = pathlib.Path(__file__)
-    my_device_folder = this_file.parent.parent.joinpath("src", "qtpy_datalogger", "sensor_node")
-
-    # Copy the files
-    shutil.copytree(
-        src=my_device_folder,
-        dst=tmp_folder,
-        ignore=shutil.ignore_patterns("*.pyc", "__pycache__"),
-        dirs_exist_ok=True,
-    )
-
-    # Stamp the notice file
-    device_notice = tmp_folder.joinpath(SnsrPath.notice)
-    source_toml = SnsrNotice.get_package_notice_info(allow_dev_version=True)
-    notice_text = toml.dumps(source_toml._asdict())
-    device_notice.write_text(notice_text)
+@pytest.fixture(scope="module")
+def reference_snsr() -> Generator[pathlib.Path, None, None]:
+    """Install the package's sensor node runtime into a temporary folder."""
+    with tempfile.TemporaryDirectory(prefix="qtpy_", suffix="_snsr_clone") as folder_string:
+        snsr_root = pathlib.Path(folder_string)
+        with contextlib.suppress(SystemExit):
+            equip.handle_equip(
+                behavior=equip.Behavior.Upgrade,
+                with_apps=(),
+                root=snsr_root,
+                secrets=equip.SecretsBehavior.Noop.as_full_name(),
+            )
+        yield snsr_root
 
 
-def get_bundle_comparison(device_path: pathlib.Path) -> dict[str, equip.SnsrNodeBundle]:
-    """Return a dictionary of SnsrNodeBundle entries for the builtin bundle and the test bundle."""
-    this_file = pathlib.Path(__file__)
-    tests_folder = this_file.parent
-    this_sensor_node_root = tests_folder.parent.joinpath("src", "qtpy_datalogger", "sensor_node")
-    runtime_bundle = equip._detect_snsr_bundle(this_sensor_node_root)
-    device_bundle = equip._detect_snsr_bundle(device_path)
-    return {
-        "device bundle": device_bundle,
-        "runtime bundle": runtime_bundle,
+def clone_test_device_into_folder(reference_device: pathlib.Path, folder: pathlib.Path) -> None:
+    """
+    Make folder into a sensor_node.
+
+    Use the 'reference_snsr' fixture in your tests as the reference_device.
+    """
+    shutil.copytree(src=reference_device, dst=folder, dirs_exist_ok=True)
+
+
+def prepare_uninitialized_device(folder: pathlib.Path) -> pathlib.Path:
+    """Create and return a folder that represents a new QT Py device without any runtime installed."""
+    node_subfolder = folder.joinpath("test_node")
+    node_subfolder.mkdir()
+    return node_subfolder
+
+
+def prepare_initialized_device_with_options(
+    reference_device: pathlib.Path,
+    folder: pathlib.Path,
+    version: str | None = None,
+    user_app_contents: str | None = None,
+) -> tuple[pathlib.Path, pathlib.Path, pathlib.Path]:
+    """
+    Make folder into a sensor_node with an optional version or existing user app contents.
+
+    Returns a tuple of paths
+      - test_node_subfolder -- the root of the initialized device
+      - unrelated_app_path  -- an extra unrelated app used as an incorrect deletion detector
+      - user_app_path       -- a preinstalled user app with the specified contents
+
+    """
+    test_node_subfolder = prepare_uninitialized_device(folder)
+    clone_test_device_into_folder(reference_device, test_node_subfolder)
+
+    if not isinstance(user_app_contents, str):
+        user_app_contents = "# See prepare_initialized_device_with_options()"
+    user_app_path = create_empty_file_in_folder("existing_app.py", test_node_subfolder.joinpath(SnsrPath.apps))
+    user_app_path.write_text(user_app_contents)
+
+    unrelated_app_path = create_empty_file_in_folder("unrelated_app.py", test_node_subfolder.joinpath(SnsrPath.apps))
+
+    if isinstance(version, str):
+        device_toml = get_device_notice(test_node_subfolder)
+        new_version_toml = SnsrNotice(
+            comment=device_toml.comment,
+            version=version,
+            commit=device_toml.commit,
+            timestamp=device_toml.timestamp,
+        )
+        set_device_notice(new_version_toml, test_node_subfolder)
+
+    return test_node_subfolder, unrelated_app_path, user_app_path
+
+
+def prepare_user_app(folder: pathlib.Path, user_app_name: str, user_app_contents: str) -> pathlib.Path:
+    """Create an app in the folder with the specified user_app_name and user_app_contents and return its path."""
+    user_app_folder = folder.joinpath("test_app")
+    user_app_path = create_empty_file_in_folder(user_app_name, user_app_folder)
+    user_app_path.write_text(user_app_contents)
+    return user_app_path
+
+
+def read_and_replace_runtime_file(snsr_file: pathlib.Path, downversion_contents: str) -> str:
+    """Return the original first line from the snsr_file and replace the whole file with downversion_contents."""
+    with snsr_file.open("r") as file:
+        original_first_line = file.readline().strip()
+    snsr_file.write_text(downversion_contents)
+    return original_first_line
+
+
+def assert_safe_exit(excinfo: pytest.ExceptionInfo) -> None:  # ty: ignore[missing-type-argument] -- this function accepts all exception types
+    """Assert that the Exception information indicates a safe execution exit."""
+    assert_exit_code(excinfo, ExitCode.Success)
+
+
+def assert_exit_code(excinfo: pytest.ExceptionInfo, expected_code: int) -> None:  # ty: ignore[missing-type-argument] -- this function accepts all exception types
+    """Assert that the Exception information indicates a normal exit with the expected_code."""
+    exception = excinfo.value
+    assert type(exception) is SystemExit
+    assert exception.code == expected_code
+
+
+def assert_device_matches_self(  # noqa: PLR0913, PLR0917 -- allow oversized functions for assert helpers
+    reference_folder: pathlib.Path,
+    device_path: pathlib.Path,
+    extra_expected_apps: list[pathlib.Path] | None = None,
+    expected_version: str | None = None,
+    extra_expected_imports: list[str] | None = None,
+    extra_expected_modules: list[str] | None = None,
+) -> None:
+    """
+    Assert that the version and dependency information matches the reference.
+
+    Optionally use the 'reference_snsr' fixture in your tests as the reference_folder.
+    """
+    reference = equip.SnsrDeviceSnapshot.from_folder(reference_folder)
+    device = equip.SnsrDeviceSnapshot.from_folder(device_path)
+
+    extra_expected_apps = extra_expected_apps or []
+    expected_version = expected_version or str(reference.snsr_runtime)
+    extra_expected_imports = extra_expected_imports or []
+    extra_expected_modules = extra_expected_modules or []
+
+    assert str(device.snsr_runtime) == expected_version
+    assert device.board_id == reference.board_id
+    assert device.circuitpython == reference.circuitpython
+
+    assert set(device.external_imports) == {*reference.external_imports, *extra_expected_imports}
+    assert {m.name for m in device.installed_modules} == {
+        *[m.name for m in reference.installed_modules],
+        *extra_expected_modules,
     }
+    assert {m.name for m in device.required_modules} == {
+        *[m.name for m in reference.required_modules],
+        *extra_expected_modules,
+    }
+    device.files.root.joinpath("lib").exists()
+
+    # Skip comparing the full file lists
+
+    for app in extra_expected_apps:
+        assert device_path.joinpath(SnsrPath.apps, app.name).exists()
 
 
-def get_device_notice(device_path: pathlib.Path) -> equip.SnsrNotice:
+def assert_new_installation_succeeded(captured_log: pytest.LogCaptureFixture) -> None:
+    """Assert that the captured_log indicates a successful installation of a new uninitialized sensor_node."""
+    assert "is not a QT Py Datalogger Sensor Node" in captured_log.text
+    assert "Initializing new QT Py Datalogger Sensor Node" in captured_log.text
+    assert "Installing sensor_node runtime" in captured_log.text
+    assert "Installing external dependencies with circup" in captured_log.text
+    assert "Installation complete" in captured_log.text
+    assert "Detected MISSING sensor_node runtime components" not in captured_log.text
+
+
+def assert_compare_snsr_node_succeeded(captured_log: pytest.LogCaptureFixture) -> None:
+    """Assert that the capture_log indicates a successful comparison of a sensor_node."""
+    assert "Comparing sensor_node device with this package" in captured_log.text
+    assert re.search(r"echo\s+echo", captured_log.text)
+    assert re.search(r"qtpycmd\s+qtpycmd", captured_log.text)
+    assert re.search(r"adafruit_minimqtt\s+adafruit_minimqtt", captured_log.text)
+
+
+def assert_equip_operation_succeeded(  # noqa: PLR0912, PLR0913, PLR0915, PLR0917 -- allow oversized functions for assert helpers
+    captured_log: pytest.LogCaptureFixture,
+    expect_new_version: bool = False,
+    expect_repair: bool = False,
+    expected_new_apps: list[pathlib.Path] | None = None,
+    expected_new_files: list[pathlib.Path] | None = None,
+    expect_circup: bool = False,
+    expect_forced: bool = False,
+) -> None:
+    """Assert that the capture_log indicates a successful equip operation on an initialized sensor_node."""
+    expected_new_apps = expected_new_apps or []
+    expect_new_apps = len(expected_new_apps) > 0
+    expected_new_files = expected_new_files or []
+    expect_install_any = any(
+        [expect_new_version, expect_repair, expect_new_apps, len(expected_new_files) > 0, expect_circup, expect_forced]
+    )
+    expect_install_snsr_files = any([expect_new_version, expect_repair, len(expected_new_files) > 0, expect_forced])
+    expect_circup = any([expect_circup, expect_forced])
+
+    if not expect_install_any:
+        assert "Skipping installation: not an upgrade" in captured_log.text
+        return
+
+    if expect_install_snsr_files:
+        assert "Installing sensor_node runtime" in captured_log.text
+        assert "All runtime files and CircuitPython modules up to date with the host" not in captured_log.text
+
+    if expect_new_apps:
+        assert "Installing apps" in captured_log.text
+        assert "All runtime files and CircuitPython modules up to date with the host" not in captured_log.text
+
+    if not (expect_install_snsr_files or expect_new_apps):
+        assert "Installing sensor_node runtime" not in captured_log.text
+        assert "Installing apps" not in captured_log.text
+        assert "All runtime files and CircuitPython modules up to date with the host" in captured_log.text
+
+    assert "Upgrading snapshot" not in captured_log.text
+    if expect_new_version:
+        assert "Upgrading version" in captured_log.text
+        assert "Repairing missing sensor_node runtime components" not in captured_log.text
+        assert "Forcing installation" not in captured_log.text
+    elif expect_repair:
+        assert "Upgrading version" not in captured_log.text
+        assert "Repairing missing sensor_node runtime components" in captured_log.text
+        assert "Forcing installation" not in captured_log.text
+    elif expect_forced:
+        assert "Upgrading version" not in captured_log.text
+        assert "Repairing missing sensor_node runtime components" not in captured_log.text
+        assert "Forcing installation" in captured_log.text
+    else:
+        assert "Upgrading version" not in captured_log.text
+        assert "Repairing missing sensor_node runtime components" not in captured_log.text
+        assert "Forcing installation" not in captured_log.text
+
+    if expected_new_apps:
+        assert "Installing apps" in captured_log.text
+    else:
+        assert "Installing apps" not in captured_log.text
+    for expected_app in expected_new_apps:
+        assert f" * {expected_app.stem}" in captured_log.text
+
+    for expected_file in expected_new_files:
+        assert re.search(f"Newer: .*{expected_file.name}", captured_log.text)
+    if not expected_new_files:
+        assert not re.search(r"Newer:  .*\.py", captured_log.text)
+
+    if expect_circup:
+        assert "Installing external dependencies with circup" in captured_log.text
+        assert "Skipping circup: external dependencies already installed" not in captured_log.text
+    else:
+        assert "Installing external dependencies with circup" not in captured_log.text
+        assert "Skipping circup: external dependencies already installed" in captured_log.text
+
+    assert "Installation complete" in captured_log.text
+
+
+def assert_user_app_matches_contents(test_device_folder: pathlib.Path, user_app_name: str, contents: str) -> None:
+    """Assert that sensor_node app matches the contents."""
+    assert test_device_folder.joinpath(SnsrPath.apps, user_app_name).exists()
+    assert test_device_folder.joinpath(SnsrPath.apps, user_app_name).read_text() == contents
+
+
+def get_device_notice(device_path: pathlib.Path) -> SnsrNotice:
     """Get the SnsrNotice information from the sensor_node at the specified path."""
-    device_notice = device_path.joinpath(SnsrPath.notice)
-    device_toml = equip.SnsrNotice(**toml.load(device_notice))
+    device_notice = device_path.joinpath(SnsrPath.notice_toml)
+    device_toml = SnsrNotice(**toml.load(device_notice))
     return device_toml
 
 
-def set_device_notice(notice: equip.SnsrNotice, device_path: pathlib.Path) -> None:
+def set_device_notice(notice: SnsrNotice, device_path: pathlib.Path) -> None:
     """Set the SnsrNotice information on the sensor_node at the specified path."""
-    device_notice = device_path.joinpath(SnsrPath.notice)
+    device_notice = device_path.joinpath(SnsrPath.notice_toml)
     notice_text = toml.dumps(notice._asdict())
     device_notice.write_text(notice_text)
 
 
-def assert_device_matches_self(comparison_results: dict[str, equip.SnsrNodeBundle]) -> None:
-    """Assert that the version and dependency information matches between the comparison_results."""
-    device_bundle = comparison_results["device bundle"]
-    runtime_bundle = comparison_results["runtime bundle"]
-    assert device_bundle.board_id == runtime_bundle.board_id
-    assert device_bundle.circuitpy_dependencies == runtime_bundle.circuitpy_dependencies
-    assert device_bundle.circuitpy_version == runtime_bundle.circuitpy_version
-    # Skip comparing the file lists
-    # Skip confirming that circup installed modules
-    assert device_bundle.notice == runtime_bundle.notice
+def create_empty_file_in_folder(file_name: str, folder: pathlib.Path) -> pathlib.Path:
+    """Create a file named 'file_name' in folder and return its path."""
+    folder.mkdir(exist_ok=True)
+    file_path = folder.joinpath(file_name)
+    file_path.touch()
+    return file_path
 
 
 def skip_secrets(text: str, default: str, hide_input: bool, type: type, show_default: bool) -> str:  # noqa: A002 -- we must hide 'type' to match the click API
