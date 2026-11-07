@@ -96,11 +96,14 @@ class CaptionCorrections:
 
 
 class SnsrPath(enum.StrEnum):
-    """Reserved path names for qtpy_datalogger sensor_node bundles."""
+    """Reserved path names for the qtpy_datalogger sensor_node runtime."""
 
-    notice = "snsr/notice.toml"
+    apps = "snsr/apps"
+    boot_out_txt = "boot_out.txt"
+    code_py = "code.py"
+    notice_toml = "snsr/notice.toml"
     root = "snsr"
-    settings = "settings.toml"
+    settings_toml = "settings.toml"
 
 
 class SnsrNotice(NamedTuple):
@@ -126,7 +129,7 @@ class SnsrNotice(NamedTuple):
         """Detect and generate the information used in the notice.toml file."""
         this_file = pathlib.Path(__file__)
         this_folder = this_file.parent
-        notice_toml = this_folder.joinpath("sensor_node", SnsrPath.notice)
+        notice_toml = this_folder.joinpath("sensor_node", SnsrPath.notice_toml)
         notice_contents = toml.load(notice_toml)
         snsr_notice = SnsrNotice(**notice_contents)
         my_comment = snsr_notice.comment
