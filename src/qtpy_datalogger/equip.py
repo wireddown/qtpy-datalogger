@@ -1,6 +1,7 @@
-"""Functions for creating, configuring, and updating QT Py sensor nodes."""
+"""Functions for creating, configuring, and updating QT Py Datalogger sensor nodes."""
 
 import datetime as dt
+import functools
 import logging
 import pathlib
 import shutil
@@ -8,6 +9,8 @@ import subprocess
 import sys
 import textwrap
 import urllib.request
+from collections.abc import Sequence
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import NamedTuple
 
@@ -16,11 +19,14 @@ import circup
 import click
 import findimports
 import toml
+from circup.lazy_metadata import LazyMetadata
 from packaging.version import Version
 
 from qtpy_datalogger import discovery
 
 from .datatypes import UNKNOWN_VERSION, ConnectionTransport, ExitCode, Links, SnsrNotice, SnsrPath
+
+CircupModuleCatalog = dict[str, LazyMetadata]
 
 logger = logging.getLogger(__name__)
 circup_logger = circup.logger
@@ -63,13 +69,12 @@ _FALLBACK_QTPY_BOARD_ID = "adafruit_qtpy_esp32s3_nopsram"
 
 
 class Behavior(StrEnum):
-    """Supported installation behaviors for QT Py sensor nodes."""
+    """Supported installation behaviors for QT Py Datalogger sensor_node devices."""
 
-    Upgrade = "Upgrade"
     Compare = "Compare"
     Describe = "Describe"
     Force = "Force"
-    NewerFilesOnly = "NewerFilesOnly"
+    Upgrade = "Upgrade"
 
 
 class SecretsBehavior(StrEnum):
@@ -84,18 +89,652 @@ class SecretsBehavior(StrEnum):
         return f"{self.__class__.__name__}.{self.name}"
 
 
-class SnsrNodeBundle(NamedTuple):
-    """Represents the version, contents, and dependencies for a sensor_node."""
+class FileWithAge(NamedTuple):
+    """Associates a file with its last modification time."""
 
-    notice: SnsrNotice
-    device_files: list[pathlib.Path]
-    circuitpy_version: str
+    path: pathlib.Path
+    """The path to the file."""
+
+    age: dt.datetime
+    """The last modification time of the file."""
+
+    @staticmethod
+    def from_path(path: pathlib.Path) -> "FileWithAge":
+        """Create a FileWithAge using the file's absolute path."""
+        modified_time = max(path.stat().st_mtime, 86400)  # Windows timezone bug, see python/cpython #107078
+        timestamp = dt.datetime.fromtimestamp(modified_time).astimezone()
+        return FileWithAge(path, timestamp)
+
+    @staticmethod
+    def make_relative(path: pathlib.Path, root: pathlib.Path) -> "FileWithAge":
+        """Use the file's absolute path to get its age and return a FileWithAge with a relative path from the specified root."""
+        as_absolute = FileWithAge.from_path(path)
+        as_relative = FileWithAge(path.relative_to(root), as_absolute.age)
+        return as_relative
+
+
+class ModuleWithVersion(NamedTuple):
+    """Associates a CircuitPython module with its version."""
+
+    name: str
+    """The name of the CircuitPython module."""
+
+    version: Version
+    """The version of the CircuitPython module."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class ImportUsage:
+    """Represents used, unused, and base references to imported modules."""
+
+    used: Sequence[findimports.ImportInfo]
+    """References to imported modules describing where they are used in their file."""
+
+    unused: Sequence[findimports.ImportInfo]
+    """References to imported modules that are unused in their file."""
+
+    base: Sequence[str]
+    """The first name segment of each imported module, usually the package name."""
+
+    @staticmethod
+    def from_files(paths: Sequence[pathlib.Path]) -> "ImportUsage":
+        """Scan the specified files for imports and return a new ImportUsage instance."""
+        all_used_imports = []
+        all_unused_imports = []
+        python_files = [str(path) for path in paths if path.suffix == ".py"]
+        for file in python_files:
+            used_imports, unused_imports = findimports.find_imports_and_track_names(file)
+            all_used_imports.extend(used_imports)
+            all_unused_imports.extend(unused_imports)
+
+        all_import_names = sorted({used_import.name for used_import in all_used_imports})
+        if all_import_names:
+            logger.debug(f"Detected {len(all_import_names)} imports")
+        for name in all_import_names:
+            logger.debug(f" * {name}")
+
+        all_base_imports = sorted(
+            {str(name).split(".", maxsplit=1)[0] for name in all_import_names} - {*_PC_ONLY_IMPORTS}
+        )
+        import_usage = ImportUsage(used=all_used_imports, unused=all_unused_imports, base=all_base_imports)
+        return import_usage
+
+    @staticmethod
+    def format_reference(import_: findimports.ImportInfo) -> str:
+        """Format a string that reports the location of the specified import."""
+        line = f" ! {import_.name:<20}  imported on  line {import_.lineno}  in  {import_.filename}"
+        return line
+
+
+@dataclass(frozen=True)
+class AppDetails:
+    """Describes a sensor_node app."""
+
+    path: pathlib.Path
+    """The path to the app."""
+
+    @functools.cached_property
+    def name(self) -> str:
+        """The name of the app."""
+        return self.path.stem
+
+    @functools.cached_property
+    def description(self) -> str:
+        """The description of the app."""
+        with self.path.open("r") as file:
+            app_help = file.readline().strip().replace('"""', "")
+        return app_help
+
+
+@dataclass(frozen=True, kw_only=True)
+class AppImportUsage:
+    """Associates a collection of apps with their the import references."""
+
+    details: Sequence[AppDetails]
+    """The collection of apps with their details."""
+
+    imports: ImportUsage
+    """The imports referenced by the collection of apps."""
+
+    @functools.cached_property
+    def files(self) -> Sequence[pathlib.Path]:
+        """Return the paths for each app in the collection."""
+        return tuple(a.path for a in self.details)
+
+    @staticmethod
+    def from_files(files: Sequence[pathlib.Path]) -> "AppImportUsage":
+        """Create an AppImportUsage from the specified files."""
+        app_details = [AppDetails(file) for file in files]
+        app_imports = ImportUsage.from_files(files)
+        return AppImportUsage(details=app_details, imports=app_imports)
+
+
+@dataclass(frozen=True, kw_only=True)
+class SnsrFileTree:
+    """Represents the file tree for a QT Py Datalogger sensor_node device."""
+
+    root: pathlib.Path
+    """The absolute path to the device's root folder."""
+
+    relative_tree: Sequence[FileWithAge]
+    """The relative paths for every folder and file under the device's root folder."""
+
+    reserved_app_names: frozenset[str]
+    """The app names reserved by the snsr runtime."""
+
+    relative_runtime_apps: Sequence[FileWithAge]
+    """The public apps as relative paths from the device's root folder."""
+
+    @staticmethod
+    def from_folder(main_folder: pathlib.Path) -> "SnsrFileTree":
+        """Create a SnsrFileTree rooted at main_folder."""
+        relative_tree = _collect_relative_folder_details(main_folder)
+        reserved_app_names: list[str] = []
+        relative_public_apps: list[FileWithAge] = []
+        for relative_entry in relative_tree:
+            if relative_entry.path.is_relative_to(SnsrPath.apps) and relative_entry.path.suffix == ".py":
+                reserved_app_names.append(relative_entry.path.stem)
+                if relative_entry.path.stem != "__init__":
+                    relative_public_apps.append(relative_entry)
+        return SnsrFileTree(
+            root=main_folder,
+            relative_tree=relative_tree,
+            reserved_app_names=frozenset(reserved_app_names),
+            relative_runtime_apps=relative_public_apps,
+        )
+
+
+@dataclass(frozen=True, kw_only=True)
+class SnsrDeviceSnapshot:
+    """Represents the version, contents, and dependencies for a CircuitPython device."""
+
     board_id: str
-    circuitpy_dependencies: list[str]
-    installed_circuitpy_modules: list[tuple[str, str]]
+    """The hardware board ID of the CircuitPython device from Links.Board_Support_Matrix."""
+
+    circuitpython: Version
+    """The version of CircuitPython on the device."""
+
+    builtin_imports: frozenset[str]
+    """The builtin imports specific to the CircuitPython device's hardware support."""
+
+    snsr_runtime: Version
+    """The version of the QT Py Datalogger runtime on the device."""
+
+    snsr_timestamp: dt.datetime
+    """The timestamp of the QT Py Datalogger runtime on the device."""
+
+    snsr_commit: str
+    """The commit hash of the QT Py Datalogger runtime on the device."""
+
+    apps: Sequence[AppDetails]
+    """The QT Py Datalogger apps on the device."""
+
+    files: SnsrFileTree
+    """The file tree for the device."""
+
+    snsr_imports: frozenset[str]
+    """The import modules belonging to the QT Py Datalogger runtime."""
+
+    external_imports: frozenset[str]
+    """The import modules belonging to the CircuitPython ecosystem."""
+
+    unused_imports: Sequence[findimports.ImportInfo]
+    """The unused import references in the QT Py Datalogger runtime."""
+
+    required_modules: Sequence[ModuleWithVersion]
+    """The CircuitPython modules required by the QT Py Datalogger runtime and apps."""
+
+    installed_modules: Sequence[ModuleWithVersion]
+    """The CircuitPython modules installed on the device."""
+
+    @functools.cached_property
+    def root(self) -> pathlib.Path:
+        """The path to the device's main folder."""
+        return self.files.root
+
+    @functools.cached_property
+    def is_circuitpython_device(self) -> bool:
+        """True when the device is a CircuitPython device."""
+        return self.files.root.joinpath(SnsrPath.boot_out_txt).exists()
+
+    @functools.cached_property
+    def is_sensor_node(self) -> bool:
+        """True when the device is a QT Py Datalogger sensor_node."""
+        return self.files.root.joinpath(SnsrPath.notice_toml).exists()
+
+    @staticmethod
+    def as_runtime(board_id: str, circuitpy_version: Version) -> "SnsrDeviceSnapshot":
+        """Create a package runtime SnsrDeviceSnapshot using the specified board_id and circuitpy_version."""
+        this_file = pathlib.Path(__file__)
+        this_folder = this_file.parent
+        this_sensor_node_root = this_folder.joinpath("sensor_node")
+        return SnsrDeviceSnapshot._create_new_snapshot(
+            this_sensor_node_root,
+            board_id,
+            circuitpy_version,
+            is_runtime=True,
+        )
+
+    @staticmethod
+    def from_folder(folder: pathlib.Path) -> "SnsrDeviceSnapshot":
+        """Create a SnsrDeviceSnapshot from the specified folder."""
+        board_id, circuitpy_version = SnsrDeviceSnapshot._get_device_platform(folder)
+        return SnsrDeviceSnapshot._create_new_snapshot(folder, board_id, circuitpy_version, is_runtime=False)
+
+    @classmethod
+    def _create_new_snapshot(
+        cls,
+        folder: pathlib.Path,
+        board_id: str,
+        circuitpy_version: Version,
+        is_runtime: bool,
+    ) -> "SnsrDeviceSnapshot":
+        """Create a SnsrDeviceSnapshot from the specified folder with the specified board_id and circuitpy_version."""
+        notice = SnsrDeviceSnapshot._get_device_notice(folder, is_runtime)
+        file_tree = SnsrFileTree.from_folder(folder)
+        apps = []
+        for app_file in file_tree.relative_runtime_apps:
+            app_details = AppDetails(file_tree.root.joinpath(app_file.path))
+            apps.append(app_details)
+        (
+            unused_imports,
+            snsr_imports,
+            builtin_imports,
+            external_imports,
+        ) = SnsrDeviceSnapshot._get_imports(file_tree, board_id)
+        required = CircupTool.query_required_modules(circuitpy_version, external_imports)
+        installed = CircupTool.query_installed_modules(folder)
+
+        return cls(
+            board_id=board_id,
+            circuitpython=circuitpy_version,
+            builtin_imports=frozenset(builtin_imports),
+            snsr_runtime=Version(notice.version),
+            snsr_timestamp=notice.timestamp,
+            snsr_commit=notice.commit,
+            apps=tuple(apps),
+            files=file_tree,
+            snsr_imports=frozenset(snsr_imports),
+            external_imports=frozenset(external_imports),
+            unused_imports=tuple(unused_imports),
+            required_modules=tuple(required),
+            installed_modules=tuple(installed),
+        )
+
+    @staticmethod
+    def _get_device_platform(main_folder: pathlib.Path) -> tuple[str, Version]:
+        """Return the device's board_id and CircuitPython version."""
+        boot_out_file = main_folder.joinpath(SnsrPath.boot_out_txt)
+        if boot_out_file.exists():
+            return CircupTool.get_circuitpython_platform(boot_out_file)
+        return _FALLBACK_QTPY_BOARD_ID, _FALLBACK_CPY_VERSION
+
+    @staticmethod
+    def _get_device_notice(main_folder: pathlib.Path, for_this_runtime: bool) -> SnsrNotice:
+        """Return the device's SnsrNotice information."""
+        if for_this_runtime:
+            return SnsrNotice.get_package_notice_info(allow_dev_version=True)
+        notice_file = main_folder.joinpath(SnsrPath.notice_toml)
+        if notice_file.exists():
+            return CircupTool.get_snsr_notice(notice_file)
+        return SnsrNotice.unknown()
+
+    @staticmethod
+    def _get_imports(
+        device_files: SnsrFileTree,
+        device_id: str,
+    ) -> tuple[Sequence[findimports.ImportInfo], Sequence[str], Sequence[str], Sequence[str]]:
+        """Scan the device_files for Python dependencies and return a tuple of (unused import references, runtime import names, builtin import names, and CircuitPython import names)."""
+        rooted_snsr_runtime_files = [
+            device_files.root.joinpath(entry.path)
+            for entry in device_files.relative_tree
+            if entry.path.is_relative_to(SnsrPath.root) or str(entry.path) == SnsrPath.code_py
+        ]
+        snsr_node_folders = [entry for entry in rooted_snsr_runtime_files if entry.is_dir()]
+        snsr_node_files = [entry for entry in rooted_snsr_runtime_files if entry.suffix == ".py"]
+        internal_folders = [folder.name for folder in snsr_node_folders]
+        internal_files = [file.stem for file in snsr_node_files]
+        internal_imports: set[str] = {*internal_folders, *internal_files}
+        internal_imports.discard("__init__")
+
+        builtin_circuitpython_imports = _load_builtin_import_data()
+        stdlib_import_names = builtin_circuitpython_imports["standard_library"]
+        builtin_import_names = builtin_circuitpython_imports[device_id]
+        all_builtin_circuitpython_imports: set[str] = {*stdlib_import_names, *builtin_import_names}
+
+        import_usage = ImportUsage.from_files(rooted_snsr_runtime_files)
+        all_base_imports = import_usage.base
+
+        external_import_names = set(all_base_imports) - internal_imports - all_builtin_circuitpython_imports
+        external_imports = tuple(sorted(external_import_names))
+
+        if all_base_imports:
+
+            def get_import_mark(import_name: str) -> str:
+                if import_name in external_import_names:
+                    return "*"
+                if import_name in builtin_circuitpython_imports:
+                    return "."
+                return "~"
+
+            grouped_by_source = sorted(
+                f"{get_import_mark(base_import):>2} {base_import}" for base_import in all_base_imports
+            )
+            logger.debug(f"Found {len(all_base_imports)} total import references   * external   . builtin   ~ internal")
+            for line in grouped_by_source:
+                logger.debug(line)
+
+        return (
+            import_usage.unused,
+            sorted(internal_imports),
+            sorted(all_builtin_circuitpython_imports),
+            external_imports,
+        )
 
 
-def handle_equip(behavior: Behavior, root: pathlib.Path | None, secrets: str) -> None:  # noqa: PLR0912 PLR0915 -- we need many lines and statements to handle CLI commands
+@dataclass(frozen=True, kw_only=True)
+class ModuleComparison:
+    """Represents the differences between two collections of CircuitPython modules."""
+
+    same: Sequence[ModuleWithVersion]
+    """Modules with the same version in both collections."""
+
+    newer: Sequence[ModuleWithVersion]
+    """Modules in the first collection with higher versions than those in the second collection."""
+
+    older: Sequence[ModuleWithVersion]
+    """Modules in the first collection with lower versions than those in the second collection."""
+
+    group1_only: Sequence[ModuleWithVersion]
+    """Modules only in the first collection."""
+
+    group2_only: Sequence[ModuleWithVersion]
+    """Modules only in the second collection."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class FileTreeComparison:
+    """Groups files by their ages when comparing two file trees."""
+
+    same: Sequence[FileWithAge]
+    """Files with the same age in both trees."""
+
+    newer: Sequence[FileWithAge]
+    """Newer files in tree1."""
+
+    older: Sequence[FileWithAge]
+    """Older files in tree1."""
+
+    tree1_only: Sequence[FileWithAge]
+    """Files only in tree1."""
+
+    tree2_only: Sequence[FileWithAge]
+    """Files only in tree2."""
+
+
+@dataclass(frozen=True, kw_only=True)
+class SnsrDeviceComparison:
+    """Represents the differences between two SnsrDeviceSnapshots."""
+
+    runtime: SnsrDeviceSnapshot
+    """This package's sensor_node snapshot."""
+
+    device: SnsrDeviceSnapshot
+    """The device's sensor_node snapshot used in the comparison."""
+
+    file_changes: FileTreeComparison
+    """The differences between their file trees."""
+
+    required_modules_changes: ModuleComparison
+    """The differences between their required CircuitPython modules."""
+
+    installed_modules_changes: ModuleComparison
+    """The differences between their installed CircuitPython modules."""
+
+    @functools.cached_property
+    def runtime_is_newer(self) -> bool:
+        """True when this package's SnsrDeviceSnapshot is newer than the device's."""
+        if self.runtime.snsr_runtime > self.device.snsr_runtime:
+            return True
+        return self.runtime.snsr_timestamp > self.device.snsr_timestamp
+
+    @functools.cached_property
+    def runtime_versions_match(self) -> bool:
+        """True when the runtime versions of both this package and the sensor_node match."""
+        return (
+            self.runtime.snsr_runtime == self.device.snsr_runtime
+            and self.runtime.snsr_timestamp == self.device.snsr_timestamp
+        )
+
+    @functools.cached_property
+    def runtime_age_days(self) -> float:
+        """The age difference in days between this package's runtime and the device's runtime."""
+        age_difference = (self.runtime.snsr_timestamp - self.device.snsr_timestamp).total_seconds() / (3600.0 * 24)
+        return age_difference
+
+    @functools.cached_property
+    def apps_in_runtime(self) -> Sequence[str]:
+        """The names of the apps in this package's runtime."""
+        runtime_apps = [app.path.stem for app in self.runtime.files.relative_runtime_apps]
+        return runtime_apps
+
+    @functools.cached_property
+    def apps_in_device(self) -> Sequence[str]:
+        """The names of the apps in the device."""
+        device_apps = [app.path.stem for app in self.device.files.relative_runtime_apps]
+        return device_apps
+
+    @functools.cached_property
+    def missing_apps(self) -> Sequence[str]:
+        """The names of the apps that are missing on the device."""
+        runtime_only_apps = sorted(set(self.apps_in_runtime) - set(self.apps_in_device))
+        return runtime_only_apps
+
+    @functools.cached_property
+    def missing_files(self) -> Sequence[pathlib.Path]:
+        """The runtime files that are missing on the device."""
+        missing_runtime_files = [
+            file.path
+            for file in self.file_changes.tree1_only
+            if not (file.path.is_relative_to("lib") or file.path.is_relative_to(SnsrPath.apps))
+        ]
+        return missing_runtime_files
+
+    @functools.cached_property
+    def missing_modules(self) -> Sequence[str]:
+        """The dependencies that are missing on the device."""
+        required_runtime_module_names = {m.name for m in self.runtime.required_modules}
+        required_device_module_names = {m.name for m in self.device.required_modules}
+        already_installed_modules = {m.name for m in self.device.installed_modules}
+        missing_dependencies = tuple(
+            sorted(required_runtime_module_names.union(required_device_module_names) - already_installed_modules)
+        )
+        return missing_dependencies
+
+    @classmethod
+    def between_runtime_and_device(
+        cls,
+        runtime: SnsrDeviceSnapshot,
+        device: SnsrDeviceSnapshot,
+    ) -> "SnsrDeviceComparison":
+        """Compare the two SnsrDeviceSnapshots and return a new SnsrDeviceComparison."""
+        file_report = _compare_snsr_file_trees(runtime.files, device.files)
+        required_report = _compare_modules(runtime.required_modules, device.required_modules)
+        installed_report = _compare_modules(runtime.installed_modules, device.installed_modules)
+        return cls(
+            runtime=runtime,
+            device=device,
+            file_changes=file_report,
+            required_modules_changes=required_report,
+            installed_modules_changes=installed_report,
+        )
+
+
+@dataclass(frozen=True, kw_only=True)
+class EquipSnsrPlan:
+    """Represents the details and requirements for installing components on a QT Py Datalogger sensor_node."""
+
+    class Goal(StrEnum):
+        """Describes the goal for the EquipSnsrPlan's outcome."""
+
+        Force = "Force"
+        Install = "Install"
+        Repair = "Repair"
+        SkipFiles = "SkipFiles"
+        SkipVersion = "SkipVersion"
+        UpgradeFiles = "UpgradeFiles"
+        UpgradeSnapshot = "UpgradeSnapshot"
+        UpgradeVersion = "UpgradeVersion"
+
+    goal: Goal
+    """The goal for the plan's outcome."""
+
+    runtime_root: pathlib.Path
+    """The path to the root of this package's runtime."""
+
+    old_runtime_version: Version
+    """The version of runtime on the device before installing."""
+
+    new_runtime_version: Version
+    """The version of runtime on the device after installing."""
+
+    runtime_age_days: float
+    """The age difference in days between the device's runtime and this package's runtime."""
+
+    device_root: pathlib.Path
+    """The path to the root of the device."""
+
+    device_board_id: str
+    """The CircuitPython board ID of the device."""
+
+    device_circuitpython: Version
+    """The version of the CircuitPython on the device."""
+
+    copy_files: Sequence[pathlib.Path]
+    """The runtime files to copy onto the device."""
+
+    delete_files: Sequence[pathlib.Path]
+    """The runtime files to delete from the device."""
+
+    copy_apps: Sequence[pathlib.Path]
+    """The app files to copy onto the device."""
+
+    modules_to_install: Sequence[str]
+    """The CircuitPython modules to install on the device."""
+
+    @functools.cached_property
+    def is_empty(self) -> bool:
+        """True when the plan has nothing to install."""
+        return (
+            self.goal in (EquipSnsrPlan.Goal.SkipFiles, EquipSnsrPlan.Goal.SkipVersion) and not self.modules_to_install
+        )
+
+
+class CircupTool:
+    """A facade for accessing CircuitPython devices and using the circup tool."""
+
+    @staticmethod
+    def get_circuitpython_platform(boot_out_file: pathlib.Path) -> tuple[str, Version]:
+        """Return the device's board ID and CircuitPython version."""
+        lines = boot_out_file.read_text().splitlines()
+        logger.debug(f"Parsed '{boot_out_file}' with contents")
+        for line in lines:
+            logger.debug(line)
+        circuitpy_version_line = lines[0]
+        circuitpy_version_string = circuitpy_version_line.split(";")[0].split(" ")[-3]
+        circuitpy_version = Version(circuitpy_version_string)
+        board_id_line = lines[1]
+        board_id = board_id_line.split(":")[-1]
+        return board_id, circuitpy_version
+
+    @staticmethod
+    def get_snsr_notice(notice_file: pathlib.Path) -> SnsrNotice:
+        """Return the SnsrNotice from the device."""
+        file_contents = notice_file.read_text()
+        logger.debug(f"Parsed '{notice_file}' with contents")
+        for line in file_contents.splitlines():
+            logger.debug(line)
+        snsr_notice_toml = toml.loads(file_contents)
+        snsr_notice = SnsrNotice(**snsr_notice_toml)
+        return snsr_notice
+
+    @staticmethod
+    @functools.cache
+    def load_circuitpython_module_catalog(circuitpy_version: Version) -> CircupModuleCatalog:
+        """Load the available CircuitPython modules for the specified circuitpy_version."""
+        # Adapted from circup.commands.install()
+        bundle_tags = None
+        device_platform = f"{circuitpy_version.major}mpy"
+        available_modules = circup.get_bundle_versions(
+            circup.get_bundles_list(bundle_tags, device_platform),
+            avoid_download=True,
+        )
+        if not available_modules:
+            available_modules = circup.get_bundle_versions(
+                circup.get_bundles_list(bundle_tags, device_platform),
+            )
+        module_catalog = {
+            str(module).replace(".py", "").lower(): metadata
+            for module, metadata in sorted(available_modules.items())
+            if isinstance(metadata, LazyMetadata)
+        }
+        return module_catalog  # ty: ignore[unsound-return-statement] -- the 'if isinstance' is sufficient
+
+    @staticmethod
+    def query_required_modules(
+        circuitpy_version: Version,
+        circuitpython_imports: Sequence[str],
+    ) -> Sequence[ModuleWithVersion]:
+        """Use circup to identify the CircuitPython modules that support the specified circuitpython_imports on circuitpy_version."""
+        module_catalog = CircupTool.load_circuitpython_module_catalog(circuitpy_version)
+        requested_installs = set(circuitpython_imports)
+        all_installs = circup.get_dependencies(requested_installs, mod_names=module_catalog)
+        modules_with_version = {
+            ModuleWithVersion(mod_name, Version(module_catalog[mod_name].deferred_data["__version__"]))
+            for mod_name in all_installs
+        }
+        return tuple(sorted(modules_with_version))
+
+    @staticmethod
+    def query_installed_modules(main_folder: pathlib.Path) -> Sequence[ModuleWithVersion]:
+        """Use circup to detect the installed CircuitPython modules and versions found in the specified folder."""
+        circup_backend = circup.DiskBackend(str(main_folder), circup_logger)
+        installed_cp_modules = circup_backend.get_device_versions()
+        modules_with_version = tuple(
+            ModuleWithVersion(name, Version(details["__version__"]))
+            for name, details in sorted(installed_cp_modules.items())
+        )
+        return modules_with_version
+
+    @staticmethod
+    def equip_modules(
+        device_root: pathlib.Path,
+        device_board_id: str,
+        device_circuitpython: Version,
+        modules_to_install: Sequence[str],
+    ) -> int:
+        """Use circup to install the specified CircuitPython modules."""
+        if not modules_to_install:
+            return ExitCode.Success
+
+        circup_install_command = [
+            "circup",
+            "--path",
+            str(device_root),
+            "--board-id",
+            device_board_id,
+            "--cpy-version",
+            str(device_circuitpython),
+            "install",
+            "--upgrade",
+            *modules_to_install,
+        ]
+        logger.info(f"  Invoking '{' '.join(circup_install_command)}'")
+        logger.info("")
+        result = subprocess.run(circup_install_command, stdout=sys.stdout, stderr=subprocess.STDOUT, check=False)  # noqa: S603 -- command is well-formed and user cannot execute arbitrary code
+        return_code = result.returncode
+        return return_code
+
     """Handle the equip CLI command."""
     logger.debug(f"behavior: '{behavior}', root: '{root}', secrets: '{secrets}'")
 
