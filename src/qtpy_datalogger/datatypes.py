@@ -111,6 +111,16 @@ class SnsrNotice(NamedTuple):
     commit: str
     timestamp: dt.datetime
 
+    @staticmethod
+    def unknown() -> "SnsrNotice":
+        """Return a new SnsrNotice that represents an unknown device."""
+        return SnsrNotice(
+            comment="(uninitialized)",
+            version=str(UNKNOWN_VERSION),
+            commit="(none)",
+            timestamp=dt.datetime.fromisoformat("0001-01-01T01:01:01+00:00"),
+        )
+
     @classmethod
     def get_package_notice_info(cls, allow_dev_version: bool) -> "SnsrNotice":
         """Detect and generate the information used in the notice.toml file."""
