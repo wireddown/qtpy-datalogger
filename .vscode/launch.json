@@ -5,20 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Attach using Process Id",
-            "type": "debugpy",
-            "request": "attach",
-            "processId": "${command:pickProcess}"
-        },
-        {
-            "name": "Active File",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
             // https://code.visualstudio.com/docs/python/debugging#_set-configuration-options
             "name": "qtpy_datalogger [with args]",
             "type": "debugpy",
@@ -41,6 +27,28 @@
             "autoReload": {
                 "enable": false
             },
+        },
+        {
+            "name": "Active File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "python inline",
+            "type": "debugpy",
+            "request": "launch",
+            "code": "import qtpy_datalogger.equip; qtpy_datalogger.equip._handle_list_builtin_modules(equip._FALLBACK_QTPY_BOARD_ID)",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Attach using Process Id",
+            "type": "debugpy",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
         },
     ]
 }
