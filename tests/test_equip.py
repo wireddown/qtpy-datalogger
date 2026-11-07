@@ -292,32 +292,141 @@ def merge_secrets(text: str, default: str, hide_input: bool, type: type, show_de
     return ""
 
 
-def test_describe(tmp_path: pathlib.Path) -> None:
+def test_describe(tmp_path: pathlib.Path, caplog: pytest.LogCaptureFixture) -> None:
     """Does it exit successfully after describing?"""
-    with pytest.raises(SystemExit) as excinfo:
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
         equip.handle_equip(
-            behavior=equip.Behavior.Describe, root=tmp_path, secrets=equip.SecretsBehavior.Noop.as_full_name()
+            behavior=equip.Behavior.Describe,
+            with_apps=(),
+            root=tmp_path,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
         )
 
-    exception = excinfo.value
-    exception_type = type(exception)
-    assert exception_type is SystemExit
-    assert exception.code == ExitCode.Success
+    assert_safe_exit(excinfo)
+    assert "QT Py Datalogger Sensor Node" in caplog.text
+    assert "echo" in caplog.text
+    assert "qtpycmd" in caplog.text
+    assert "__init__" not in caplog.text
+    assert "adafruit_ticks" in caplog.text
 
 
-def test_compare(tmp_path: pathlib.Path) -> None:
+def test_snsr_runtime_fixture(reference_snsr: pathlib.Path) -> None:
+    """Does the fixture successfully create the cloneable sensor node runtime?"""
+    assert reference_snsr.is_dir()
+    assert reference_snsr.joinpath("lib").exists()
+
+
+def test_compare(reference_snsr: pathlib.Path, tmp_path: pathlib.Path, caplog: pytest.LogCaptureFixture) -> None:
     """Does it exit successfully after comparing?"""
-    create_test_device_folder(tmp_path)
+    clone_test_device_into_folder(reference_snsr, tmp_path)
 
-    with pytest.raises(SystemExit) as excinfo:
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
         equip.handle_equip(
-            behavior=equip.Behavior.Compare, root=tmp_path, secrets=equip.SecretsBehavior.Noop.as_full_name()
+            behavior=equip.Behavior.Compare,
+            with_apps=(),
+            root=tmp_path,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
         )
 
-    exception = excinfo.value
-    exception_type = type(exception)
-    assert exception_type is SystemExit
-    assert exception.code == ExitCode.Success
+    assert_safe_exit(excinfo)
+    assert_compare_snsr_node_succeeded(caplog)
+    assert "The sensor_node matches this package's version" in caplog.text
+
+
+def test_compare_detects_missing_snsr_file(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it report that a snsr runtime file is missing when comparing?"""
+    clone_test_device_into_folder(reference_snsr, tmp_path)
+    snsr_file_path = tmp_path.joinpath(SnsrPath.root, "core.py")
+    snsr_file_path.unlink()
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Compare,
+            with_apps=(),
+            root=tmp_path,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert_compare_snsr_node_succeeded(caplog)
+    assert "The sensor_node is MISSING runtime files" in caplog.text
+    assert f"  ! MISSING {snsr_file_path.relative_to(tmp_path)!s}" in caplog.text
+
+
+def test_compare_detects_missing_builtin_app(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it report that a builtin app is missing when comparing?"""
+    clone_test_device_into_folder(reference_snsr, tmp_path)
+    qtpycmd_app_path = tmp_path.joinpath(SnsrPath.apps, "qtpycmd.py")
+    qtpycmd_app_path.unlink()
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Compare,
+            with_apps=(),
+            root=tmp_path,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert_compare_snsr_node_succeeded(caplog)
+    assert "The sensor_node is MISSING builtin apps" in caplog.text
+    assert f"  ! MISSING {qtpycmd_app_path.stem}" in caplog.text
+
+
+def test_compare_detects_missing_circuitpython_module(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it report that a required CircuitPython module is missing when comparing?"""
+    clone_test_device_into_folder(reference_snsr, tmp_path)
+    adafruit_ticks_path = tmp_path.joinpath("lib", "adafruit_ticks.mpy")
+    adafruit_ticks_path.unlink()
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Compare,
+            with_apps=(),
+            root=tmp_path,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert_compare_snsr_node_succeeded(caplog)
+    assert "The sensor_node is MISSING CircuitPython modules" in caplog.text
+    assert f"  ! MISSING {adafruit_ticks_path.stem}" in caplog.text
+
+
+def test_compare_detects_user_app(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it list a pre-installed user app when comparing without user apps?"""
+    test_device_folder, unrelated_app, existing_app = prepare_initialized_device_with_options(reference_snsr, tmp_path)
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Compare,
+            with_apps=(),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert_compare_snsr_node_succeeded(caplog)
+    assert_device_matches_self(reference_snsr, test_device_folder, extra_expected_apps=[unrelated_app, existing_app])
+    assert re.search(f"{existing_app.stem}\\s+\\(none\\)", caplog.text)
+    assert re.search(f"{unrelated_app.stem}\\s+\\(none\\)", caplog.text)
+    assert "The sensor_node matches this package's version" in caplog.text
 
 
 def test_cannot_install_with_mqtt(monkeypatch: pytest.MonkeyPatch) -> None:
