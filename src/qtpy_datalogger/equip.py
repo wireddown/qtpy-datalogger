@@ -1043,32 +1043,148 @@ def _print_snapshot_report(comparison: SnsrDeviceComparison) -> None:  # noqa: P
         for app in device.files.relative_runtime_apps:
             logger.debug(f" * {app.path.stem}")
 
+
+def _make_equip_plan(behavior: Behavior, comparison: SnsrDeviceComparison, user_apps: AppImportUsage) -> EquipSnsrPlan:
+    """Return a plan that updates the target sensor_node device to support the runtime and user_apps."""
+    internal_imports = comparison.runtime.snsr_imports
+    builtin_imports = comparison.runtime.builtin_imports
+    installed_modules = [m.name for m in comparison.device.installed_modules]
+    required_app_modules = set(user_apps.imports.base) - internal_imports - builtin_imports - set(installed_modules)
+    app_freshness = _separate_apps_by_freshness(user_apps.files, comparison.device.files.relative_runtime_apps)
+
+    # Delete paths are extra files in the device's runtime that are not in the package's runtime iow: comparison.file_changes.tree2_only
+    # NB: There is no way for the runtime to delete **apps** with this approach. Instead, they must be removed by code because
+    # we treat unknown apps as user apps.
+    copy_runtime_files: set[pathlib.Path] = set()
+    copy_user_apps: set[pathlib.Path] = set()
+    install_modules: set[str] = set()
+    delete_runtime_files: set[pathlib.Path] = set()
+    if behavior == Behavior.Force:
+        copy_runtime_files.update(entry.path for entry in comparison.runtime.files.relative_tree)
+        copy_user_apps.update(user_apps.files)
+        install_modules.update(m.name for m in comparison.runtime.required_modules)
+        install_modules.update(m.name for m in comparison.device.required_modules)
+        install_modules.update(user_apps.imports.base)
+    else:
+        # Create a baseline profile that repairs missing files, adds new files, and updates newer files
+        copy_runtime_files.update(entry.path for entry in comparison.file_changes.tree1_only)
+        copy_runtime_files.update(entry.path for entry in comparison.file_changes.newer)
+        copy_runtime_files.update(comparison.missing_files)
+        copy_user_apps.update(app.path for app in app_freshness.tree1_only)
+        copy_user_apps.update(app.path for app in app_freshness.newer)
+        install_modules.update(comparison.missing_modules)
+        install_modules.update(required_app_modules)
+
+    if behavior == Behavior.Force:
+        runtime_goal = EquipSnsrPlan.Goal.Force
+    elif comparison.device.is_sensor_node:
+        if comparison.runtime.snsr_runtime < comparison.device.snsr_runtime:
+            runtime_goal = EquipSnsrPlan.Goal.SkipVersion
+        elif comparison.runtime.snsr_runtime > comparison.device.snsr_runtime:
+            runtime_goal = EquipSnsrPlan.Goal.UpgradeVersion
+            # Refresh the runtime files for new versions
+            copy_runtime_files.update(entry.path for entry in comparison.runtime.files.relative_tree)
+        elif comparison.runtime.snsr_timestamp > comparison.device.snsr_timestamp:
+            runtime_goal = EquipSnsrPlan.Goal.UpgradeSnapshot
+        elif comparison.missing_files or comparison.missing_apps or comparison.missing_modules:
+            runtime_goal = EquipSnsrPlan.Goal.Repair
+        elif copy_runtime_files or copy_user_apps or install_modules:
+            runtime_goal = EquipSnsrPlan.Goal.UpgradeFiles
+        else:
+            runtime_goal = EquipSnsrPlan.Goal.SkipFiles
+    else:
+        runtime_goal = EquipSnsrPlan.Goal.Install
+
+    return EquipSnsrPlan(
+        goal=runtime_goal,
+        runtime_root=comparison.runtime.root,
+        old_runtime_version=comparison.device.snsr_runtime,
+        new_runtime_version=comparison.runtime.snsr_runtime,
+        runtime_age_days=comparison.runtime_age_days,
+        device_root=comparison.device.root,
+        device_board_id=comparison.device.board_id,
+        device_circuitpython=comparison.device.circuitpython,
+        copy_files=tuple(sorted(copy_runtime_files)),
+        delete_files=tuple(sorted(delete_runtime_files)),
+        copy_apps=tuple(sorted(copy_user_apps)),
+        modules_to_install=tuple(sorted(install_modules)),
+    )
+
+
+def _execute_equip_plan(plan: EquipSnsrPlan) -> int:  # noqa: PLR0912, PLR0915 -- allow oversized function because it executes the procedure that changes the contents of a device
+    """Use the specified plan to equip the sensor_node."""
+    if plan.is_empty:
+        return ExitCode.Success
+
+    if plan.goal == EquipSnsrPlan.Goal.Install:
+        logger.info("Initializing new QT Py Datalogger Sensor Node")
+        logger.info(f"  Location:  {plan.device_root!s}")
+        logger.info(f"  Version :  {plan.new_runtime_version!s}")
+    elif plan.goal == EquipSnsrPlan.Goal.Repair:
+        logger.info("Repairing missing sensor_node runtime components")
+    elif plan.goal == EquipSnsrPlan.Goal.UpgradeVersion:
+        logger.info("Upgrading version")
+        logger.info(f"  From  {plan.old_runtime_version!s}  to  {plan.new_runtime_version!s}")
+    elif plan.goal == EquipSnsrPlan.Goal.UpgradeFiles:
+        logger.info("Applying updates")
+    elif plan.goal == EquipSnsrPlan.Goal.UpgradeSnapshot:
+        logger.info("Upgrading snapshot")
+        logger.info(
+            f"  Both are version  {plan.new_runtime_version}  but the device is  {abs(plan.runtime_age_days):.1f}  days older"
+        )
+    elif plan.goal == EquipSnsrPlan.Goal.Force:
+        logger.info("Forcing installation")
+    else:
+        raise ValueError(plan.goal)
+
+    if plan.copy_files or plan.modules_to_install:
+        logger.info("  Installing sensor_node runtime components")
+
+    if plan.copy_files:
+        for file in plan.copy_files:
+            source = plan.runtime_root.joinpath(file)
+            if source.is_dir():
+                continue
+            destination = plan.device_root.joinpath(file)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            if plan.goal == EquipSnsrPlan.Goal.UpgradeFiles:
+                logger.info(f"  * Newer:  {file!s}")
+            logger.debug(f"- {file!s:<30}  :::  {source!s}  -->  {destination!s}")
+            shutil.copy2(src=source, dst=destination)
+
+    if plan.copy_files or plan.goal == EquipSnsrPlan.Goal.UpgradeSnapshot:
+        notice_file = plan.device_root.joinpath(SnsrPath.notice_toml)
+        notice_contents = _create_notice_file_contents(allow_dev_version=True)
+        notice_file.write_text(notice_contents)
+        logger.debug(f"Wrote {notice_file!s}")
+
+    if plan.copy_apps:
+        logger.info("Installing apps")
+        for user_app in plan.copy_apps:
+            destination = plan.device_root.joinpath(SnsrPath.apps, user_app.name)
+            logger.info(f"  * {user_app.stem}")
+            logger.debug(f"- {user_app.name:<15}  :::  {user_app!s}  -->  {destination!s}")
+            shutil.copy2(src=user_app, dst=destination)
+
     return_code = ExitCode.Success
-    if circup_packages:
-        circup_install_command = [
-            "circup",
-            "--path",
-            str(device_main_folder),
-            "--board-id",
-            device_bundle.board_id,
-            "--cpy-version",
-            device_bundle.circuitpy_version,
-            "install",
-            "--upgrade",
-        ]
-        circup_install_command.extend(circup_packages)
-        logger.info("  Installing external dependencies with circup")
-        logger.info(f"  Invoking '{' '.join(circup_install_command)}'")
+    if plan.modules_to_install:
+        logger.info("Installing external dependencies with circup")
+        return_code = CircupTool.equip_modules(
+            plan.device_root,
+            plan.device_board_id,
+            plan.device_circuitpython,
+            plan.modules_to_install,
+        )
         logger.info("")
-        result = subprocess.run(circup_install_command, stdout=sys.stdout, stderr=subprocess.STDOUT, check=False)  # noqa: S603 -- command is well-formed and user cannot execute arbitrary code
-        logger.info("")
-        return_code = result.returncode
+    else:
+        logger.info("Skipping circup: external dependencies already installed")
 
     if return_code == ExitCode.Success:
-        device_main_folder.joinpath("code.py").touch()  # Restart the node
-        logger.info("Installation complete")
+        plan.device_root.joinpath(SnsrPath.code_py).touch()  # Restart the node
+        logger.info(click.style("Installation complete", "green"))
     else:
-        logger.error(f"circup exited with code '{return_code}'")
+        logger.error(f"circup exited with code '{click.style(return_code, 'red')}'")
+    return return_code
 
 
 def _validate_user_apps(candidates: Sequence[pathlib.Path], runtime_snapshot: SnsrDeviceSnapshot) -> AppImportUsage:
