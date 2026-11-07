@@ -14,6 +14,9 @@ from collections.abc import Generator
 from typing import Any, NamedTuple
 
 import toml
+from packaging.version import Version
+
+UNKNOWN_VERSION = Version("0")
 
 
 class Links(enum.StrEnum):
