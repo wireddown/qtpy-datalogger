@@ -812,262 +812,237 @@ class CircupTool:
             _update_secrets(secrets_file, device_bundle.device_files[0])
             logger.info("Secrets updated")
 
-    if should_install:
-        _equip_snsr_node(behavior, comparison_information)
-    else:
-        logger.info(f"Skipping installation: {skip_reason}")
 
-
-def _detect_snsr_bundle(main_folder: pathlib.Path) -> SnsrNodeBundle:
-    """Build and return a SnsrNodeBundle by probing the specified folder."""
-    # Begin with default sentinel values
-    snsr_notice = SnsrNotice(
-        comment="(uninitialized)",
-        version="(missing)",
-        commit="(missing)",
-        timestamp=dt.datetime.fromisoformat("0001-01-01T01:01:01+00:00"),
-    )
-    device_files = []
-    circuitpy_version = "9.2.1"
-    board_id = "adafruit_qtpy_esp32s3_nopsram"
-    circuitpy_dependencies = []
-    installed_circuitpy_modules = []
-
-    # Are we detecting a device or ourselves?
-    this_file = pathlib.Path(__file__)
-    this_folder_parent = this_file.parent
-    main_folder_parent = main_folder.parent
-    detecting_self = this_folder_parent == main_folder_parent
-
-    notice_file = main_folder.joinpath(SnsrPath.notice)
-
-    detect_message = f"Probing for sensor_node at '{main_folder}'"
-    if detecting_self:
-        snsr_notice = SnsrNotice.get_package_notice_info(allow_dev_version=True)
-        detect_message = ""
-    elif notice_file.exists():
-        file_contents = notice_file.read_text()
-        snsr_notice_toml = toml.loads(file_contents)
-        snsr_notice = SnsrNotice(**snsr_notice_toml)
-
-    # We only want to print information about the device, not ourselves
-    should_log_info_messages = len(detect_message) > 0
-    if should_log_info_messages or logger.isEnabledFor(logging.DEBUG):
-        logger.info(detect_message)
-        logger.info(f" - version    {snsr_notice.version}")
-        logger.info(f" - timestamp  {snsr_notice.timestamp.strftime('%Y.%m.%d  %H:%M:%S')}")
-
-    device_files = _recursive_folder_scan(main_folder)
-
-    boot_out_file = main_folder.joinpath("boot_out.txt")
-    if boot_out_file.exists():
-        lines = boot_out_file.read_text().splitlines()
-        logger.debug(f"Parsing '{boot_out_file}' with contents")
-        _ = [logger.debug(line) for line in lines]
-        circuitpy_version_line = lines[0]
-        board_id_line = lines[1]
-        circuitpy_version = circuitpy_version_line.split(";")[0].split(" ")[-3]
-        board_id = board_id_line.split(":")[-1]
-
-    circuitpy_dependencies = _get_circuitpython_dependencies(device_files, board_id, should_log_info_messages)
-    installed_circuitpy_modules = _query_modules_from_circup(main_folder, should_log_info_messages)
-
-    snsr_bundle = SnsrNodeBundle(
-        snsr_notice,
-        device_files,
-        circuitpy_version,
-        board_id,
-        circuitpy_dependencies,
-        installed_circuitpy_modules,
-    )
-    return snsr_bundle
-
-
-def _format_bundle_description(bundle: SnsrNodeBundle) -> list[str]:
-    """Format and return a list of lines that describes this package's sensor_node bundle."""
+def _print_runtime_description(device: SnsrDeviceSnapshot) -> None:
+    """Print a description of this package's sensor_node runtime."""
+    import_column_width = 30
+    package_name_width = 44
     report_contents = textwrap.dedent(
-        f"""
-        QT Py Data Logger Sensor Node
-          Version:    {bundle.notice.version}  ({bundle.notice.commit})
-          Timestamp:  {bundle.notice.timestamp.strftime("%Y.%m.%d  %H:%M:%S")}
-          Homepage:   {Links.Homepage}
-
-        Dependencies
-          CircuitPython module           PC package name
-          ====================   -{"-" * 31}-
+        f"""\
+        QT Py Datalogger Sensor Node
+          Version                {device.snsr_runtime}  ({device.snsr_commit})
+          Timestamp              {device.snsr_timestamp.strftime("%Y.%m.%d  %H:%M:%S")}
+          Homepage               {Links.Homepage}
         """
     ).splitlines()
-    for circuitpy_library in bundle.circuitpy_dependencies:
-        library_stub = "adafruit-circuitpython-{}".format(circuitpy_library.replace("adafruit_", ""))
-        report_contents.append(f"  {circuitpy_library:>19}    {library_stub:>32}")
-    return report_contents
+    report_contents.append("Apps")
+    for app in device.apps:
+        report_contents.append(f"  {app.name:<20}   {app.description}")
+    report_contents.append("Dependencies")
+    report_contents.append(f"  CircuitPython import {' ' * (import_column_width - 20)}  PyPI package name")
+    report_contents.append(f"  {'=' * import_column_width}   {'-' * package_name_width}")
+    for circuitpy_import in [m.name for m in device.required_modules]:
+        package_name = "adafruit-circuitpython-{}".format(circuitpy_import.replace("adafruit_", "").replace("_", ""))
+        report_contents.append(f"  {circuitpy_import:>{import_column_width}}   {package_name:<{package_name_width}}")
+    for line in report_contents:
+        logger.info(line)
 
 
-def _format_bundle_comparison(
-    comparison_information: dict[str, SnsrNodeBundle],
-    file_freshness: dict[pathlib.Path, str],
-) -> list[str]:
-    """Format and return a list of lines that compares the specified sensor_node bundles."""
-    device_bundle = comparison_information["device bundle"]
-    this_bundle = comparison_information["runtime bundle"]
+def _print_snapshot_comparison(report: SnsrDeviceComparison) -> None:  # noqa: PLR0912, PLR0915 -- allow oversized function because it prints a report to the console
+    """Print a summary that compares the specified sensor_node snapshots."""
+    self_is_newer = report.runtime_is_newer
+    self_is_older = not (report.runtime_versions_match or report.runtime_is_newer)
+    self_version = report.runtime.snsr_runtime
+    self_timestamp = report.runtime.snsr_timestamp
+    device_version = report.device.snsr_runtime
+    device_timestamp = report.device.snsr_timestamp
+    newer_files = [file.path for file in report.file_changes.newer]
+    # Ignore report.file_changes.tree1_only because these are reclassified as missing
+    apps_in_both = sorted(set(report.apps_in_runtime).intersection(set(report.apps_in_device)))
+    custom_apps = sorted(set(report.apps_in_device) - set(report.apps_in_runtime))
+    missing_snsr_apps = report.missing_apps
+    missing_snsr_files = report.missing_files
+    missing_dependencies = report.missing_modules
 
+    extra_color_chars = 9
     newer_mark = "(newer)"
     older_mark = "       "
     same_mark = "(same) "
-    try:
-        device_version = packaging.version.Version(device_bundle.notice.version)
-    except packaging.version.InvalidVersion:
-        device_version = packaging.version.Version("0")
-    device_timestamp = device_bundle.notice.timestamp
-    self_version = packaging.version.Version(this_bundle.notice.version)
-    self_timestamp = this_bundle.notice.timestamp
-
-    self_is_newer = self_version > device_version
-    if self_version == device_version:
-        self_is_newer = self_timestamp > device_timestamp
-
     device_mark = older_mark if self_is_newer else newer_mark
     self_mark = newer_mark if self_is_newer else older_mark
-    if self_version == device_version and self_timestamp == device_timestamp:
-        device_mark = same_mark
-        self_mark = same_mark
+    if self_version == device_version:
+        if self_timestamp == device_timestamp:
+            device_mark = same_mark
+            self_mark = same_mark
+        elif self_is_newer:
+            self_mark = f" ({abs(report.runtime_age_days):.1f} days newer)"
+        else:
+            self_mark = f" ({abs(report.runtime_age_days):.1f} days older)"
+    assumed_mark = "" if report.device.is_circuitpython_device else click.style("(assumed)", "yellow")
+    extra_assumed_chars = 0 if report.device.is_circuitpython_device else extra_color_chars
+    circuitpy_version = f"{report.device.circuitpython!s}  {assumed_mark}"
+    board_id = f"{report.device.board_id}  {assumed_mark}"
 
-    report_contents = textwrap.dedent(
+    first_column_width = 40
+    location = str(report.device.files.root)
+    if len(location) > first_column_width:
+        location = f"...{location[(-first_column_width + 3) :]}"
+    report_header = textwrap.dedent(
         f"""
         Comparing sensor_node device with this package
-            Trait        Device {device_mark}                              Self {self_mark}
-         ===========  -{"-" * 40}-  ----------------------
-          Version      {device_version!s:<40}    {self_version!s}
-          Timestamp    {device_timestamp.strftime("%Y.%m.%d  %H:%M:%S"):<40}    {self_timestamp.strftime("%Y.%m.%d  %H:%M:%S")}
-          CircuitPy    {device_bundle.circuitpy_version:<40}    (PC host)
-          Board ID     {device_bundle.board_id:<40}    (PC host)
-          Location     {device_bundle.device_files[0]!s:<40}    (builtin)
+          Trait         Device {device_mark}                              Self {self_mark}
+          ===========   {"-" * first_column_width}    -------------------------
+          Version       {device_version!s:<{first_column_width}}    {self_version!s}
+          Timestamp     {device_timestamp.strftime("%Y.%m.%d  %H:%M:%S"):<{first_column_width}}    {self_timestamp.strftime("%Y.%m.%d  %H:%M:%S")}
+          CircuitPy     {circuitpy_version:<{first_column_width + extra_assumed_chars}}    (PC host)
+          Board ID      {board_id:<{first_column_width + extra_assumed_chars}}   (PC host)
+          Location      {location:<{first_column_width}}    (builtin)
         """
     )
-    report_lines = report_contents.splitlines()
+    header_lines = report_header.splitlines()
+    for line in header_lines:
+        logger.info(line)
 
-    newer_files = set()
-    for path, freshness in sorted(file_freshness.items()):
-        full_path = this_bundle.device_files[0].joinpath(path)
-        if not full_path.is_file():
-            continue
-        if freshness == "newer":
-            newer_files.add(path)
-            continue
-    if newer_files:
-        newer_file_lines = ["\n", "Newer files"]
-        newer_file_lines.extend([f"  * {file!s}\n" for file in sorted(newer_files)])
-        report_lines.extend(newer_file_lines)
-    return report_lines
+    logger.info("  Apps")
+    yellow_missing = click.style("MISSING", "yellow")
+    for app in apps_in_both:
+        logger.info(f"                {app:<{first_column_width}}    {app}")
+    for app in missing_snsr_apps:
+        logger.info(f"                {click.style(app, 'yellow'):<{first_column_width + extra_color_chars}}    {app}")
+    for app in custom_apps:
+        logger.info(f"                {app:<{first_column_width}}    (none)")
 
-
-def _should_install(behavior: Behavior, comparison_information: dict[str, SnsrNodeBundle]) -> tuple[bool, str]:
-    """
-    Use the comparison_information to decide whether to install or upgrade the sensor_node bundle.
-
-    Returns a tuple with
-    - a bool indicating whether the bundle should be installed
-    - a string message explaining why the bundle should not be installed
-    """
-    this_bundle = comparison_information["runtime bundle"]
-    device_bundle = comparison_information["device bundle"]
-
-    my_version = packaging.version.Version(this_bundle.notice.version)
-    should_install = False
-
-    # Do the first lines from the device's code.py and our code.py match?
-    device_main_folder = device_bundle.device_files[0]
-    device_codepy_file = device_main_folder.joinpath("code.py")
-    device_codepy_is_snsr_node = False
-    if device_codepy_file.exists():
-        device_first_line = device_codepy_file.read_text().splitlines()[0]
-        snsr_codepy_first_line = this_bundle.device_files[0].joinpath("code.py").read_text().splitlines()[0]
-        device_codepy_is_snsr_node = device_first_line == snsr_codepy_first_line
-
-    skip_reason = ""
-    if device_codepy_is_snsr_node:
-        device_snsr_version = packaging.version.Version(device_bundle.notice.version)
-        device_snsr_timestamp = device_bundle.notice.timestamp
-        my_timestamp = this_bundle.notice.timestamp
-
-        if behavior == Behavior.NewerFilesOnly:
-            logger.info("Forcing installation of newer files")
-            should_install = True
-        elif my_version > device_snsr_version:
-            logger.info("Upgrading version")
-            logger.info(f"  Device is version  '{device_snsr_version}'")
-            logger.info(f"  Runtime is version '{my_version}'")
-            should_install = True
-        elif my_timestamp > device_snsr_timestamp:
-            logger.info("Upgrading snapshot")
-            logger.info(f"  Device has timestamp  '{device_snsr_timestamp}'")
-            logger.info(f"  Runtime has timestamp '{my_timestamp}'")
-            should_install = True
-        elif behavior == Behavior.Force:
-            logger.info("Forcing installation")
-            should_install = True
-        else:
-            skip_reason = "not an upgrade, use '--force' to override"
-    else:
-        logger.info("Initializing new QT Py Sensor Node")
-        should_install = True
-
-    return should_install, skip_reason
-
-
-def _equip_snsr_node(behavior: Behavior, comparison_information: dict[str, SnsrNodeBundle]) -> None:
-    """Install the sensor_node bundle and its CircuitPython dependencies."""
-    device_bundle = comparison_information["device bundle"]
-    device_main_folder = device_bundle.device_files[0]
-    this_bundle = comparison_information["runtime bundle"]
-
-    logger.info(f"Installing sensor_node v{this_bundle.notice.version} to '{device_main_folder}'")
-    my_main_folder = this_bundle.device_files[0]
-    device_snsr_root = device_main_folder.joinpath(SnsrPath.root)
-
-    ignore_patterns = set(_EQUIP_IGNORE_PATTERNS)
-    if behavior == Behavior.NewerFilesOnly:
-        runtime_freshness = _compare_file_trees(
-            this_bundle.device_files,
-            device_bundle.device_files,
-            frozenset(ignore_patterns),
+    logger.info("  Modules")
+    for module in [m.name for m in report.required_modules_changes.same]:
+        logger.info(f"                {module:<{first_column_width}}    {module}")
+    for module in missing_dependencies:
+        self_module_mark = module if module in [m.name for m in report.runtime.required_modules] else "(none)"
+        logger.info(
+            f"                {click.style(module, 'yellow'):<{first_column_width + extra_color_chars}}    {self_module_mark}"
         )
-        older_files = set()
-        newer_files = set()
-        for path, freshness in sorted(runtime_freshness.items()):
-            full_path = this_bundle.device_files[0].joinpath(path)
-            if not full_path.is_file():
-                continue
-            if freshness == "newer":
-                logger.info(f"  Newer: {path}")
-                newer_files.add(path.name)
-                continue
-            older_files.add(path.name)
-        if not newer_files:
-            logger.info("All files up to date with the host")
-            return
-        ignored_files = older_files - newer_files
-        ignore_patterns.update(ignored_files)
-    elif device_snsr_root.exists():
-        logger.info("  Copying snsr bundle")
-        shutil.rmtree(device_snsr_root)
+    for module in report.required_modules_changes.group2_only:
+        if module.name in missing_dependencies:
+            continue
+        logger.info(f"                {module.name:<{first_column_width}}    (none)")
 
-    shutil.copytree(
-        src=my_main_folder,
-        dst=device_main_folder,
-        ignore=shutil.ignore_patterns(*ignore_patterns),
-        dirs_exist_ok=True,
-    )
+    logger.info("")
+    if not report.device.is_sensor_node:
+        logger.info("The device is not a QT Py Datalogger Sensor Node")
+    elif self_is_older:
+        logger.info("The sensor_node is newer than this package's version")
+    elif self_is_newer:
+        logger.info("The sensor_node is older than this package's version")
+    elif newer_files:
+        logger.info("The sensor_node matches this package's version")
+        logger.info("Newer files in runtime")
+        for newer_file in newer_files:
+            logger.info(f"  * {newer_file!s}")
+    else:
+        logger.info(click.style("The sensor_node matches this package's version", "green"))
 
-    notice_file = device_main_folder.joinpath(SnsrPath.notice)
-    notice_contents = _create_notice_file_contents(allow_dev_version=True)
-    notice_file.write_text(notice_contents)
+    equip_command = click.style("qtpy-datalogger equip", "green")
+    if report.device.is_sensor_node:
+        if (self_is_newer or newer_files) and not (missing_dependencies or missing_snsr_files or missing_snsr_apps):
+            logger.info(f"Use '{equip_command}' to update the sensor_node to match")
+        elif missing_dependencies or missing_snsr_files or missing_snsr_apps:
+            warnings = []
+            if missing_snsr_apps:
+                warnings.append(click.style("The sensor_node is MISSING builtin apps", "yellow"))
+                warnings.extend(f"  ! {yellow_missing} {missing}" for missing in missing_snsr_apps)
+            if missing_dependencies:
+                warnings.append(click.style("The sensor_node is MISSING CircuitPython modules", "yellow"))
+                warnings.extend(f"  ! {yellow_missing} {missing}" for missing in missing_dependencies)
+            if missing_snsr_files:
+                warnings.append(click.style("The sensor_node is MISSING runtime files", "yellow"))
+                warnings.extend(f"  ! {yellow_missing} {missing}" for missing in missing_snsr_files)
+            for warning in warnings:
+                logger.warning(warning)
+            logger.warning("")
+            logger.warning(f"Use '{equip_command}' to repair them")
+    else:
+        logger.info(f"Use '{equip_command}' to install the runtime onto it")
 
-    if behavior == Behavior.NewerFilesOnly:
-        logger.info("Bundle files updated")
-        return
 
-    circup_packages = this_bundle.circuitpy_dependencies
+def _print_snapshot_report(comparison: SnsrDeviceComparison) -> None:  # noqa: PLR0912, PLR0915 -- allow oversized function because it prints a report to the console
+    """Print a description of the detected device's platform details and sensor_node runtime."""
+    device = comparison.device
+    if device.is_circuitpython_device:
+        board_id = device.board_id
+        circuitpy_version = device.circuitpython
+    else:
+        board_id = _UNKNOWN_QTPY_BOARD_ID
+        circuitpy_version = UNKNOWN_VERSION
+
+    # Sensor node report
+    if device.is_sensor_node:
+        logger.info(f"Found a QT Py Datalogger Sensor Node at '{device.root}'")
+    else:
+        logger.info(f"The folder '{device.root}' is not a QT Py Datalogger Sensor Node")
+    logger.info(f" * {'Runtime version':<30} {device.snsr_runtime!s}")
+    logger.info(f" * {'Version timestamp':<30} {device.snsr_timestamp.strftime('%Y.%m.%d  %H:%M:%S')}")
+    logger.info(f" * {'QT Py device':<30} {board_id}")
+    logger.info(f" * {'CircuitPython version':<30} {circuitpy_version!s}")
+
+    # Device support warnings
+    if not device.is_circuitpython_device:
+        logger.warning(click.style(f"The folder '{device.root}' is not a CircuitPython device", "yellow"))
+        fallback_version = click.style(f"CircuitPython {_FALLBACK_CPY_VERSION!s}", "magenta")
+        logger.warning(f" ! Assuming device uses {fallback_version}")
+    if board_id not in _load_builtin_import_data():
+        logger.warning(
+            click.style(f"Missing information for builtin modules on CircuitPython device '{board_id}'", "yellow")
+        )
+        logger.warning(f" ! Visit '{Links.Board_Support_Matrix}' and find your BOARD NAME")
+        logger.warning(
+            " ! Then use 'qtpy-datalogger --list-builtin-modules \"BOARD NAME\" -' to get the builtin modules"
+        )
+        logger.warning(f" ! And create a new Issue with this information at '{Links.New_Bug}'")
+        fallback_board = click.style(f"{_FALLBACK_QTPY_BOARD_ID!s}", "magenta")
+        logger.warning(f" ! Assuming device is {fallback_board}")
+
+    # Runtime warnings
+    if device.is_sensor_node:
+        missing_snsr_files = comparison.missing_files
+        missing_snsr_apps = comparison.missing_apps
+        missing_circuitpython_dependencies = comparison.missing_modules
+        if any((missing_snsr_files, missing_snsr_apps, missing_circuitpython_dependencies)):
+            logger.warning(click.style("Detected MISSING sensor_node runtime components", "yellow"))
+        if missing_snsr_files:
+            for file in missing_snsr_files:
+                logger.warning(f" ! File:    {file!s}")
+        if missing_snsr_apps:
+            for app in missing_snsr_apps:
+                logger.warning(f" ! App:     {app}")
+        if missing_circuitpython_dependencies:
+            for dependency in missing_circuitpython_dependencies:
+                logger.warning(f" ! Module:  {dependency}")
+
+    # Import warnings
+    name_collisions = device.builtin_imports.intersection(device.snsr_imports)
+    if name_collisions:
+        logger.warning(click.style("Detected snsr runtime import name collisions!", "yellow"))
+        for collision in name_collisions:
+            logger.warning(f" ! {collision}")
+        logger.warning(" ! These names are reserved by CircuitPython!")
+    if device.unused_imports:
+        logger.warning(click.style("Detected unused imports", "yellow"))
+        for unused_import in device.unused_imports:
+            logger.warning(ImportUsage.format_reference(unused_import))
+
+    # Module report
+    logger.debug("Required external CircuitPython modules")
+    for name, version in device.required_modules:
+        logger.debug(f" * {name:<30} {version}")
+    if device.installed_modules:
+        logger.debug("Detected installed external CircuitPython modules")
+        for name, version in device.installed_modules:
+            logger.debug(f" * {name:<30} {version}")
+    else:
+        logger.debug("No CircuitPython modules installed")
+
+    # Module warnings
+    unused_modules = {m.name for m in device.installed_modules} - {m.name for m in device.required_modules}
+    if unused_modules:
+        logger.warning(click.style("Detected unused CircuitPython modules", "yellow"))
+        for module in unused_modules:
+            logger.warning(f" ! {module}")
+
+    # Apps report
+    if device.files.relative_runtime_apps:
+        logger.debug("Detected apps")
+        for app in device.files.relative_runtime_apps:
+            logger.debug(f" * {app.path.stem}")
+
     return_code = ExitCode.Success
     if circup_packages:
         circup_install_command = [
