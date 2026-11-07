@@ -443,14 +443,14 @@ def _query_node_info_from_drive(drive_root: str) -> tuple[str, str, str]:
         return ("", "", "")
 
     python_implementation = boot_out_info[DetailKey.python_implementation]
-    notice_file = as_path.joinpath(SnsrPath.notice)
+    notice_file = as_path.joinpath(SnsrPath.notice_toml)
     if not notice_file.exists():
         # If there isn't a notice.toml file on the device, it's not a qtpy_datalogger sensor_node
         return (python_implementation, "", "")
 
     notice_contents = toml.load(notice_file)
     snsr_notice = SnsrNotice(**notice_contents)
-    settings_file = as_path.joinpath(SnsrPath.settings)
+    settings_file = as_path.joinpath(SnsrPath.settings_toml)
     if not settings_file.exists():
         # If there isn't a settings file on the device, it won't have an MQTT group_id
         return (python_implementation, snsr_notice.version, "")
@@ -462,7 +462,7 @@ def _query_node_info_from_drive(drive_root: str) -> tuple[str, str, str]:
 
 def _parse_boot_out_file(main_folder: pathlib.Path) -> dict[DetailKey, str]:
     """Return a dictionary representation of the boot_out.txt file in main_folder."""
-    boot_out_file = main_folder.joinpath("boot_out.txt")
+    boot_out_file = main_folder.joinpath(SnsrPath.boot_out_txt)
     if not boot_out_file.exists():
         return {}
 
