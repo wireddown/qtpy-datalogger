@@ -15,12 +15,12 @@ import bs4
 import circup
 import click
 import findimports
-import packaging.version
 import toml
+from packaging.version import Version
 
 from qtpy_datalogger import discovery
 
-from .datatypes import ConnectionTransport, ExitCode, Links, SnsrNotice, SnsrPath
+from .datatypes import UNKNOWN_VERSION, ConnectionTransport, ExitCode, Links, SnsrNotice, SnsrPath
 
 logger = logging.getLogger(__name__)
 circup_logger = circup.logger
@@ -34,7 +34,6 @@ _PC_ONLY_IMPORTS = [
 
 _EQUIP_IGNORE_PATTERNS = frozenset(
     {
-        "*.pyc",
         "__pycache__",
     }
 )
@@ -48,6 +47,19 @@ _SNSR_NODE_SECRET_KEY_NAMES = frozenset(
         "QTPY_NODE_NAME",
     }
 )
+
+_ALLOWED_USER_APP_FILE_TYPES = frozenset(
+    {
+        ".json",
+        ".py",
+        ".toml",
+    }
+)
+
+_FALLBACK_CPY_VERSION = Version("9.0.0")
+
+_UNKNOWN_QTPY_BOARD_ID = "(unknown)"
+_FALLBACK_QTPY_BOARD_ID = "adafruit_qtpy_esp32s3_nopsram"
 
 
 class Behavior(StrEnum):
