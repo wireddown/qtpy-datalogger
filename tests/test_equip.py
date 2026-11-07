@@ -1,6 +1,8 @@
 """Acceptance tests for the equip module."""
 
 import contextlib
+import dataclasses
+import datetime as dt
 import logging
 import pathlib
 import re
@@ -654,27 +656,216 @@ def test_install_compatible_app(
     )
     assert_user_app_matches_contents(test_device_folder, user_app_name, user_app_contents)
 
+
+def test_upgrade_node_version(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     """Does it upgrade when the device is an older sensor node?"""
-    create_test_device_folder(tmp_path)
-    device_toml = get_device_notice(tmp_path)
-    downversion_toml = equip.SnsrNotice(
-        comment=device_toml.comment,
-        version="0.0.1",
-        commit=device_toml.commit,
-        timestamp=device_toml.timestamp,
-    )
-    set_device_notice(downversion_toml, tmp_path)
-
-    equip.handle_equip(
-        behavior=equip.Behavior.Upgrade, root=tmp_path, secrets=equip.SecretsBehavior.Noop.as_full_name()
+    test_device_folder, unrelated_app, existing_app = prepare_initialized_device_with_options(
+        reference_snsr, tmp_path, version="0.0.1"
     )
 
-    comparison_results = get_bundle_comparison(tmp_path)
-    assert_device_matches_self(comparison_results)
-    assert tmp_path.joinpath("lib").exists()
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert "Found a QT Py Datalogger Sensor Node" in caplog.text
+    assert_equip_operation_succeeded(caplog, expect_circup=False, expect_new_version=True)
+    assert_device_matches_self(reference_snsr, test_device_folder, extra_expected_apps=[unrelated_app, existing_app])
 
 
-def test_skip_upgrade(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize(
+    "snsr_file",
+    [
+        pathlib.Path(SnsrPath.root).joinpath("core.py"),
+        pathlib.Path(SnsrPath.apps).joinpath("echo.py"),
+    ],
+)
+def test_upgrade_node_updates_snsr_file(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+    snsr_file: pathlib.Path,
+) -> None:
+    """Does it upgrade a snsr runtime file when the device is an older sensor node?"""
+    test_device_folder, unrelated_app, existing_app = prepare_initialized_device_with_options(
+        reference_snsr, tmp_path, version="0.0.1"
+    )
+    snsr_file_path = test_device_folder.joinpath(snsr_file)
+    original_first_line = read_and_replace_runtime_file(snsr_file_path, "# downversion app contents")
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert "Found a QT Py Datalogger Sensor Node" in caplog.text
+    assert_equip_operation_succeeded(caplog, expect_circup=False, expect_new_version=True)
+    assert_device_matches_self(reference_snsr, test_device_folder, extra_expected_apps=[unrelated_app, existing_app])
+    with snsr_file_path.open("r") as file:
+        updated_first_line = file.readline().strip()
+    assert updated_first_line == original_first_line
+
+
+def test_upgrade_node_with_compatible_app(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it upgrade the runtime and install a user app when the device is an older sensor node?"""
+    test_device_folder, unrelated_app, existing_app = prepare_initialized_device_with_options(
+        reference_snsr, tmp_path, version="0.0.1"
+    )
+    user_app_name = "new_app.py"
+    user_app_contents = "# new user app"
+    user_app = prepare_user_app(tmp_path, user_app_name, user_app_contents)
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(user_app,),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert "Found a QT Py Datalogger Sensor Node" in caplog.text
+    assert_equip_operation_succeeded(caplog, expected_new_apps=[user_app], expect_circup=False, expect_new_version=True)
+    assert_device_matches_self(
+        reference_snsr,
+        test_device_folder,
+        extra_expected_apps=[unrelated_app, existing_app, user_app],
+    )
+    assert_user_app_matches_contents(test_device_folder, user_app_name, user_app_contents)
+
+
+def test_upgrade_app_files_with_compatible_updated_app(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it update the pre-installed user app without re-installing CircuitPython modules?"""
+    test_device_folder, unrelated_app, existing_app = prepare_initialized_device_with_options(
+        reference_snsr, tmp_path, user_app_contents="# existing user app not updated -- test failed"
+    )
+    updated_app_contents = "# updated correctly"
+    user_app = prepare_user_app(tmp_path, existing_app.name, updated_app_contents)
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(user_app,),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert "Found a QT Py Datalogger Sensor Node" in caplog.text
+    assert_equip_operation_succeeded(caplog, expect_circup=False, expected_new_apps=[user_app])
+    assert_device_matches_self(reference_snsr, test_device_folder, extra_expected_apps=[unrelated_app, existing_app])
+    assert_user_app_matches_contents(test_device_folder, existing_app.name, updated_app_contents)
+
+
+def test_upgrade_app_files_with_incompatible_updated_app(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Does it install a new CircuitPython dependency when an existing app has a new dependency?"""
+    test_device_folder, unrelated_app, existing_app = prepare_initialized_device_with_options(reference_snsr, tmp_path)
+    new_dependency_name = "adafruit_ble"
+    user_app_contents = f"import {new_dependency_name}"
+    user_app = prepare_user_app(tmp_path, existing_app.name, user_app_contents)
+
+    with caplog.at_level(logging.INFO), pytest.raises(SystemExit) as excinfo:
+        equip.handle_equip(
+            behavior=equip.Behavior.Upgrade,
+            with_apps=(user_app,),
+            root=test_device_folder,
+            secrets=equip.SecretsBehavior.Noop.as_full_name(),
+        )
+
+    assert_safe_exit(excinfo)
+    assert "Found a QT Py Datalogger Sensor Node" in caplog.text
+    assert_equip_operation_succeeded(caplog, expect_circup=True, expected_new_apps=[user_app])
+    assert_device_matches_self(
+        reference_snsr,
+        test_device_folder,
+        extra_expected_apps=[unrelated_app, existing_app],
+        extra_expected_imports=[new_dependency_name],
+        extra_expected_modules=[new_dependency_name],
+    )
+    assert_user_app_matches_contents(test_device_folder, user_app.name, user_app_contents)
+    assert test_device_folder.joinpath("lib", new_dependency_name).exists()
+    assert new_dependency_name in caplog.text
+
+
+def test_upgrade_node_files_and_app_files_with_updated_runtime_and_app(
+    reference_snsr: pathlib.Path,
+    tmp_path: pathlib.Path,
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Does it update both the user app and runtime files without installing CircuitPython modules?"""
+    test_device_folder, unrelated_app, existing_app = prepare_initialized_device_with_options(
+        reference_snsr, tmp_path, user_app_contents="# existing user app not updated -- test failed"
+    )
+    updated_app_contents = "# updated correctly"
+    updated_user_app = prepare_user_app(tmp_path, existing_app.name, updated_app_contents)
+    snsr_file = pathlib.Path(SnsrPath.root).joinpath("core.py")
+
+    def compare_force_newer(runtime: equip.SnsrFileTree, device: equip.SnsrFileTree) -> equip.FileTreeComparison:
+        """Replace equip._compare_snsr_file_trees() and force the package runtime to report newer files."""
+        relative_self_age_map = dict(
+            entry for entry in runtime.relative_tree if runtime.root.joinpath(entry.path).is_file()
+        )
+        relative_self_file_map = {entry: entry for entry in relative_self_age_map}
+        relative_other_age_map = dict(
+            entry for entry in device.relative_tree if device.root.joinpath(entry.path).is_file()
+        )
+        relative_other_file_map = {entry: entry for entry in relative_other_age_map}
+        report = equip._build_file_comparison(
+            candidate_file_map=relative_self_file_map,
+            candidate_age_map=relative_self_age_map,
+            baseline_file_map=relative_other_file_map,
+            baseline_age_map=relative_other_age_map,
+        )
+        forced_equal = [entry for entry in report.same if entry.path != snsr_file]
+        forced_newer = sorted(set(report.newer).union({equip.FileWithAge(snsr_file, dt.datetime.now(dt.UTC))}))
+        forced_older = [entry for entry in report.older if entry.path != snsr_file]
+        report = dataclasses.replace(report, same=forced_equal, newer=forced_newer, older=forced_older)
+        return report
+
+    with caplog.at_level(logging.INFO), monkeypatch.context() as m:
+        m.setattr(equip, "_compare_snsr_file_trees", compare_force_newer)
+        with pytest.raises(SystemExit) as excinfo:
+            equip.handle_equip(
+                behavior=equip.Behavior.Upgrade,
+                with_apps=(updated_user_app,),
+                root=test_device_folder,
+                secrets=equip.SecretsBehavior.Noop.as_full_name(),
+            )
+
+    assert_safe_exit(excinfo)
+    assert "Found a QT Py Datalogger Sensor Node" in caplog.text
+    assert_equip_operation_succeeded(
+        caplog, expect_circup=False, expected_new_files=[snsr_file], expected_new_apps=[updated_user_app]
+    )
+    assert_device_matches_self(reference_snsr, test_device_folder, extra_expected_apps=[unrelated_app, existing_app])
+    assert_user_app_matches_contents(test_device_folder, updated_user_app.name, updated_app_contents)
+    assert f" * Newer:  {snsr_file!s}" in caplog.text
+
     """Does it skip upgrading when the device is a newer version?"""
 
     def throw_on_call(behavior: equip.Behavior, comparison_information: dict[str, equip.SnsrNodeBundle]) -> None:
