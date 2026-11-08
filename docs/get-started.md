@@ -11,7 +11,7 @@ tags:
 
 !!! tip ":lucide-cable:{ .lg .middle }&nbsp; Connect the QT Py to your workstation with USB"
 
-- Back up the `code.py` file on the QT Py
+- _(Optional)_ Back up the `code.py` file on the QT Py
 - Preview the package in a deletable Python virtual environment
 
     ```pwsh title="PowerShell"
@@ -47,7 +47,7 @@ tags:
 
 - Plot data in the [**Analog Plotter**](customize.md#analog-plotter) demo GUI app
     ![Screenshot of Analog Plotter demo app](gallery/ex-analog-plotter.png)
-- Optionally, delete the folder `qtpy-preview` when you are done
+- _(Optional)_ Delete the `qtpy-preview` folder and restore the original `code.py` file
 
 ## :lucide-wifi: WiFi control in 3 minutes
 

@@ -76,14 +76,11 @@ uv run poe fix
 ```pwsh title="Powershell"
 # ✍️ Save source code changes
 
-# Update the code on the QT Py
-uv run qtpy-datalogger equip --newer-files-only
+# Update the code and any necessary libraries on the QT Py
+uv run qtpy-datalogger equip
 
-# When changes require new support libraries
-uv run qtpy-datalogger equip [--force]
-
-# Run new code
-uv run qtpy-datalogger [OPTIONS]
+# Run the new code on the host and on the QT Py
+uv run qtpy-datalogger run [APP_NAME]
 
 # Run the tests
 uv run poe test

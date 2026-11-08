@@ -14,6 +14,9 @@ from collections.abc import Generator
 from typing import Any, NamedTuple
 
 import toml
+from packaging.version import Version
+
+UNKNOWN_VERSION = Version("0")
 
 
 class Links(enum.StrEnum):
@@ -93,11 +96,14 @@ class CaptionCorrections:
 
 
 class SnsrPath(enum.StrEnum):
-    """Reserved path names for qtpy_datalogger sensor_node bundles."""
+    """Reserved path names for the qtpy_datalogger sensor_node runtime."""
 
-    notice = "snsr/notice.toml"
+    apps = "snsr/apps"
+    boot_out_txt = "boot_out.txt"
+    code_py = "code.py"
+    notice_toml = "snsr/notice.toml"
     root = "snsr"
-    settings = "settings.toml"
+    settings_toml = "settings.toml"
 
 
 class SnsrNotice(NamedTuple):
@@ -108,12 +114,22 @@ class SnsrNotice(NamedTuple):
     commit: str
     timestamp: dt.datetime
 
+    @staticmethod
+    def unknown() -> "SnsrNotice":
+        """Return a new SnsrNotice that represents an unknown device."""
+        return SnsrNotice(
+            comment="(uninitialized)",
+            version=str(UNKNOWN_VERSION),
+            commit="(none)",
+            timestamp=dt.datetime.fromisoformat("0001-01-01T01:01:01+00:00"),
+        )
+
     @classmethod
     def get_package_notice_info(cls, allow_dev_version: bool) -> "SnsrNotice":
         """Detect and generate the information used in the notice.toml file."""
         this_file = pathlib.Path(__file__)
         this_folder = this_file.parent
-        notice_toml = this_folder.joinpath("sensor_node", SnsrPath.notice)
+        notice_toml = this_folder.joinpath("sensor_node", SnsrPath.notice_toml)
         notice_contents = toml.load(notice_toml)
         snsr_notice = SnsrNotice(**notice_contents)
         my_comment = snsr_notice.comment

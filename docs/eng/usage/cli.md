@@ -14,7 +14,7 @@ qtpy-datalogger --help
 ```
 
 ```txt
-Usage: qtpy-datalogger [OPTIONS] COMMAND [ARGS]...
+Usage: qtpy-datalogger [OPTIONS] [COMMAND] [ARGS]...
 
   QT Py datalogger control program.
 
@@ -32,7 +32,7 @@ Options:
 
 Commands:
   connect  Connect to a serial port or MQTT sensor_node.
-  equip    Install the QT Py Sensor Node runtime on a CircuitPython device.
+  equip    Install the sensor_node runtime on a CircuitPython device.
   run      Run the APP_NAME app for QT Py datalogger.
   server   Query and control the MQTT server.
 

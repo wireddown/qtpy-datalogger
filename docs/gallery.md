@@ -26,7 +26,7 @@ Select a sensor node to send it messages.
 qtpy-datalogger run data-viewer
 ```
 
-Open a CSV file for time series data.
+Open a CSV file and plot time series data.
 
 ![Screenshot of the data viewer app](gallery/app-data-viewer.png)
 

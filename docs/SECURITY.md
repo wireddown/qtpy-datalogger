@@ -22,6 +22,7 @@ This table lists the system impacts when using `qtpy-datalogger`.
 | qtpy-datalogger     | Cloning uses github.com     |
 | QT Py device        | Connects to USB             |
 | QT Py device        | Connects to WiFi            |
+| QT Py device        | WiFi password saved in file |
 | MQTT broker service | Uses port `1883` on local subnet |
 | MQTT broker service | Allows anonymous clients    |
 

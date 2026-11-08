@@ -21,12 +21,23 @@ qtpy-datalogger connect --discover-only
 # Detect and show differences between the QT Py sensor node and the package
 qtpy-datalogger equip --compare
 
+# Detect and show missing configuration variables
+qtpy-datalogger equip --secrets
+
 # Confirm MQTT server readiness
 qtpy-datalogger server
 
 # Find and communicate with the QT Py sensor node over the network
 qtpy-datalogger run scanner
 ```
+
+More help on the command line interface
+
+- **[qtpy-datalogger]**
+    - **[connect]**
+    - **[equip]**
+    - **[server]**
+    - **[run]**
 
 ## Development environment
 
@@ -60,3 +71,10 @@ uv tree
 # Show VS Code extension information
 code --list-extensions --show-versions
 ```
+
+
+[qtpy-datalogger]: ./eng/usage/cli.md
+[connect]: ./eng/usage/connect.md
+[equip]: ./eng/usage/equip.md
+[server]: ./eng/usage/server.md
+[run]: ./eng/usage/run.md

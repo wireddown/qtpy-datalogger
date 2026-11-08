@@ -28,8 +28,21 @@ If you want to add this package to your own project and use it in your code, add
     poetry add qtpy-datalogger
     ```
 
-Then import the package like any other in your source code.
+## Create PC app
 
-```py title="my_program.py"
+To create a new PC app, import the package like any other in your source code.
+
+```py title="my_pc_program.py"
 from qtpy_datalogger import discovery, snsrkit
 ```
+
+## Install sensor node app
+
+To install a custom sensor node app, add the `--with-app FILE` option to the **[equip]** command.
+
+```pwsh title="PowerShell"
+qtpy-datalogger equip --with-app path/to/sensor_node_app.py
+```
+
+
+[equip]: ./equip.md

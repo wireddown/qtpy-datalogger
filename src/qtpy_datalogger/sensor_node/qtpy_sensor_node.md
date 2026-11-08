@@ -1,4 +1,4 @@
-# QT Py Sensor Node
+# QT Py Datalogger Sensor Node
 
 The `snsr` folder and its subfolders are an overlay for a CircuitPython device.
 The code adds functions to perform data logging from analog channels and I2C devices.
@@ -12,7 +12,7 @@ The code adds functions to perform data logging from analog channels and I2C dev
 
 1. Connect a QT Py device to the computer with USB
 2. Install the `qtpy-datalogger` package into a Python environment
-3. Install the sensor node bundle onto the QT Py device
+3. Install the sensor node runtime onto the QT Py device
    ```pwsh
    # Use the equip command to install or upgrade
    qtpy-datalogger equip

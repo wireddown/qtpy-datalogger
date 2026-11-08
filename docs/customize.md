@@ -29,7 +29,7 @@ A custom host-side app that plots analog data using the built-in sensor node app
 1. **Edit** the [variables at the top] of `get_and_plot_data()` to exercise the features
     - Note that this example only enables UART communication to start
     - If you setup [MQTT](eng/intro/mqtt.md) to use WiFi, change **`use_mqtt`** to **`True`**
-    ```python title="get_and_plot_data()"
+    ```python title="get_and_plot_data()" linenums="158" hl_lines="2 3"
       # Customize
       use_uart = True
       use_mqtt = False
@@ -56,4 +56,4 @@ Go get logging!
 
 [View]: https://github.com/wireddown/qtpy-datalogger/blob/main/examples/analog_plotter/analog_plotter.py
 [Save-as]: https://raw.githubusercontent.com/wireddown/qtpy-datalogger/refs/heads/main/examples/analog_plotter/analog_plotter.py
-[variables at the top]: https://github.com/wireddown/qtpy-datalogger/blob/main/examples/analog_plotter/analog_plotter.py#L154
+[variables at the top]: https://github.com/wireddown/qtpy-datalogger/blob/main/examples/analog_plotter/analog_plotter.py#L158
